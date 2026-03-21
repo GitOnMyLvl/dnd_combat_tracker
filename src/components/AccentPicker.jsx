@@ -1,17 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { useThemeStore } from '../store/themeStore'
 
+// Sorted by hue around the colour wheel (red → pink → orange → yellow → green → teal → sky → blue → purple → lavender)
+// Three brightness levels within each hue family
 const PRESETS = [
-  // Light / bright
-  '#60a5fa', '#38bdf8', '#818cf8',
-  '#c084fc', '#f472b6', '#4ade80',
-  '#2dd4bf', '#fbbf24', '#e2e8f0',
-  // Mid
-  '#3b82f6', '#8b5cf6', '#ec4899',
-  '#10b981', '#f59e0b', '#94a3b8',
-  // Dark / deep
-  '#1d4ed8', '#6d28d9', '#be123c',
-  '#065f46', '#92400e', '#1e3a5f',
+  '#be123c', '#f472b6', '#ec4899',  // red → pink
+  '#92400e', '#f59e0b', '#fbbf24',  // dark orange → amber → yellow
+  '#065f46', '#10b981', '#4ade80',  // dark green → emerald → light green
+  '#2dd4bf', '#38bdf8', '#1e3a5f',  // teal → sky → navy
+  '#1d4ed8', '#3b82f6', '#60a5fa',  // dark blue → mid blue → light blue
+  '#6d28d9', '#8b5cf6', '#c084fc',  // dark purple → violet → lavender
 ]
 
 export default function AccentPicker() {
