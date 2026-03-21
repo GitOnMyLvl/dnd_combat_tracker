@@ -9,7 +9,7 @@ export default function TopBar() {
     newEncounter, saveEncounter, loadEncounter, deleteEncounter, renameEncounter,
   } = useEncounterStore()
   const [showEncounters, setShowEncounters] = useState(false)
-  const { theme, toggleTheme } = useThemeStore()
+  const { theme, toggleTheme, accent, setAccent } = useThemeStore()
   const [editingName, setEditingName] = useState(false)
   const [saveFlash, setSaveFlash] = useState(false)
 
@@ -26,7 +26,7 @@ export default function TopBar() {
     >
       {/* Logo */}
       <span style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--c-accent)', letterSpacing: '0.06em', flexShrink: 0 }}>
-        DM TRACKER
+        COMBAT TRACKER
       </span>
 
       <div style={{ width: 1, height: 20, background: 'var(--c-border)', flexShrink: 0, margin: '0 4px' }} />
@@ -111,6 +111,28 @@ export default function TopBar() {
         title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
         style={{ minHeight: 32, minWidth: 32, padding: '0 8px', flexShrink: 0, fontSize: '0.8rem' }}
       >{theme === 'dark' ? 'Light' : 'Dark'}</button>
+
+      {/* Accent color picker */}
+      <label
+        title="Pick accent color"
+        style={{ position: 'relative', flexShrink: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+      >
+        <div style={{
+          width: 22, height: 22, borderRadius: '50%', background: accent,
+          border: '2px solid var(--c-border-strong)',
+          boxShadow: `0 0 0 1px var(--c-bg)`,
+          transition: 'transform 0.12s',
+        }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+        />
+        <input
+          type="color"
+          value={accent}
+          onChange={e => setAccent(e.target.value)}
+          style={{ position: 'absolute', opacity: 0, width: '100%', height: '100%', cursor: 'pointer', minHeight: 'unset', minWidth: 'unset', padding: 0, border: 'none' }}
+        />
+      </label>
 
       {/* Encounters dropdown */}
       {showEncounters && (
