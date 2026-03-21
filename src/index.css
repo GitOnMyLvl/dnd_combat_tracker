@@ -1,0 +1,170 @@
+@import "tailwindcss";
+@import "react-grid-layout/css/styles.css";
+@import "react-resizable/css/styles.css";
+
+/* Dark theme (default) */
+:root {
+  --c-bg:           #0c0c0e;
+  --c-surface:      #131315;
+  --c-elevated:     #1c1c20;
+  --c-hover:        #22222a;
+  --c-border:       rgba(255,255,255,0.07);
+  --c-border-strong:rgba(255,255,255,0.13);
+  --c-text:         #e8e8e8;
+  --c-muted:        #5a5a6a;
+  --c-muted2:       #888;
+  --c-accent:       #f97316;
+  --c-accent-dim:   rgba(249,115,22,0.12);
+  --c-danger:       #f43f5e;
+  --c-danger-dim:   rgba(244,63,94,0.12);
+  --c-success:      #4ade80;
+  --c-shadow:       rgba(0,0,0,0.4);
+}
+
+/* Light theme */
+:root.light {
+  --c-bg:           #e9e9ed;
+  --c-surface:      #f6f6f8;
+  --c-elevated:     #ffffff;
+  --c-hover:        #eaeaee;
+  --c-border:       rgba(0,0,0,0.1);
+  --c-border-strong:rgba(0,0,0,0.2);
+  --c-text:         #1a1a1a;
+  --c-muted:        #7a7a88;
+  --c-muted2:       #555;
+  --c-accent:       #d95a06;
+  --c-accent-dim:   rgba(217,90,6,0.1);
+  --c-danger:       #dc2646;
+  --c-danger-dim:   rgba(220,38,70,0.08);
+  --c-success:      #16a34a;
+  --c-shadow:       rgba(0,0,0,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollable module content */
+.module-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Grid layout */
+.react-grid-item.react-grid-placeholder {
+  background: var(--c-accent-dim);
+  border: 1.5px dashed var(--c-accent);
+  border-radius: 10px;
+  opacity: 0.8;
+}
+
+.react-resizable-handle {
+  opacity: 0.25;
+  filter: invert(1);
+  transition: opacity 0.15s;
+}
+.light .react-resizable-handle { filter: none; }
+.react-resizable-handle:hover { opacity: 0.7; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--c-border-strong); border-radius: 2px; }
+
+/* Touch targets */
+button, [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+  cursor: pointer;
+}
+
+/* Inputs */
+input, select, textarea {
+  background: var(--c-elevated);
+  color: var(--c-text);
+  border: 1px solid var(--c-border-strong);
+  border-radius: 7px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.light input, .light select, .light textarea {
+  background: var(--c-bg);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--c-accent);
+}
+input[type="number"] { -moz-appearance: textfield; }
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Ghost button base */
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--c-border-strong);
+  color: var(--c-muted2);
+  border-radius: 7px;
+  padding: 0 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background 0.12s, color 0.12s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-ghost:hover { background: var(--c-elevated); color: var(--c-text); }
+
+/* Primary button */
+.btn-primary {
+  background: var(--c-accent);
+  border: none;
+  color: #fff;
+  border-radius: 7px;
+  padding: 0 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: opacity 0.12s;
+}
+.btn-primary:hover { opacity: 0.88; }
+
+/* Danger button */
+.btn-danger {
+  background: transparent;
+  border: 1px solid var(--c-border);
+  color: var(--c-danger);
+  border-radius: 7px;
+  padding: 0 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background 0.12s;
+}
+.btn-danger:hover { background: var(--c-danger-dim); }
+
+/* Disabled */
+button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Label text */
+.label { font-size: 0.7rem; color: var(--c-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+
+/* Card */
+.card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px var(--c-shadow);
+}
+
+/* Divider */
+.divider { border: none; border-top: 1px solid var(--c-border); margin: 0; }
