@@ -9,6 +9,7 @@ const DEFAULT_SIZES = {
   ConditionsPanel:   { w: 4, h: 6 },
   DiceRoller:        { w: 4, h: 7 },
   NotesPad:          { w: 4, h: 6 },
+  PartyManager:      { w: 4, h: 8 },
 }
 
 export const useLayoutStore = create(
@@ -24,6 +25,8 @@ export const useLayoutStore = create(
         const newModule = { i: id, type, x: 0, y: Infinity, w, h, config }
         set(s => ({ modules: [...s.modules, newModule] }))
       },
+
+      clearModules: () => set({ modules: [] }),
 
       removeModule: (id) => {
         set(s => ({ modules: s.modules.filter(m => m.i !== id) }))

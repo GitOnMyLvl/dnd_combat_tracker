@@ -9,6 +9,7 @@ import CombatantTable from '../modules/CombatantTable'
 import ConditionsPanel from '../modules/ConditionsPanel'
 import DiceRoller from '../modules/DiceRoller'
 import NotesPad from '../modules/NotesPad'
+import PartyManager from '../modules/PartyManager'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -18,6 +19,7 @@ const MODULE_COMPONENTS = {
   ConditionsPanel,
   DiceRoller,
   NotesPad,
+  PartyManager,
 }
 
 // Expose picker open function so TopBar can trigger it
@@ -58,7 +60,7 @@ export default function Canvas() {
           position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center', gap: 16, pointerEvents: 'none',
         }}>
-          <div style={{ fontSize: '1.2rem', opacity: 0.15, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--c-muted)' }}>DM TRACKER</div>
+          <div style={{ fontSize: '1.2rem', opacity: 0.15, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--c-muted)' }}>BATTLE TRACKER</div>
           <p style={{ color: 'var(--c-muted)', fontSize: '0.9rem', margin: 0 }}>
             Canvas is empty — tap <strong style={{ color: 'var(--c-muted2)' }}>+ Add Module</strong> to get started
           </p>
@@ -106,7 +108,7 @@ export default function Canvas() {
           width: 48, height: 48, minHeight: 'unset', minWidth: 'unset',
           borderRadius: '50%', background: 'var(--c-accent)', border: 'none',
           color: '#fff', fontSize: '1.5rem', fontWeight: 300,
-          boxShadow: '0 4px 24px rgba(249,115,22,0.35)',
+          boxShadow: 'none',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           transition: 'opacity 0.12s, transform 0.12s',
         }}

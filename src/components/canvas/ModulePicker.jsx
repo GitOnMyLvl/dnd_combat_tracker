@@ -7,6 +7,7 @@ const AVAILABLE_MODULES = [
   { type: 'ConditionsPanel', label: 'Conditions', desc: 'Apply conditions to selected combatant', config: {} },
   { type: 'DiceRoller', label: 'Dice Roller', desc: 'd4–d100, advantage, custom rolls', config: {} },
   { type: 'NotesPad', label: 'Notes', desc: 'Free text, auto-saved', config: {} },
+  { type: 'PartyManager', label: 'Party Manager', desc: 'Save characters & parties, load into encounters', config: {} },
 ]
 
 export default function ModulePicker({ onClose }) {

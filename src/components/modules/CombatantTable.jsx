@@ -4,6 +4,9 @@ import HPEditor from '../shared/HPEditor'
 import EditableField from '../shared/EditableField'
 import ConditionBadge from '../shared/ConditionBadge'
 import MonsterSearch from '../shared/MonsterSearch'
+import { useCharacterStore, combatantToTemplate, DEFAULT_ABILITIES } from '../../store/characterStore'
+
+const ABILITY_LABELS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 
 const CONDITIONS = [
   'Blinded','Charmed','Deafened','Frightened','Grappled',
@@ -106,7 +109,9 @@ function StatPill({ label, value, onChange }) {
 
 function CombatantRow({ combatant, isSelected, isActive }) {
   const { updateCombatant, removeCombatant, toggleCondition, selectCombatant, resetCombatantToApi } = useEncounterStore()
+  const saveCharacter = useCharacterStore(s => s.saveCharacter)
   const [expanded, setExpanded] = useState(false)
+  const [saveFlash, setSaveFlash] = useState(false)
   const dying = combatant.hp.current === 0
 
   return (
@@ -198,6 +203,27 @@ function CombatantRow({ combatant, isSelected, isActive }) {
             />
           </div>
 
+          {/* Ability Scores */}
+          {(() => {
+            const abilities = combatant.abilities ?? DEFAULT_ABILITIES
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
+                {ABILITY_LABELS.map(a => {
+                  const score = abilities[a] ?? 10
+                  const m = Math.floor((score - 10) / 2)
+                  return (
+                    <StatPill
+                      key={a}
+                      label={<>{a.toUpperCase()} <span style={{ fontWeight: 400, opacity: 0.6 }}>{m >= 0 ? `+${m}` : m}</span></>}
+                      value={score}
+                      onChange={v => updateCombatant(combatant.id, { abilities: { ...abilities, [a]: v } })}
+                    />
+                  )
+                })}
+              </div>
+            )
+          })()}
+
           {/* Conditions */}
           <div>
             <div className="label" style={{ marginBottom: 6 }}>Conditions</div>
@@ -233,6 +259,17 @@ function CombatantRow({ combatant, isSelected, isActive }) {
 
           {/* Actions */}
           <div className="flex justify-end" style={{ gap: 6 }}>
+            <button
+              onClick={() => {
+                saveCharacter(combatantToTemplate(combatant))
+                setSaveFlash(true)
+                setTimeout(() => setSaveFlash(false), 1200)
+              }}
+              className="btn-ghost"
+              style={{ minHeight: 32, minWidth: 'unset', fontSize: '0.75rem', color: saveFlash ? 'var(--c-success)' : undefined }}
+            >
+              {saveFlash ? 'Saved!' : 'Save'}
+            </button>
             {combatant._source === 'api' && combatant._apiData && (
               <button onClick={() => resetCombatantToApi(combatant.id)} className="btn-ghost" style={{ minHeight: 32, minWidth: 'unset', fontSize: '0.75rem' }}>
                 Reset to Default

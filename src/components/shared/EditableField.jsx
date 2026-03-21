@@ -47,7 +47,7 @@ export default function EditableField({ value, onChange, type = 'text', classNam
       role="button"
       tabIndex={0}
       className={`cursor-pointer select-none hover:underline decoration-dotted ${className}`}
-      style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center' }}
+      style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center', ...(className.includes('text-center') ? { justifyContent: 'center', width: '100%' } : {}) }}
       onClick={() => setEditing(true)}
       onKeyDown={e => e.key === 'Enter' && setEditing(true)}
     >

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useEncounterStore } from '../store/encounterStore'
 import { useThemeStore } from '../store/themeStore'
+import { useLayoutStore } from '../store/layoutStore'
 import { openModulePicker } from './canvas/Canvas'
 import AccentPicker from './AccentPicker'
 
@@ -11,6 +12,7 @@ export default function TopBar() {
   } = useEncounterStore()
   const [showEncounters, setShowEncounters] = useState(false)
   const { theme, toggleTheme } = useThemeStore()
+  const clearModules = useLayoutStore(s => s.clearModules)
   const [editingName, setEditingName] = useState(false)
   const [saveFlash, setSaveFlash] = useState(false)
 
@@ -100,7 +102,7 @@ export default function TopBar() {
 
       {/* New */}
       <button
-        onClick={() => { if (window.confirm('Start a new encounter? Unsaved changes will be lost.')) newEncounter() }}
+        onClick={() => { if (window.confirm('Start a new encounter? Unsaved changes will be lost.')) { newEncounter(); clearModules() } }}
         className="btn-ghost"
         style={{ minHeight: 32, minWidth: 'unset', flexShrink: 0 }}
       >New</button>

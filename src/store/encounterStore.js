@@ -23,6 +23,7 @@ const makeCombatant = (overrides = {}) => ({
   conditions: [],
   concentration: null,
   legendary: null,
+  abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
   notes: '',
   _source: 'manual',
   _apiData: null,
@@ -280,5 +281,13 @@ export function mapApiToCombatant(data) {
     legendary: data.legendary_actions
       ? { total: data.legendary_actions.length, remaining: data.legendary_actions.length }
       : null,
+    abilities: {
+      str: data.strength ?? 10,
+      dex: data.dexterity ?? 10,
+      con: data.constitution ?? 10,
+      int: data.intelligence ?? 10,
+      wis: data.wisdom ?? 10,
+      cha: data.charisma ?? 10,
+    },
   }
 }
