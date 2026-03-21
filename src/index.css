@@ -4,38 +4,38 @@
 
 /* Dark theme (default) */
 :root {
-  --c-bg:           #0c0c0e;
-  --c-surface:      #131315;
-  --c-elevated:     #1c1c20;
-  --c-hover:        #22222a;
-  --c-border:       rgba(255,255,255,0.07);
-  --c-border-strong:rgba(255,255,255,0.13);
-  --c-text:         #e8e8e8;
-  --c-muted:        #5a5a6a;
-  --c-muted2:       #888;
-  --c-accent:       #f97316;
-  --c-accent-dim:   rgba(249,115,22,0.12);
-  --c-danger:       #f43f5e;
-  --c-danger-dim:   rgba(244,63,94,0.12);
+  --c-bg:           #0d0d12;
+  --c-surface:      #14141c;
+  --c-elevated:     #1e1e2a;
+  --c-hover:        #26263a;
+  --c-border:       rgba(255,255,255,0.10);
+  --c-border-strong:rgba(255,255,255,0.18);
+  --c-text:         #f2f2f5;
+  --c-muted:        #7070a0;
+  --c-muted2:       #a0a0c0;
+  --c-accent:       #a78bfa;
+  --c-accent-dim:   rgba(167,139,250,0.14);
+  --c-danger:       #f87171;
+  --c-danger-dim:   rgba(248,113,113,0.13);
   --c-success:      #4ade80;
-  --c-shadow:       rgba(0,0,0,0.4);
+  --c-shadow:       rgba(0,0,0,0.5);
 }
 
 /* Light theme */
 :root.light {
-  --c-bg:           #e9e9ed;
-  --c-surface:      #f6f6f8;
+  --c-bg:           #eeeef4;
+  --c-surface:      #f8f8fc;
   --c-elevated:     #ffffff;
-  --c-hover:        #eaeaee;
-  --c-border:       rgba(0,0,0,0.1);
-  --c-border-strong:rgba(0,0,0,0.2);
-  --c-text:         #1a1a1a;
-  --c-muted:        #7a7a88;
-  --c-muted2:       #555;
-  --c-accent:       #d95a06;
-  --c-accent-dim:   rgba(217,90,6,0.1);
-  --c-danger:       #dc2646;
-  --c-danger-dim:   rgba(220,38,70,0.08);
+  --c-hover:        #e8e8f0;
+  --c-border:       rgba(0,0,0,0.10);
+  --c-border-strong:rgba(0,0,0,0.20);
+  --c-text:         #111118;
+  --c-muted:        #7070a0;
+  --c-muted2:       #444460;
+  --c-accent:       #7c3aed;
+  --c-accent-dim:   rgba(124,58,237,0.10);
+  --c-danger:       #dc2626;
+  --c-danger-dim:   rgba(220,38,38,0.09);
   --c-success:      #16a34a;
   --c-shadow:       rgba(0,0,0,0.08);
 }
