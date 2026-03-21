@@ -2,18 +2,16 @@ import { useState, useEffect, useRef } from 'react'
 import { useThemeStore } from '../store/themeStore'
 
 const PRESETS = [
-  // Blues
+  // Light / bright
   '#60a5fa', '#38bdf8', '#818cf8',
-  // Purples / Pinks
-  '#c084fc', '#e879f9', '#fb7185',
-  // Reds
-  '#f87171', '#fb923c', '#fbbf24',
-  // Greens
-  '#4ade80', '#34d399', '#a3e635',
-  // Teals / Cyans
-  '#2dd4bf', '#22d3ee', '#94a3b8',
-  // Neutral light
-  '#e2e8f0',
+  '#c084fc', '#f472b6', '#4ade80',
+  '#2dd4bf', '#fbbf24', '#e2e8f0',
+  // Mid
+  '#3b82f6', '#8b5cf6', '#ec4899',
+  '#10b981', '#f59e0b', '#94a3b8',
+  // Dark / deep
+  '#1d4ed8', '#6d28d9', '#be123c',
+  '#065f46', '#92400e', '#1e3a5f',
 ]
 
 export default function AccentPicker() {
@@ -70,7 +68,7 @@ export default function AccentPicker() {
           className="card"
           style={{
             position: 'absolute', top: 42, right: 0, zIndex: 60,
-            padding: 14, width: 200,
+            padding: 14, width: 224,
             boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
           }}
         >
