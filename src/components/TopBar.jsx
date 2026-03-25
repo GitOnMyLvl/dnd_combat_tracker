@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useEncounterStore } from '../store/encounterStore'
 import { useThemeStore } from '../store/themeStore'
 import { useLayoutStore } from '../store/layoutStore'
-import { openModulePicker } from './canvas/Canvas'
+import { useUIStore } from '../store/uiStore'
 import AccentPicker from './AccentPicker'
 
 export default function TopBar() {
@@ -13,6 +13,7 @@ export default function TopBar() {
   const [showEncounters, setShowEncounters] = useState(false)
   const { theme, toggleTheme } = useThemeStore()
   const clearModules = useLayoutStore(s => s.clearModules)
+  const openModulePicker = useUIStore(s => s.openModulePicker)
   const [editingName, setEditingName] = useState(false)
   const [saveFlash, setSaveFlash] = useState(false)
 
@@ -63,7 +64,7 @@ export default function TopBar() {
 
       {/* Add Module button */}
       <button
-        onClick={() => openModulePicker()}
+        onClick={openModulePicker}
         className="btn-primary"
         style={{ minHeight: 32, minWidth: 'unset', padding: '0 14px', fontSize: '0.8rem', flexShrink: 0 }}
       >+ Module</button>

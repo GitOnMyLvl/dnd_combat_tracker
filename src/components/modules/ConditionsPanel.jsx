@@ -1,23 +1,5 @@
 import { useEncounterStore } from '../../store/encounterStore'
-
-const CONDITIONS = [
-  { name: 'Blinded',       color: '#71717a', desc: 'Auto-fail sight checks, attacks at disadv.' },
-  { name: 'Charmed',       color: '#be185d', desc: 'Can\'t attack charmer, adv on charmer\'s social' },
-  { name: 'Deafened',      color: '#71717a', desc: 'Auto-fail hearing checks' },
-  { name: 'Frightened',    color: '#7c3aed', desc: 'Disadv while source is visible' },
-  { name: 'Grappled',      color: '#92400e', desc: 'Speed 0' },
-  { name: 'Incapacitated', color: '#b91c1c', desc: 'No actions or reactions' },
-  { name: 'Invisible',     color: '#52525b', desc: 'Attacks against disadv, attacks with adv' },
-  { name: 'Paralyzed',     color: '#b91c1c', desc: 'Incapacitated + auto-fail Str/Dex saves' },
-  { name: 'Petrified',     color: '#78716c', desc: 'Stone, incapacitated, resistant all' },
-  { name: 'Poisoned',      color: '#15803d', desc: 'Disadv on attacks and ability checks' },
-  { name: 'Prone',         color: '#92400e', desc: 'Melee adv against, ranged disadv against' },
-  { name: 'Restrained',    color: '#7c2d12', desc: 'Speed 0, attacks against adv, own disadv' },
-  { name: 'Stunned',       color: '#b91c1c', desc: 'Incapacitated + auto-fail Str/Dex' },
-  { name: 'Unconscious',   color: '#1e40af', desc: 'Incapacitated + prone, crits within 5ft' },
-  { name: 'Concentration', color: '#d97706', desc: 'Currently concentrating on a spell' },
-  { name: 'Exhaustion',    color: '#78350f', desc: 'Stacking penalty levels 1-6' },
-]
+import { CONDITIONS } from '../../constants/conditions'
 
 export default function ConditionsPanel() {
   const { selectedCombatantId, encounter, toggleCondition } = useEncounterStore()

@@ -25,6 +25,8 @@ const makeCombatant = (overrides = {}) => ({
   legendary: null,
   abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
   notes: '',
+  exhaustion: 0,
+  inspiration: false,
   _source: 'manual',
   _apiData: null,
   ...overrides,
@@ -172,6 +174,28 @@ export const useEncounterStore = create(
         }))
       },
 
+      setExhaustion: (id, level) => {
+        set(s => ({
+          encounter: {
+            ...s.encounter,
+            combatants: s.encounter.combatants.map(c =>
+              c.id === id ? { ...c, exhaustion: Math.max(0, Math.min(10, level)) } : c
+            ),
+          }
+        }))
+      },
+
+      toggleInspiration: (id) => {
+        set(s => ({
+          encounter: {
+            ...s.encounter,
+            combatants: s.encounter.combatants.map(c =>
+              c.id === id ? { ...c, inspiration: !c.inspiration } : c
+            ),
+          }
+        }))
+      },
+
       sortInitiative: () => {
         set(s => {
           const sorted = [...s.encounter.combatants]
@@ -179,7 +203,7 @@ export const useEncounterStore = create(
               const aTotal = a.initiative.roll + a.initiative.bonus
               const bTotal = b.initiative.roll + b.initiative.bonus
               if (bTotal !== aTotal) return bTotal - aTotal
-              return b.initiative.bonus - a.initiative.bonus // tiebreak by bonus
+              return (b.abilities?.dex ?? 10) - (a.abilities?.dex ?? 10) // 2024: tiebreak by DEX score
             })
             .map(c => c.id)
           return {
@@ -241,10 +265,24 @@ export const useEncounterStore = create(
       addToInitiative: (id) => {
         set(s => {
           if (s.encounter.initiativeOrder.includes(id)) return s
+          const combatant = s.encounter.combatants.find(c => c.id === id)
+          if (!combatant) return s
+          const newTotal = combatant.initiative.roll + combatant.initiative.bonus
+          const order = s.encounter.initiativeOrder
+          const insertAt = order.findIndex(existingId => {
+            const c = s.encounter.combatants.find(x => x.id === existingId)
+            if (!c) return false
+            const total = c.initiative.roll + c.initiative.bonus
+            if (newTotal !== total) return newTotal > total
+            return (combatant.abilities?.dex ?? 10) > (c.abilities?.dex ?? 10)
+          })
+          const newOrder = insertAt === -1
+            ? [...order, id]
+            : [...order.slice(0, insertAt), id, ...order.slice(insertAt)]
           return {
             encounter: {
               ...s.encounter,
-              initiativeOrder: [...s.encounter.initiativeOrder, id],
+              initiativeOrder: newOrder,
             }
           }
         })

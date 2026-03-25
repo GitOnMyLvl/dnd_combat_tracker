@@ -1,13 +1,8 @@
 import { useState } from 'react'
-import { useCharacterStore, templateToCombatant, DEFAULT_ABILITIES } from '../../store/characterStore'
+import { useCharacterStore, templateToCombatant } from '../../store/characterStore'
 import { useEncounterStore } from '../../store/encounterStore'
-
-const ABILITY_LABELS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
-
-function mod(score) {
-  const m = Math.floor((score - 10) / 2)
-  return m >= 0 ? `+${m}` : `${m}`
-}
+import CharacterFormModal from '../shared/CharacterFormModal'
+import Modal from '../shared/Modal'
 
 function CharacterCard({ char, compact, onRemove, onEdit, actions }) {
   const typeColor = char.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)'
@@ -52,135 +47,6 @@ function CharacterCard({ char, compact, onRemove, onEdit, actions }) {
             title="Delete"
           >✕</button>
         )}
-      </div>
-    </div>
-  )
-}
-
-/** Shared modal for creating and editing characters */
-function CharacterFormModal({ initial, onClose, onSave, title }) {
-  const [name, setName] = useState(initial?.name ?? '')
-  const [type, setType] = useState(initial?.type ?? 'ally')
-  const [hp, setHp] = useState(initial?.hp ?? 10)
-  const [ac, setAc] = useState(initial?.ac ?? 10)
-  const [initBonus, setInitBonus] = useState(initial?.initiativeBonus ?? 0)
-  const [spellDC, setSpellDC] = useState(initial?.spellSaveDC ?? '')
-  const [spellAtk, setSpellAtk] = useState(initial?.spellAttackBonus ?? '')
-  const initAbilities = initial?.abilities ?? DEFAULT_ABILITIES
-  const [abilities, setAbilities] = useState({ ...initAbilities })
-  const [notes, setNotes] = useState(initial?.notes ?? '')
-
-  const setAbility = (key, val) => setAbilities(prev => ({ ...prev, [key]: parseInt(val, 10) || 0 }))
-
-  const submit = () => {
-    if (!name.trim()) return
-    onSave({
-      name: name.trim(),
-      type,
-      hp,
-      ac,
-      initiativeBonus: initBonus,
-      spellSaveDC: spellDC === '' ? null : Number(spellDC),
-      spellAttackBonus: spellAtk === '' ? null : Number(spellAtk),
-      legendary: initial?.legendary ?? null,
-      notes,
-      abilities,
-    })
-    onClose()
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.75)', padding: 16, overflowY: 'auto' }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="card w-full" style={{ maxWidth: 400, padding: 20, boxShadow: '0 24px 64px var(--c-shadow)', margin: 'auto' }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{title}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 30, minWidth: 30, fontSize: '1rem', borderRadius: 6 }}>✕</button>
-        </div>
-        <div className="flex flex-col" style={{ gap: 10 }}>
-          {/* Name */}
-          <input autoFocus placeholder="Name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && submit()} style={{ minHeight: 44, fontSize: '0.95rem' }} />
-
-          {/* Type toggle */}
-          <div className="flex" style={{ gap: 4 }}>
-            {['ally', 'enemy'].map(t => (
-              <button
-                key={t}
-                onClick={() => setType(t)}
-                style={{
-                  flex: 1, minHeight: 34, minWidth: 'unset', fontSize: '0.8rem', fontWeight: 600, borderRadius: 6,
-                  border: type === t ? '1px solid var(--c-accent)' : '1px solid var(--c-border)',
-                  background: type === t ? 'var(--c-accent-dim)' : 'transparent',
-                  color: type === t ? 'var(--c-accent)' : 'var(--c-muted)',
-                  textTransform: 'capitalize',
-                }}
-              >{t}</button>
-            ))}
-          </div>
-
-          {/* Core stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-            {[
-              { label: 'Max HP', val: hp, set: v => setHp(parseInt(v, 10) || 1) },
-              { label: 'AC', val: ac, set: v => setAc(parseInt(v, 10) || 1) },
-              { label: 'Init Bonus', val: initBonus, set: v => setInitBonus(parseInt(v, 10) || 0) },
-            ].map(({ label, val, set }) => (
-              <label key={label} className="flex flex-col" style={{ gap: 4 }}>
-                <span className="label">{label}</span>
-                <input type="number" value={val} onChange={e => set(e.target.value)} style={{ minHeight: 38, minWidth: 0, width: '100%', textAlign: 'center' }} />
-              </label>
-            ))}
-          </div>
-
-          {/* Ability scores */}
-          <div>
-            <div className="label" style={{ marginBottom: 6 }}>Ability Scores</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 4 }}>
-              {ABILITY_LABELS.map(a => (
-                <label key={a} className="flex flex-col" style={{ gap: 2, alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--c-muted)' }}>{a}</span>
-                  <input
-                    type="number"
-                    value={abilities[a]}
-                    onChange={e => setAbility(a, e.target.value)}
-                    style={{ minHeight: 34, minWidth: 0, width: '100%', textAlign: 'center', fontSize: '0.8rem' }}
-                  />
-                  <span style={{ fontSize: '0.6rem', color: 'var(--c-muted)' }}>{mod(abilities[a])}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Spell stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <label className="flex flex-col" style={{ gap: 4 }}>
-              <span className="label">Spell Save DC</span>
-              <input type="number" placeholder="—" value={spellDC} onChange={e => setSpellDC(e.target.value)} style={{ minHeight: 38, minWidth: 0, width: '100%', textAlign: 'center' }} />
-            </label>
-            <label className="flex flex-col" style={{ gap: 4 }}>
-              <span className="label">Spell Atk Bonus</span>
-              <input type="number" placeholder="—" value={spellAtk} onChange={e => setSpellAtk(e.target.value)} style={{ minHeight: 38, minWidth: 0, width: '100%', textAlign: 'center' }} />
-            </label>
-          </div>
-
-          {/* Notes */}
-          <textarea
-            placeholder="Notes…"
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            rows={2}
-            style={{ width: '100%', resize: 'none', fontSize: '0.8rem', minHeight: 48 }}
-          />
-
-          {/* Actions */}
-          <div className="flex justify-end" style={{ gap: 8, marginTop: 4 }}>
-            <button onClick={onClose} className="btn-ghost" style={{ minHeight: 40, minWidth: 'unset' }}>Cancel</button>
-            <button onClick={submit} className="btn-primary" style={{ minHeight: 40, minWidth: 'unset', padding: '0 20px' }}>Save</button>
-          </div>
-        </div>
       </div>
     </div>
   )
@@ -269,69 +135,58 @@ function CreatePartyModal({ onClose }) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.75)', padding: 16 }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="card w-full" style={{ maxWidth: 380, padding: 20, boxShadow: '0 24px 64px var(--c-shadow)' }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Create Party</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 30, minWidth: 30, fontSize: '1rem', borderRadius: 6 }}>✕</button>
-        </div>
+    <Modal title="Create Party" onClose={onClose}>
+      <div className="flex flex-col" style={{ gap: 10 }}>
+        <input
+          autoFocus
+          placeholder="Party name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && submit()}
+          style={{ minHeight: 44, fontSize: '0.95rem' }}
+        />
 
-        <div className="flex flex-col" style={{ gap: 10 }}>
-          <input
-            autoFocus
-            placeholder="Party name"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && submit()}
-            style={{ minHeight: 44, fontSize: '0.95rem' }}
-          />
-
-          {characters.length === 0 ? (
-            <div style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '12px 0' }}>
-              Save some characters first to create a party.
-            </div>
-          ) : (
-            <div className="flex flex-col" style={{ gap: 4, maxHeight: 240, overflowY: 'auto' }}>
-              <div className="label" style={{ marginBottom: 2 }}>Select members</div>
-              {characters.map(char => (
-                <button
-                  key={char.id}
-                  onClick={() => toggle(char.id)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '6px 10px', borderRadius: 8, textAlign: 'left',
-                    minHeight: 'unset', minWidth: 'unset',
-                    border: selected.has(char.id) ? '1px solid var(--c-accent)' : '1px solid var(--c-border)',
-                    background: selected.has(char.id) ? 'var(--c-accent-dim)' : 'var(--c-surface)',
-                    transition: 'all 0.1s',
-                  }}
-                >
-                  <span style={{ color: char.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.55rem' }}>●</span>
-                  <span style={{ flex: 1, fontSize: '0.8rem', fontWeight: 600 }}>{char.name}</span>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--c-muted)' }}>
-                    HP {char.hp} · AC {char.ac}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div className="flex justify-end" style={{ gap: 8, marginTop: 4 }}>
-            <button onClick={onClose} className="btn-ghost" style={{ minHeight: 40, minWidth: 'unset' }}>Cancel</button>
-            <button
-              onClick={submit}
-              className="btn-primary"
-              style={{ minHeight: 40, minWidth: 'unset', padding: '0 20px' }}
-              disabled={!name.trim() || selected.size === 0}
-            >Create</button>
+        {characters.length === 0 ? (
+          <div style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '12px 0' }}>
+            Save some characters first to create a party.
           </div>
+        ) : (
+          <div className="flex flex-col" style={{ gap: 4, maxHeight: 240, overflowY: 'auto' }}>
+            <div className="label" style={{ marginBottom: 2 }}>Select members</div>
+            {characters.map(char => (
+              <button
+                key={char.id}
+                onClick={() => toggle(char.id)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '6px 10px', borderRadius: 8, textAlign: 'left',
+                  minHeight: 'unset', minWidth: 'unset',
+                  border: selected.has(char.id) ? '1px solid var(--c-accent)' : '1px solid var(--c-border)',
+                  background: selected.has(char.id) ? 'var(--c-accent-dim)' : 'var(--c-surface)',
+                  transition: 'all 0.1s',
+                }}
+              >
+                <span style={{ color: char.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.55rem' }}>●</span>
+                <span style={{ flex: 1, fontSize: '0.8rem', fontWeight: 600 }}>{char.name}</span>
+                <span style={{ fontSize: '0.7rem', color: 'var(--c-muted)' }}>
+                  HP {char.hp} · AC {char.ac}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex justify-end" style={{ gap: 8, marginTop: 4 }}>
+          <button onClick={onClose} className="btn-ghost" style={{ minHeight: 40, minWidth: 'unset' }}>Cancel</button>
+          <button
+            onClick={submit}
+            className="btn-primary"
+            style={{ minHeight: 40, minWidth: 'unset', padding: '0 20px' }}
+            disabled={!name.trim() || selected.size === 0}
+          >Create</button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -341,64 +196,44 @@ function AddToPartyModal({ party, onClose }) {
 
   if (available.length === 0) {
     return (
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center"
-        style={{ background: 'rgba(0,0,0,0.75)', padding: 16 }}
-        onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      >
-        <div className="card w-full" style={{ maxWidth: 380, padding: 20, boxShadow: '0 24px 64px var(--c-shadow)' }}>
-          <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-            <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Add to {party.name}</span>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 30, minWidth: 30, fontSize: '1rem', borderRadius: 6 }}>✕</button>
-          </div>
-          <div style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '12px 0' }}>
-            All saved characters are already in this party.
-          </div>
-          <div className="flex justify-end" style={{ marginTop: 8 }}>
-            <button onClick={onClose} className="btn-ghost" style={{ minHeight: 40, minWidth: 'unset' }}>Close</button>
-          </div>
+      <Modal title={`Add to ${party.name}`} onClose={onClose}>
+        <div style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '12px 0' }}>
+          All saved characters are already in this party.
         </div>
-      </div>
+        <div className="flex justify-end" style={{ marginTop: 8 }}>
+          <button onClick={onClose} className="btn-ghost" style={{ minHeight: 40, minWidth: 'unset' }}>Close</button>
+        </div>
+      </Modal>
     )
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.75)', padding: 16 }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="card w-full" style={{ maxWidth: 380, padding: 20, boxShadow: '0 24px 64px var(--c-shadow)' }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Add to {party.name}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 30, minWidth: 30, fontSize: '1rem', borderRadius: 6 }}>✕</button>
-        </div>
-        <div className="flex flex-col" style={{ gap: 4, maxHeight: 300, overflowY: 'auto' }}>
-          {available.map(char => (
-            <div
-              key={char.id}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '6px 10px', borderRadius: 8,
-                border: '1px solid var(--c-border)', background: 'var(--c-surface)',
-              }}
-            >
-              <span style={{ color: char.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.55rem' }}>●</span>
-              <span style={{ flex: 1, fontSize: '0.8rem', fontWeight: 600 }}>{char.name}</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--c-muted)' }}>HP {char.hp} · AC {char.ac}</span>
-              <button
-                onClick={() => addCharacterToParty(party.id, char.id)}
-                className="btn-primary"
-                style={{ minHeight: 24, minWidth: 'unset', fontSize: '0.68rem', padding: '0 8px', borderRadius: 6 }}
-              >+ Add</button>
-            </div>
-          ))}
-        </div>
-        <div className="flex justify-end" style={{ marginTop: 12 }}>
-          <button onClick={onClose} className="btn-ghost" style={{ minHeight: 40, minWidth: 'unset' }}>Done</button>
-        </div>
+    <Modal title={`Add to ${party.name}`} onClose={onClose}>
+      <div className="flex flex-col" style={{ gap: 4, maxHeight: 300, overflowY: 'auto' }}>
+        {available.map(char => (
+          <div
+            key={char.id}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '6px 10px', borderRadius: 8,
+              border: '1px solid var(--c-border)', background: 'var(--c-surface)',
+            }}
+          >
+            <span style={{ color: char.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.55rem' }}>●</span>
+            <span style={{ flex: 1, fontSize: '0.8rem', fontWeight: 600 }}>{char.name}</span>
+            <span style={{ fontSize: '0.7rem', color: 'var(--c-muted)' }}>HP {char.hp} · AC {char.ac}</span>
+            <button
+              onClick={() => addCharacterToParty(party.id, char.id)}
+              className="btn-primary"
+              style={{ minHeight: 24, minWidth: 'unset', fontSize: '0.68rem', padding: '0 8px', borderRadius: 6 }}
+            >+ Add</button>
+          </div>
+        ))}
       </div>
-    </div>
+      <div className="flex justify-end" style={{ marginTop: 12 }}>
+        <button onClick={onClose} className="btn-ghost" style={{ minHeight: 40, minWidth: 'unset' }}>Done</button>
+      </div>
+    </Modal>
   )
 }
 

@@ -1,85 +1,26 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useEncounterStore } from '../../store/encounterStore'
 import HPEditor from '../shared/HPEditor'
 import EditableField from '../shared/EditableField'
 import ConditionBadge from '../shared/ConditionBadge'
 import MonsterSearch from '../shared/MonsterSearch'
-import { useCharacterStore, combatantToTemplate, DEFAULT_ABILITIES } from '../../store/characterStore'
+import CharacterFormModal from '../shared/CharacterFormModal'
+import Modal from '../shared/Modal'
+import { useCharacterStore, combatantToTemplate, templateToCombatant, DEFAULT_ABILITIES } from '../../store/characterStore'
+import { CONDITION_NAMES } from '../../constants/conditions'
 
 const ABILITY_LABELS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 
-const CONDITIONS = [
-  'Blinded','Charmed','Deafened','Frightened','Grappled',
-  'Incapacitated','Invisible','Paralyzed','Petrified',
-  'Poisoned','Prone','Restrained','Stunned','Unconscious','Concentration',
-]
-
-function Modal({ onClose, title, children }) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.75)', padding: 16 }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="card w-full" style={{ maxWidth: 380, padding: 20, boxShadow: '0 24px 64px var(--c-shadow)' }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{title}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 30, minWidth: 30, fontSize: '1rem', borderRadius: 6 }}>✕</button>
-        </div>
-        {children}
-      </div>
-    </div>
-  )
-}
-
 function AddManualModal({ tableType, onClose }) {
   const addCombatant = useEncounterStore(s => s.addCombatant)
-  const [name, setName] = useState('')
-  const [hp, setHp] = useState(10)
-  const [ac, setAc] = useState(10)
-  const [initBonus, setInitBonus] = useState(0)
-
-  const submit = () => {
-    if (!name.trim()) return
-    addCombatant({
-      name: name.trim(),
-      type: tableType,
-      hp: { current: hp, max: hp, temp: 0 },
-      ac,
-      initiative: { bonus: initBonus, roll: 0 },
-    })
-    onClose()
-  }
 
   return (
-    <Modal title={`Add ${tableType === 'ally' ? 'Ally' : 'Enemy'}`} onClose={onClose}>
-      <div className="flex flex-col" style={{ gap: 10 }}>
-        <input
-          autoFocus
-          placeholder="Name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && submit()}
-          style={{ minHeight: 44, fontSize: '0.95rem' }}
-        />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-          {[
-            { label: 'Max HP', val: hp, set: v => setHp(parseInt(v,10)||1) },
-            { label: 'AC', val: ac, set: v => setAc(parseInt(v,10)||1) },
-            { label: 'Init Bonus', val: initBonus, set: v => setInitBonus(parseInt(v,10)||0) },
-          ].map(({ label, val, set }) => (
-            <label key={label} className="flex flex-col" style={{ gap: 4 }}>
-              <span className="label">{label}</span>
-              <input type="number" value={val} onChange={e => set(e.target.value)} style={{ minHeight: 40, minWidth: 0, width: '100%', textAlign: 'center' }} />
-            </label>
-          ))}
-        </div>
-        <div className="flex justify-end" style={{ gap: 8, marginTop: 4 }}>
-          <button onClick={onClose} className="btn-ghost" style={{ minHeight: 40, minWidth: 'unset' }}>Cancel</button>
-          <button onClick={submit} className="btn-primary" style={{ minHeight: 40, minWidth: 'unset', padding: '0 20px' }}>Add</button>
-        </div>
-      </div>
-    </Modal>
+    <CharacterFormModal
+      title={`Add ${tableType === 'ally' ? 'Ally' : 'Enemy'}`}
+      lockedType={tableType}
+      onClose={onClose}
+      onSave={(data) => addCombatant(templateToCombatant(data))}
+    />
   )
 }
 
@@ -108,14 +49,28 @@ function StatPill({ label, value, onChange }) {
 }
 
 function CombatantRow({ combatant, isSelected, isActive }) {
-  const { updateCombatant, removeCombatant, toggleCondition, selectCombatant, resetCombatantToApi } = useEncounterStore()
+  const { updateCombatant, removeCombatant, toggleCondition, selectCombatant, resetCombatantToApi, setExhaustion, toggleInspiration } = useEncounterStore()
   const saveCharacter = useCharacterStore(s => s.saveCharacter)
   const [expanded, setExpanded] = useState(false)
   const [saveFlash, setSaveFlash] = useState(false)
+  const rowRef = useRef(null)
+  const [rowWidth, setRowWidth] = useState(0)
+
+  useEffect(() => {
+    if (!rowRef.current) return
+    const ro = new ResizeObserver(entries => setRowWidth(entries[0].contentRect.width))
+    ro.observe(rowRef.current)
+    return () => ro.disconnect()
+  }, [])
+
   const dying = combatant.hp.current === 0
+  const bloodied = !dying && combatant.hp.current <= Math.floor(combatant.hp.max / 2)
+  const exhaustion = combatant.exhaustion ?? 0
+  const inspiration = combatant.inspiration ?? false
 
   return (
     <div
+      ref={rowRef}
       style={{
         borderRadius: 10,
         border: isActive ? '1px solid var(--c-accent)' : '1px solid var(--c-border)',
@@ -141,8 +96,18 @@ function CombatantRow({ combatant, isSelected, isActive }) {
             className="font-semibold"
             style={{ fontSize: '0.85rem' }}
           />
-          {combatant.conditions.length > 0 && (
+          {(combatant.conditions.length > 0 || exhaustion > 0 || inspiration) && (
             <div className="flex flex-wrap" style={{ gap: 3, marginTop: 3 }}>
+              {inspiration && (
+                <span style={{ background: '#1d4ed833', border: '1px solid #1d4ed888', borderRadius: 100, padding: '1px 7px', fontSize: '0.68rem', fontWeight: 600, color: '#e8e8e8' }}>
+                  ✦ Inspired
+                </span>
+              )}
+              {exhaustion > 0 && (
+                <span style={{ background: '#78350f33', border: '1px solid #78350f88', borderRadius: 100, padding: '1px 7px', fontSize: '0.68rem', fontWeight: 600, color: '#e8e8e8' }}>
+                  Exhaustion {exhaustion} (−{exhaustion * 2})
+                </span>
+              )}
               {combatant.conditions.map(cond => (
                 <ConditionBadge
                   key={cond}
@@ -154,23 +119,41 @@ function CombatantRow({ combatant, isSelected, isActive }) {
           )}
         </div>
 
-        {/* AC */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-          <span className="label">AC</span>
-          <EditableField
-            value={combatant.ac}
-            type="number"
-            onChange={v => updateCombatant(combatant.id, { ac: v })}
-            style={{ fontWeight: 700, fontSize: '0.85rem', textAlign: 'center', width: 28 }}
-          />
-        </div>
+        {/* Stats: AC + saves (when wide) + HP */}
+        <div className="flex items-center" style={{ gap: 10, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+          {/* AC */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
+            <span className="label">AC</span>
+            <EditableField
+              value={combatant.ac}
+              type="number"
+              onChange={v => updateCombatant(combatant.id, { ac: v })}
+              style={{ fontWeight: 700, fontSize: '0.85rem', textAlign: 'center', width: 28, minHeight: 'unset' }}
+            />
+          </div>
 
-        {/* HP */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-          <span className="label">HP</span>
-          <span style={{ fontWeight: 700, fontSize: '0.85rem', color: dying ? 'var(--c-danger)' : 'var(--c-text)' }}>
-            {combatant.hp.current}<span style={{ color: 'var(--c-muted)', fontWeight: 400 }}>/{combatant.hp.max}</span>
-          </span>
+          {/* Saving throw modifiers — visible when card is wide enough */}
+          {rowWidth > 440 && (() => {
+            const abilities = combatant.abilities ?? DEFAULT_ABILITIES
+            return ABILITY_LABELS.map(a => {
+              const score = abilities[a] ?? 10
+              const mod = Math.floor((score - 10) / 2)
+              return (
+                <div key={a} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
+                  <span className="label">{a.toUpperCase()}</span>
+                  <span style={{ fontWeight: 700, fontSize: '0.82rem' }}>{mod >= 0 ? `+${mod}` : mod}</span>
+                </div>
+              )
+            })
+          })()}
+
+          {/* HP — always rightmost */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
+            <span className="label">HP</span>
+            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: dying ? 'var(--c-danger)' : bloodied ? '#f97316' : 'var(--c-text)', whiteSpace: 'nowrap' }}>
+              {combatant.hp.current}<span style={{ color: 'var(--c-muted)', fontWeight: 400 }}>/{combatant.hp.max}</span>
+            </span>
+          </div>
         </div>
 
         <span style={{ color: 'var(--c-muted)', fontSize: '0.65rem', flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>
@@ -203,6 +186,29 @@ function CombatantRow({ combatant, isSelected, isActive }) {
             />
           </div>
 
+          {/* Exhaustion */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="label" style={{ minWidth: 70 }}>Exhaustion</span>
+            <button
+              onClick={() => setExhaustion(combatant.id, exhaustion - 1)}
+              disabled={exhaustion === 0}
+              style={{ background: 'none', border: '1px solid var(--c-border)', borderRadius: 6, minHeight: 26, minWidth: 26, padding: 0, fontSize: '0.9rem', color: 'var(--c-muted)' }}
+            >−</button>
+            <span style={{ fontWeight: 700, fontSize: '0.9rem', minWidth: 16, textAlign: 'center', color: exhaustion > 0 ? '#f97316' : 'var(--c-muted)' }}>
+              {exhaustion}
+            </span>
+            <button
+              onClick={() => setExhaustion(combatant.id, exhaustion + 1)}
+              disabled={exhaustion === 10}
+              style={{ background: 'none', border: '1px solid var(--c-border)', borderRadius: 6, minHeight: 26, minWidth: 26, padding: 0, fontSize: '0.9rem', color: 'var(--c-muted)' }}
+            >+</button>
+            {exhaustion > 0 && (
+              <span style={{ fontSize: '0.72rem', color: '#f97316', marginLeft: 4 }}>
+                −{exhaustion * 2} to d20s{exhaustion >= 5 ? ' · speed halved' : ''}
+              </span>
+            )}
+          </div>
+
           {/* Ability Scores */}
           {(() => {
             const abilities = combatant.abilities ?? DEFAULT_ABILITIES
@@ -228,7 +234,7 @@ function CombatantRow({ combatant, isSelected, isActive }) {
           <div>
             <div className="label" style={{ marginBottom: 6 }}>Conditions</div>
             <div className="flex flex-wrap" style={{ gap: 4 }}>
-              {CONDITIONS.map(cond => {
+              {CONDITION_NAMES.map(cond => {
                 const active = combatant.conditions.includes(cond)
                 return (
                   <button
@@ -259,6 +265,18 @@ function CombatantRow({ combatant, isSelected, isActive }) {
 
           {/* Actions */}
           <div className="flex justify-end" style={{ gap: 6 }}>
+            <button
+              onClick={() => toggleInspiration(combatant.id)}
+              className="btn-ghost"
+              style={{
+                minHeight: 32, minWidth: 'unset', fontSize: '0.75rem',
+                color: inspiration ? '#60a5fa' : undefined,
+                border: inspiration ? '1px solid #1d4ed888' : undefined,
+                background: inspiration ? '#1d4ed822' : undefined,
+              }}
+            >
+              ✦ {inspiration ? 'Inspired' : 'Inspire'}
+            </button>
             <button
               onClick={() => {
                 saveCharacter(combatantToTemplate(combatant))

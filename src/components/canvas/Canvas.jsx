@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 import { useLayoutStore } from '../../store/layoutStore'
+import { useUIStore } from '../../store/uiStore'
 import ModuleWrapper from './ModuleWrapper'
 import ModulePicker from './ModulePicker'
 
@@ -22,16 +23,9 @@ const MODULE_COMPONENTS = {
   PartyManager,
 }
 
-// Expose picker open function so TopBar can trigger it
-let _openPicker = null
-export function openModulePicker() { _openPicker?.() }
-
 export default function Canvas() {
   const { modules, setLayout } = useLayoutStore()
-  const [showPicker, setShowPicker] = useState(false)
-
-  // Register the open function
-  _openPicker = () => setShowPicker(true)
+  const { showModulePicker, openModulePicker, closeModulePicker } = useUIStore()
 
   const layouts = {
     lg: modules.map(m => ({
@@ -101,7 +95,7 @@ export default function Canvas() {
 
       {/* FAB */}
       <button
-        onClick={() => setShowPicker(true)}
+        onClick={openModulePicker}
         title="Add module"
         style={{
           position: 'fixed', bottom: 24, right: 24, zIndex: 40,
@@ -116,7 +110,7 @@ export default function Canvas() {
         onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)' }}
       >+</button>
 
-      {showPicker && <ModulePicker onClose={() => setShowPicker(false)} />}
+      {showModulePicker && <ModulePicker onClose={closeModulePicker} />}
     </div>
   )
 }

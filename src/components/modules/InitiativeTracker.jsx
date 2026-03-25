@@ -6,7 +6,7 @@ export default function InitiativeTracker() {
     nextTurn, prevTurn,
     sortInitiative, setInitiativeRoll,
     selectCombatant, selectedCombatantId,
-    addToInitiative,
+    addToInitiative, reorderInitiative,
   } = useEncounterStore()
 
   const { initiativeOrder, combatants, currentTurnIndex, round } = encounter
@@ -17,6 +17,20 @@ export default function InitiativeTracker() {
 
   const unordered = combatants.filter(c => !initiativeOrder.includes(c.id))
   const currentId = initiativeOrder[currentTurnIndex]
+
+  const moveUp = (idx) => {
+    if (idx === 0) return
+    const next = [...initiativeOrder]
+    ;[next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]
+    reorderInitiative(next)
+  }
+
+  const moveDown = (idx) => {
+    if (idx === initiativeOrder.length - 1) return
+    const next = [...initiativeOrder]
+    ;[next[idx], next[idx + 1]] = [next[idx + 1], next[idx]]
+    reorderInitiative(next)
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 8 }}>
@@ -85,6 +99,7 @@ export default function InitiativeTracker() {
                 value={c.initiative.roll}
                 onChange={e => setInitiativeRoll(c.id, parseInt(e.target.value, 10) || 0)}
                 onClick={e => e.stopPropagation()}
+                onFocus={e => e.target.select()}
                 style={{ width: 38, textAlign: 'center', fontWeight: 700, fontSize: '0.85rem', minHeight: 32, padding: '2px 4px' }}
                 title="Roll"
               />
@@ -98,6 +113,19 @@ export default function InitiativeTracker() {
               </div>
 
               <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isActive ? 'var(--c-accent)' : 'var(--c-text)', minWidth: 20, textAlign: 'right' }}>{total}</span>
+
+              <div className="flex flex-col" style={{ gap: 1, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+                <button
+                  onClick={() => moveUp(idx)}
+                  disabled={idx === 0}
+                  style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 'unset', minWidth: 'unset', padding: '1px 4px', fontSize: '0.6rem', lineHeight: 1, opacity: idx === 0 ? 0.2 : 0.6 }}
+                >▲</button>
+                <button
+                  onClick={() => moveDown(idx)}
+                  disabled={idx === ordered.length - 1}
+                  style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 'unset', minWidth: 'unset', padding: '1px 4px', fontSize: '0.6rem', lineHeight: 1, opacity: idx === ordered.length - 1 ? 0.2 : 0.6 }}
+                >▼</button>
+              </div>
             </div>
           )
         })}
@@ -121,6 +149,7 @@ export default function InitiativeTracker() {
                   value={c.initiative.roll}
                   onChange={e => setInitiativeRoll(c.id, parseInt(e.target.value, 10) || 0)}
                   onClick={e => e.stopPropagation()}
+                  onFocus={e => e.target.select()}
                   style={{ width: 38, textAlign: 'center', fontSize: '0.82rem', minHeight: 32, padding: '2px 4px' }}
                 />
                 <span style={{ flex: 1, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>

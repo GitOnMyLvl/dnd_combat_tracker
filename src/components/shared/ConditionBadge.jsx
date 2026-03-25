@@ -1,24 +1,7 @@
-const CONDITION_COLORS = {
-  Blinded:      '#52525b',
-  Charmed:      '#be185d',
-  Deafened:     '#52525b',
-  Exhaustion:   '#78350f',
-  Frightened:   '#6d28d9',
-  Grappled:     '#7c3aed',
-  Incapacitated:'#b91c1c',
-  Invisible:    '#71717a',
-  Paralyzed:    '#b91c1c',
-  Petrified:    '#57534e',
-  Poisoned:     '#15803d',
-  Prone:        '#92400e',
-  Restrained:   '#7c2d12',
-  Stunned:      '#b91c1c',
-  Unconscious:  '#1e40af',
-  Concentration:'#d97706',
-}
+import { CONDITION_MAP } from '../../constants/conditions'
 
 export default function ConditionBadge({ condition, onRemove }) {
-  const color = CONDITION_COLORS[condition] ?? '#334155'
+  const color = CONDITION_MAP[condition]?.color ?? '#334155'
   return (
     <span
       className="inline-flex items-center"
