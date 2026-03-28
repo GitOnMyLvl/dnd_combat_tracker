@@ -58,7 +58,8 @@ export default function HPEditor({ combatant }) {
         <input
           type="text"
           inputMode="numeric"
-          value={hpDraft !== null ? hpDraft : hp.current}
+          value={hpDraft !== null ? hpDraft : String(hp.current)}
+          onFocus={e => { setHpDraft(String(hp.current)); e.target.select() }}
           onChange={e => setHpDraft(e.target.value)}
           onBlur={commitHP}
           onKeyDown={e => { if (e.key === 'Enter') commitHP() }}
@@ -68,7 +69,8 @@ export default function HPEditor({ combatant }) {
         <input
           type="text"
           inputMode="numeric"
-          value={maxHpDraft !== null ? maxHpDraft : hp.max}
+          value={maxHpDraft !== null ? maxHpDraft : String(hp.max)}
+          onFocus={e => { setMaxHpDraft(String(hp.max)); e.target.select() }}
           onChange={e => setMaxHpDraft(e.target.value)}
           onBlur={commitMaxHP}
           onKeyDown={e => { if (e.key === 'Enter') commitMaxHP() }}
