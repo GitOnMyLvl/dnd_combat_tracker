@@ -53,9 +53,9 @@ export default function HPEditor({ combatant }) {
       {/* HP inputs */}
       <div className="flex items-center" style={{ gap: 6 }}>
         <input
-          type="number"
+          type="text"
+          inputMode="numeric"
           value={hpDraft !== null ? hpDraft : hp.current}
-          min={0} max={hp.max}
           onChange={e => setHpDraft(e.target.value)}
           onBlur={commitHP}
           onKeyDown={e => { if (e.key === 'Enter') commitHP() }}
@@ -63,9 +63,9 @@ export default function HPEditor({ combatant }) {
         />
         <span style={{ color: 'var(--c-muted)', fontSize: '0.8rem' }}>/</span>
         <input
-          type="number"
+          type="text"
+          inputMode="numeric"
           value={maxHpDraft !== null ? maxHpDraft : hp.max}
-          min={1}
           onChange={e => setMaxHpDraft(e.target.value)}
           onBlur={commitMaxHP}
           onKeyDown={e => { if (e.key === 'Enter') commitMaxHP() }}
