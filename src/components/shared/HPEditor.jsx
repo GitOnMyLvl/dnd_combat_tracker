@@ -5,6 +5,7 @@ export default function HPEditor({ combatant }) {
   const { updateHP, setHP, updateCombatant } = useEncounterStore()
   const [inputVal, setInputVal] = useState('')
   const [hpDraft, setHpDraft] = useState(null) // null = not editing
+  const [maxHpDraft, setMaxHpDraft] = useState(null) // null = not editing
   const { hp } = combatant
 
   const commitHP = () => {
@@ -14,6 +15,16 @@ export default function HPEditor({ combatant }) {
         if (!isNaN(n)) setHP(combatant.id, n)
       }
       setHpDraft(null)
+    }
+  }
+
+  const commitMaxHP = () => {
+    if (maxHpDraft !== null) {
+      if (maxHpDraft !== '') {
+        const n = parseInt(maxHpDraft, 10)
+        if (!isNaN(n) && n > 0) updateCombatant(combatant.id, { hp: { ...hp, max: n } })
+      }
+      setMaxHpDraft(null)
     }
   }
 
@@ -53,9 +64,11 @@ export default function HPEditor({ combatant }) {
         <span style={{ color: 'var(--c-muted)', fontSize: '0.8rem' }}>/</span>
         <input
           type="number"
-          value={hp.max}
+          value={maxHpDraft !== null ? maxHpDraft : hp.max}
           min={1}
-          onChange={e => updateCombatant(combatant.id, { hp: { ...hp, max: parseInt(e.target.value, 10) || 1 } })}
+          onChange={e => setMaxHpDraft(e.target.value)}
+          onBlur={commitMaxHP}
+          onKeyDown={e => { if (e.key === 'Enter') commitMaxHP() }}
           style={{ width: 52, textAlign: 'center', color: 'var(--c-muted2)', minHeight: 36, padding: '2px 4px' }}
         />
         {hp.temp > 0 && (
