@@ -22,7 +22,10 @@ export default function HPEditor({ combatant }) {
     if (maxHpDraft !== null) {
       if (maxHpDraft !== '') {
         const n = parseInt(maxHpDraft, 10)
-        if (!isNaN(n) && n > 0) updateCombatant(combatant.id, { hp: { ...hp, max: n } })
+        if (!isNaN(n) && n > 0) {
+          const current = Math.min(hp.current, n)
+          updateCombatant(combatant.id, { hp: { ...hp, max: n, current } })
+        }
       }
       setMaxHpDraft(null)
     }
