@@ -4,7 +4,18 @@ import { useEncounterStore } from '../../store/encounterStore'
 export default function HPEditor({ combatant }) {
   const { updateHP, setHP, updateCombatant } = useEncounterStore()
   const [inputVal, setInputVal] = useState('')
+  const [hpDraft, setHpDraft] = useState(null) // null = not editing
   const { hp } = combatant
+
+  const commitHP = () => {
+    if (hpDraft !== null) {
+      if (hpDraft !== '') {
+        const n = parseInt(hpDraft, 10)
+        if (!isNaN(n)) setHP(combatant.id, n)
+      }
+      setHpDraft(null)
+    }
+  }
 
   const pct = hp.max > 0 ? hp.current / hp.max : 0
   const barColor = pct > 0.5 ? 'var(--c-success)' : pct > 0.25 ? 'var(--c-accent)' : 'var(--c-danger)'
@@ -32,9 +43,11 @@ export default function HPEditor({ combatant }) {
       <div className="flex items-center" style={{ gap: 6 }}>
         <input
           type="number"
-          value={hp.current}
+          value={hpDraft !== null ? hpDraft : hp.current}
           min={0} max={hp.max}
-          onChange={e => setHP(combatant.id, parseInt(e.target.value, 10) || 0)}
+          onChange={e => setHpDraft(e.target.value)}
+          onBlur={commitHP}
+          onKeyDown={e => { if (e.key === 'Enter') commitHP() }}
           style={{ width: 52, textAlign: 'center', fontWeight: 700, fontSize: '0.95rem', minHeight: 36, padding: '2px 4px' }}
         />
         <span style={{ color: 'var(--c-muted)', fontSize: '0.8rem' }}>/</span>

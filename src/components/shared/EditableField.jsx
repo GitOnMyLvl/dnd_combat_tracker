@@ -18,8 +18,13 @@ export default function EditableField({ value, onChange, type = 'text', classNam
 
   const commit = () => {
     setEditing(false)
-    const parsed = type === 'number' ? Number(draft) : draft
-    if (!isNaN(parsed) || type !== 'number') onChange(parsed)
+    if (type === 'number') {
+      if (draft === '') return
+      const parsed = Number(draft)
+      if (!isNaN(parsed)) onChange(parsed)
+    } else {
+      onChange(draft)
+    }
   }
 
   if (editing) {

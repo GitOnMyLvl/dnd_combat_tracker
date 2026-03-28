@@ -172,12 +172,12 @@ function CombatantRow({ combatant, isSelected, isActive }) {
             <StatPill
               label="Spell DC"
               value={combatant.spellSaveDC ?? ''}
-              onChange={v => updateCombatant(combatant.id, { spellSaveDC: v || null })}
+              onChange={v => updateCombatant(combatant.id, { spellSaveDC: v ?? null })}
             />
             <StatPill
               label="Spell Atk"
               value={combatant.spellAttackBonus ?? ''}
-              onChange={v => updateCombatant(combatant.id, { spellAttackBonus: v || null })}
+              onChange={v => updateCombatant(combatant.id, { spellAttackBonus: v ?? null })}
             />
             <StatPill
               label="Init Bonus"
