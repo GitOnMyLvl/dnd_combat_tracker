@@ -32,7 +32,7 @@ export default function HPEditor({ combatant }) {
   }
 
   const pct = hp.max > 0 ? hp.current / hp.max : 0
-  const barColor = pct > 0.5 ? 'var(--c-success)' : pct > 0.25 ? 'var(--c-accent)' : 'var(--c-danger)'
+  const barColor = pct > 0.5 ? 'var(--c-success)' : pct > 0.25 ? '#f97316' : 'var(--c-danger)'
 
   const applyInput = (action) => {
     const n = parseInt(inputVal, 10)

@@ -38,7 +38,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
   const total = isManual ? c.initiative.roll : c.initiative.roll + c.initiative.bonus
   const isDowned = c.hp.current === 0
   const hpPct = c.hp.max > 0 ? c.hp.current / c.hp.max : 0
-  const barColor = hpPct > 0.5 ? 'var(--c-success)' : hpPct > 0.25 ? 'var(--c-accent)' : 'var(--c-danger)'
+  const barColor = hpPct > 0.5 ? 'var(--c-success)' : hpPct > 0.25 ? '#f97316' : 'var(--c-danger)'
 
   const applyHP = (dir) => {
     const n = parseInt(amt, 10)
