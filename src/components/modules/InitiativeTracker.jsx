@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useEncounterStore } from '../../store/encounterStore'
 
 function InitInput({ id, value, onCommit, style }) {
@@ -28,7 +28,10 @@ function InitInput({ id, value, onCommit, style }) {
   )
 }
 
-function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect, onMoveUp, onMoveDown }) {
+const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha']
+const abilityMod = score => { const m = Math.floor((score - 10) / 2); return m >= 0 ? `+${m}` : `${m}` }
+
+function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, onSelect, onMoveUp, onMoveDown }) {
   const [amt, setAmt] = useState('')
   const { setInitiativeRoll, updateHP } = useEncounterStore()
 
@@ -122,7 +125,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect
           <input
             type="text"
             inputMode="numeric"
-            placeholder="amt"
+            placeholder="±"
             value={amt}
             onChange={e => setAmt(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') applyHP('dmg') }}
@@ -138,6 +141,22 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect
           >HEAL</button>
         </div>
       </div>
+
+      {/* Ability scores — only when panel is wide enough */}
+      {wide && (
+        <div style={{ paddingLeft: 22, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 2 }} onClick={e => e.stopPropagation()}>
+          {ABILITIES.map(a => {
+            const score = c.abilities?.[a] ?? 10
+            return (
+              <div key={a} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '0.55rem', color: 'var(--c-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>{a}</div>
+                <div style={{ fontSize: '0.72rem', fontWeight: 600, lineHeight: 1.2 }}>{score}</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--c-muted)' }}>{abilityMod(score)}</div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -153,6 +172,16 @@ export default function InitiativeTracker() {
 
   const { initiativeOrder, combatants, currentTurnIndex, round, initiativeMode = 'auto' } = encounter
   const isManual = initiativeMode === 'manual'
+
+  const containerRef = useRef(null)
+  const [wide, setWide] = useState(false)
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([entry]) => setWide(entry.contentRect.width >= 380))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   const ordered = initiativeOrder
     .map(id => combatants.find(c => c.id === id))
@@ -176,7 +205,7 @@ export default function InitiativeTracker() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 8 }}>
+    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 8 }}>
       {/* Round row */}
       <div className="flex items-center justify-between flex-shrink-0" style={{ gap: 8 }}>
         <div>
@@ -243,6 +272,7 @@ export default function InitiativeTracker() {
             isSelected={c.id === selectedCombatantId}
             isManual={isManual}
             isLast={idx === ordered.length - 1}
+            wide={wide}
             onSelect={selectCombatant}
             onMoveUp={() => moveUp(idx)}
             onMoveDown={() => moveDown(idx)}
