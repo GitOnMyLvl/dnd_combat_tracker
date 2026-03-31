@@ -9,6 +9,7 @@ const defaultEncounter = () => ({
   currentTurnIndex: 0,
   combatants: [],
   initiativeOrder: [], // array of combatant ids, sorted
+  initiativeMode: 'auto', // 'auto' | 'manual'
 })
 
 const makeCombatant = (overrides = {}) => ({
@@ -163,6 +164,10 @@ export const useEncounterStore = create(
       },
 
       // Initiative
+      setInitiativeMode: (mode) => {
+        set(s => ({ encounter: { ...s.encounter, initiativeMode: mode } }))
+      },
+
       setInitiativeRoll: (id, roll) => {
         set(s => ({
           encounter: {
@@ -198,12 +203,13 @@ export const useEncounterStore = create(
 
       sortInitiative: () => {
         set(s => {
+          const isManual = s.encounter.initiativeMode === 'manual'
           const sorted = [...s.encounter.combatants]
             .sort((a, b) => {
-              const aTotal = a.initiative.roll + a.initiative.bonus
-              const bTotal = b.initiative.roll + b.initiative.bonus
+              const aTotal = isManual ? a.initiative.roll : a.initiative.roll + a.initiative.bonus
+              const bTotal = isManual ? b.initiative.roll : b.initiative.roll + b.initiative.bonus
               if (bTotal !== aTotal) return bTotal - aTotal
-              return (b.abilities?.dex ?? 10) - (a.abilities?.dex ?? 10) // 2024: tiebreak by DEX score
+              return (b.abilities?.dex ?? 10) - (a.abilities?.dex ?? 10)
             })
             .map(c => c.id)
           return {
@@ -267,12 +273,13 @@ export const useEncounterStore = create(
           if (s.encounter.initiativeOrder.includes(id)) return s
           const combatant = s.encounter.combatants.find(c => c.id === id)
           if (!combatant) return s
-          const newTotal = combatant.initiative.roll + combatant.initiative.bonus
+          const isManual = s.encounter.initiativeMode === 'manual'
+          const newTotal = isManual ? combatant.initiative.roll : combatant.initiative.roll + combatant.initiative.bonus
           const order = s.encounter.initiativeOrder
           const insertAt = order.findIndex(existingId => {
             const c = s.encounter.combatants.find(x => x.id === existingId)
             if (!c) return false
-            const total = c.initiative.roll + c.initiative.bonus
+            const total = isManual ? c.initiative.roll : c.initiative.roll + c.initiative.bonus
             if (newTotal !== total) return newTotal > total
             return (combatant.abilities?.dex ?? 10) > (c.abilities?.dex ?? 10)
           })

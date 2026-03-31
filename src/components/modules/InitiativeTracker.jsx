@@ -23,8 +23,122 @@ function InitInput({ id, value, onCommit, style }) {
       onKeyDown={e => { if (e.key === 'Enter') commit() }}
       onClick={e => e.stopPropagation()}
       style={style}
-      title="Roll"
+      title="Initiative roll"
     />
+  )
+}
+
+function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect, onMoveUp, onMoveDown }) {
+  const [amt, setAmt] = useState('')
+  const { setInitiativeRoll, updateHP } = useEncounterStore()
+
+  const total = isManual ? c.initiative.roll : c.initiative.roll + c.initiative.bonus
+  const isDowned = c.hp.current === 0
+  const hpPct = c.hp.max > 0 ? c.hp.current / c.hp.max : 0
+  const barColor = hpPct > 0.5 ? 'var(--c-success)' : hpPct > 0.25 ? 'var(--c-accent)' : 'var(--c-danger)'
+
+  const applyHP = (dir) => {
+    const n = parseInt(amt, 10)
+    if (isNaN(n) || n <= 0) return
+    updateHP(c.id, dir === 'heal' ? n : -n)
+    setAmt('')
+  }
+
+  return (
+    <div
+      onClick={() => onSelect(c.id)}
+      style={{
+        borderRadius: 8, cursor: 'pointer', padding: '6px 8px',
+        background: isActive ? 'var(--c-accent-dim)' : isSelected ? 'var(--c-elevated)' : 'transparent',
+        border: isActive ? '1px solid var(--c-accent)' : isDowned ? '1px solid var(--c-danger)' : '1px solid transparent',
+        opacity: isDowned ? 0.7 : 1,
+        transition: 'background 0.1s',
+        display: 'flex', flexDirection: 'column', gap: 5,
+      }}
+    >
+      {/* Top row: position | roll | name + badges | AC | total | reorder */}
+      <div className="flex items-center" style={{ gap: 6 }}>
+        <span style={{ width: 16, textAlign: 'center', fontSize: '0.65rem', color: isActive ? 'var(--c-accent)' : 'var(--c-muted)', fontWeight: 700, flexShrink: 0 }}>
+          {isActive ? '▶' : idx + 1}
+        </span>
+
+        <InitInput
+          id={c.id}
+          value={c.initiative.roll}
+          onCommit={setInitiativeRoll}
+          style={{ width: 34, textAlign: 'center', fontWeight: 700, fontSize: '0.82rem', minHeight: 28, padding: '2px 4px' }}
+        />
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontWeight: 600, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {c.name}
+            </span>
+            {isDowned && (
+              <span style={{ fontSize: '0.58rem', fontWeight: 800, color: 'var(--c-danger)', background: 'var(--c-danger-dim)', borderRadius: 4, padding: '1px 4px', flexShrink: 0, letterSpacing: '0.03em' }}>
+                DOWN
+              </span>
+            )}
+          </div>
+          <div style={{ fontSize: '0.65rem', color: 'var(--c-muted)', marginTop: 1, display: 'flex', gap: 6, alignItems: 'center' }}>
+            <span style={{ color: c.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)' }}>●</span>
+            <span>AC {c.ac}</span>
+            {!isManual && c.initiative.bonus !== 0 && (
+              <span>{c.initiative.bonus > 0 ? '+' : ''}{c.initiative.bonus} bonus</span>
+            )}
+            {c.conditions?.length > 0 && (
+              <span style={{ color: 'var(--c-accent)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {c.conditions.join(', ')}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <span style={{ fontWeight: 700, fontSize: '0.88rem', color: isActive ? 'var(--c-accent)' : 'var(--c-text)', minWidth: 18, textAlign: 'right', flexShrink: 0 }}>
+          {total}
+        </span>
+
+        <div className="flex flex-col" style={{ gap: 1, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+          <button
+            onClick={onMoveUp}
+            disabled={idx === 0}
+            style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 'unset', minWidth: 'unset', padding: '1px 4px', fontSize: '0.6rem', lineHeight: 1, opacity: idx === 0 ? 0.2 : 0.6 }}
+          >▲</button>
+          <button
+            onClick={onMoveDown}
+            disabled={isLast}
+            style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 'unset', minWidth: 'unset', padding: '1px 4px', fontSize: '0.6rem', lineHeight: 1, opacity: isLast ? 0.2 : 0.6 }}
+          >▼</button>
+        </div>
+      </div>
+
+      {/* HP bar + quick DMG/HEAL */}
+      <div style={{ paddingLeft: 22 }} onClick={e => e.stopPropagation()}>
+        <div style={{ height: 3, borderRadius: 2, background: 'var(--c-elevated)', overflow: 'hidden', marginBottom: 4 }}>
+          <div style={{ height: '100%', width: `${hpPct * 100}%`, background: barColor, borderRadius: 2, transition: 'width 0.3s, background 0.3s' }} />
+        </div>
+        <div className="flex items-center" style={{ gap: 4 }}>
+          <span style={{ fontSize: '0.65rem', color: 'var(--c-muted)', minWidth: 32 }}>{c.hp.current}/{c.hp.max}</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder="amt"
+            value={amt}
+            onChange={e => setAmt(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') applyHP('dmg') }}
+            style={{ width: 38, minHeight: 22, padding: '0 4px', fontSize: '0.72rem', textAlign: 'center' }}
+          />
+          <button
+            onClick={() => applyHP('dmg')}
+            style={{ background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)', borderRadius: 5, padding: '0 6px', minHeight: 22, minWidth: 'unset', fontSize: '0.65rem', fontWeight: 600 }}
+          >DMG</button>
+          <button
+            onClick={() => applyHP('heal')}
+            style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid var(--c-success)', color: 'var(--c-success)', borderRadius: 5, padding: '0 6px', minHeight: 22, minWidth: 'unset', fontSize: '0.65rem', fontWeight: 600 }}
+          >HEAL</button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -32,12 +146,13 @@ export default function InitiativeTracker() {
   const {
     encounter,
     nextTurn, prevTurn,
-    sortInitiative, setInitiativeRoll,
+    sortInitiative, setInitiativeRoll, setInitiativeMode,
     selectCombatant, selectedCombatantId,
     addToInitiative, reorderInitiative,
   } = useEncounterStore()
 
-  const { initiativeOrder, combatants, currentTurnIndex, round } = encounter
+  const { initiativeOrder, combatants, currentTurnIndex, round, initiativeMode = 'auto' } = encounter
+  const isManual = initiativeMode === 'manual'
 
   const ordered = initiativeOrder
     .map(id => combatants.find(c => c.id === id))
@@ -84,76 +199,55 @@ export default function InitiativeTracker() {
         </div>
       </div>
 
-      <button
-        onClick={sortInitiative}
-        className="btn-ghost flex-shrink-0"
-        style={{ minHeight: 36, minWidth: 'unset', width: '100%', justifyContent: 'center', fontSize: '0.78rem' }}
-        disabled={combatants.length === 0}
-      >Sort by Initiative</button>
+      {/* Mode toggle + Sort */}
+      <div className="flex flex-shrink-0" style={{ gap: 6 }}>
+        <div style={{ display: 'flex', border: '1px solid var(--c-border)', borderRadius: 7, overflow: 'hidden', flexShrink: 0 }}>
+          {['auto', 'manual'].map(m => (
+            <button
+              key={m}
+              onClick={() => setInitiativeMode(m)}
+              style={{
+                minHeight: 32, minWidth: 'unset', padding: '0 10px', fontSize: '0.72rem', fontWeight: 600,
+                borderRadius: 0, border: 'none',
+                background: initiativeMode === m ? 'var(--c-accent-dim)' : 'transparent',
+                color: initiativeMode === m ? 'var(--c-accent)' : 'var(--c-muted)',
+                textTransform: 'capitalize',
+              }}
+            >{m}</button>
+          ))}
+        </div>
+        <button
+          onClick={sortInitiative}
+          className="btn-ghost"
+          style={{ flex: 1, minHeight: 32, minWidth: 'unset', justifyContent: 'center', fontSize: '0.78rem' }}
+          disabled={combatants.length === 0}
+        >Sort by Initiative</button>
+      </div>
 
       <hr className="divider flex-shrink-0" />
 
       {/* List */}
-      <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
         {ordered.length === 0 && (
           <p style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '16px 0' }}>
             Add combatants, set rolls, then sort.
           </p>
         )}
 
-        {ordered.map((c, idx) => {
-          const isActive = c.id === currentId
-          const isSelected = c.id === selectedCombatantId
-          const total = c.initiative.roll + c.initiative.bonus
-
-          return (
-            <div
-              key={c.id}
-              onClick={() => selectCombatant(c.id)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '6px 8px', borderRadius: 8, cursor: 'pointer',
-                background: isActive ? 'var(--c-accent-dim)' : isSelected ? 'var(--c-elevated)' : 'transparent',
-                border: isActive ? '1px solid var(--c-accent)' : '1px solid transparent',
-                minHeight: 46, transition: 'background 0.1s',
-              }}
-            >
-              <span style={{ width: 16, textAlign: 'center', fontSize: '0.65rem', color: isActive ? 'var(--c-accent)' : 'var(--c-muted)', fontWeight: 700, flexShrink: 0 }}>
-                {isActive ? '▶' : idx + 1}
-              </span>
-
-              <InitInput
-                id={c.id}
-                value={c.initiative.roll}
-                onCommit={setInitiativeRoll}
-                style={{ width: 38, textAlign: 'center', fontWeight: 700, fontSize: '0.85rem', minHeight: 32, padding: '2px 4px' }}
-              />
-
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 600, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--c-muted)', marginTop: 1 }}>
-                  <span style={{ color: c.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)' }}>●</span>
-                  {' '}{c.hp.current}/{c.hp.max} HP
-                </div>
-              </div>
-
-              <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isActive ? 'var(--c-accent)' : 'var(--c-text)', minWidth: 20, textAlign: 'right' }}>{total}</span>
-
-              <div className="flex flex-col" style={{ gap: 1, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-                <button
-                  onClick={() => moveUp(idx)}
-                  disabled={idx === 0}
-                  style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 'unset', minWidth: 'unset', padding: '1px 4px', fontSize: '0.6rem', lineHeight: 1, opacity: idx === 0 ? 0.2 : 0.6 }}
-                >▲</button>
-                <button
-                  onClick={() => moveDown(idx)}
-                  disabled={idx === ordered.length - 1}
-                  style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 'unset', minWidth: 'unset', padding: '1px 4px', fontSize: '0.6rem', lineHeight: 1, opacity: idx === ordered.length - 1 ? 0.2 : 0.6 }}
-                >▼</button>
-              </div>
-            </div>
-          )
-        })}
+        {ordered.map((c, idx) => (
+          <CombatantRow
+            key={c.id}
+            c={c}
+            idx={idx}
+            isActive={c.id === currentId}
+            isSelected={c.id === selectedCombatantId}
+            isManual={isManual}
+            isLast={idx === ordered.length - 1}
+            onSelect={selectCombatant}
+            onMoveUp={() => moveUp(idx)}
+            onMoveDown={() => moveDown(idx)}
+          />
+        ))}
 
         {unordered.length > 0 && (
           <>
