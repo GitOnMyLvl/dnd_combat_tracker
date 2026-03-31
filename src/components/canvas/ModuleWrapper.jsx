@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useLayoutStore } from '../../store/layoutStore'
 
 const MODULE_TITLES = {
@@ -8,12 +9,97 @@ const MODULE_TITLES = {
   NotesPad:          'Notes',
 }
 
+const MODULE_INFO = {
+  InitiativeTracker: {
+    title: 'Initiative Tracker',
+    body: `Manages turn order and round count during combat.
+
+• Enter each combatant's dice roll in the small input on the left of their name
+• Auto mode: final initiative = roll + bonus. Manual mode: you type the total directly — useful when you want full control
+• Hit "Sort by Initiative" to lock in the order
+• ▶ / ◀ buttons step forward or backward through turns
+• The active combatant is highlighted and marked with ▶
+• DOWN badge + red border appears automatically when a combatant's HP hits 0
+• Use the DMG / HEAL buttons on each row to update HP on the fly`,
+  },
+  CombatantTable_ally: {
+    title: 'Allies Table',
+    body: `Tracks your party members during combat.
+
+• Click "+ Add Ally" to create a character manually
+• Click any row to expand it — shows HP editor, conditions, ability scores, spell stats and notes
+• Edit stats inline by clicking on any value (AC, abilities, etc.)
+• Load saved characters from the Party Manager module
+• Conditions applied here are reflected in the Conditions panel`,
+  },
+  CombatantTable_enemy: {
+    title: 'Enemies Table',
+    body: `Tracks monsters and enemies during combat.
+
+• Click "+ Add Enemy" to create one manually, or use "Search Monsters" to look up any creature from the D&D 5e SRD
+• Click any row to expand it — shows HP editor, AC, conditions, ability scores and more
+• The reset button (↺) on API-sourced monsters restores all stats to the original values
+• Click a row to select that combatant — the Conditions panel will then apply to them`,
+  },
+  ConditionsPanel: {
+    title: 'Conditions',
+    body: `Apply and remove status conditions from combatants.
+
+• First select a combatant by clicking their row in the Allies or Enemies table
+• Then click any condition to toggle it on or off
+• Active conditions are highlighted and shown as badges on the combatant's row
+• Hover a condition name for a short rules reminder`,
+  },
+  DiceRoller: {
+    title: 'Dice Roller',
+    body: `Roll any standard dice with modifiers.
+
+• Click a die button (d4, d6, d8, d10, d12, d20, d100) to roll it once
+• Advantage: rolls twice, takes the higher result
+• Disadvantage: rolls twice, takes the lower result
+• Custom field: type any expression like 2d6+3 or d20-1 and press Enter
+• The last 20 rolls are shown in the history below`,
+  },
+  NotesPad: {
+    title: 'Notes',
+    body: `A free-text scratch pad for the session.
+
+• Type anything — spell slots, loot, reminders, NPC names
+• Auto-saved to your browser`,
+  },
+  PartyManager: {
+    title: 'Party Manager',
+    body: `Save and reuse characters across encounters.
+
+• Characters tab: create reusable character cards with full stats. Load any character directly into the current encounter
+• Parties tab: group characters into a named party and load the whole group into the encounter at once
+• Characters saved here persist between sessions`,
+  },
+}
+
+function getInfo(type, config) {
+  if (type === 'CombatantTable') {
+    return MODULE_INFO[`CombatantTable_${config.tableType ?? 'ally'}`]
+  }
+  return MODULE_INFO[type] ?? null
+}
+
 export default function ModuleWrapper({ id, type, config = {}, minimized, children }) {
   const { removeModule, toggleMinimize } = useLayoutStore()
+  const [infoOpen, setInfoOpen] = useState(false)
 
   let title = MODULE_TITLES[type] ?? type
   if (type === 'CombatantTable') {
     title = config.tableType === 'ally' ? 'Allies' : 'Enemies'
+  }
+
+  const info = getInfo(type, config)
+
+  const btnStyle = {
+    height: 36, width: 36, minHeight: 36, minWidth: 36,
+    background: 'none', border: 'none',
+    color: 'var(--c-muted)', fontSize: '0.85rem',
+    borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center',
   }
 
   return (
@@ -40,15 +126,19 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
 
         {/* Controls — outside drag handle */}
         <div className="flex items-center" style={{ gap: 4 }}>
+          {info && (
+            <button
+              onClick={() => setInfoOpen(o => !o)}
+              title="About this module"
+              style={{ ...btnStyle, color: infoOpen ? 'var(--c-accent)' : 'var(--c-muted)', fontWeight: 700, fontSize: '0.8rem' }}
+              onMouseEnter={e => { e.currentTarget.style.color = infoOpen ? 'var(--c-accent)' : 'var(--c-text)'; e.currentTarget.style.background = 'var(--c-elevated)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = infoOpen ? 'var(--c-accent)' : 'var(--c-muted)'; e.currentTarget.style.background = 'none' }}
+            >?</button>
+          )}
           <button
             onClick={() => toggleMinimize(id)}
             title={minimized ? 'Expand' : 'Collapse'}
-            style={{
-              height: 36, width: 36, minHeight: 36, minWidth: 36,
-              background: 'none', border: 'none',
-              color: 'var(--c-muted)', fontSize: '0.85rem',
-              borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
+            style={btnStyle}
             onMouseEnter={e => { e.currentTarget.style.color = 'var(--c-text)'; e.currentTarget.style.background = 'var(--c-elevated)' }}
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--c-muted)'; e.currentTarget.style.background = 'none' }}
           >
@@ -57,12 +147,7 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
           <button
             onClick={() => removeModule(id)}
             title="Remove"
-            style={{
-              height: 36, width: 36, minHeight: 36, minWidth: 36,
-              background: 'none', border: 'none',
-              color: 'var(--c-muted)', fontSize: '0.95rem',
-              borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
+            style={btnStyle}
             onMouseEnter={e => { e.currentTarget.style.color = 'var(--c-danger)'; e.currentTarget.style.background = 'var(--c-elevated)' }}
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--c-muted)'; e.currentTarget.style.background = 'none' }}
           >✕</button>
@@ -75,6 +160,24 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
           <div style={{ position: 'absolute', inset: 0, padding: '10px 12px 12px', overflowY: 'auto', overflowX: 'hidden' }}>
             {children}
           </div>
+
+          {/* Info overlay */}
+          {infoOpen && info && (
+            <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'var(--c-bg)', overflowY: 'auto', padding: '14px 16px' }}>
+              <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+                <span style={{ fontWeight: 700, fontSize: '0.88rem' }}>{info.title}</span>
+                <button
+                  onClick={() => setInfoOpen(false)}
+                  style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 28, minWidth: 28, fontSize: '0.9rem', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--c-text)'; e.currentTarget.style.background = 'var(--c-elevated)' }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--c-muted)'; e.currentTarget.style.background = 'none' }}
+                >✕</button>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--c-muted)', whiteSpace: 'pre-line', lineHeight: 1.7, margin: 0 }}>
+                {info.body}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
