@@ -31,7 +31,8 @@ export default function EditableField({ value, onChange, type = 'text', classNam
     return (
       <input
         ref={inputRef}
-        type={type}
+        type={type === 'number' ? 'text' : type}
+        inputMode={type === 'number' ? 'numeric' : undefined}
         value={draft}
         min={min}
         max={max}

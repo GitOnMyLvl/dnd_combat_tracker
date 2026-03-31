@@ -1,4 +1,32 @@
+import { useState } from 'react'
 import { useEncounterStore } from '../../store/encounterStore'
+
+function InitInput({ id, value, onCommit, style }) {
+  const [draft, setDraft] = useState(null)
+  const commit = () => {
+    if (draft !== null) {
+      if (draft !== '') {
+        const n = parseInt(draft, 10)
+        if (!isNaN(n)) onCommit(id, n)
+      }
+      setDraft(null)
+    }
+  }
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      value={draft !== null ? draft : String(value)}
+      onFocus={e => { setDraft(String(value)); e.target.select() }}
+      onChange={e => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={e => { if (e.key === 'Enter') commit() }}
+      onClick={e => e.stopPropagation()}
+      style={style}
+      title="Roll"
+    />
+  )
+}
 
 export default function InitiativeTracker() {
   const {
@@ -94,14 +122,11 @@ export default function InitiativeTracker() {
                 {isActive ? '▶' : idx + 1}
               </span>
 
-              <input
-                type="number"
+              <InitInput
+                id={c.id}
                 value={c.initiative.roll}
-                onChange={e => setInitiativeRoll(c.id, parseInt(e.target.value, 10) || 0)}
-                onClick={e => e.stopPropagation()}
-                onFocus={e => e.target.select()}
+                onCommit={setInitiativeRoll}
                 style={{ width: 38, textAlign: 'center', fontWeight: 700, fontSize: '0.85rem', minHeight: 32, padding: '2px 4px' }}
-                title="Roll"
               />
 
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -144,12 +169,10 @@ export default function InitiativeTracker() {
                   border: '1px solid transparent',
                 }}
               >
-                <input
-                  type="number"
+                <InitInput
+                  id={c.id}
                   value={c.initiative.roll}
-                  onChange={e => setInitiativeRoll(c.id, parseInt(e.target.value, 10) || 0)}
-                  onClick={e => e.stopPropagation()}
-                  onFocus={e => e.target.select()}
+                  onCommit={setInitiativeRoll}
                   style={{ width: 38, textAlign: 'center', fontSize: '0.82rem', minHeight: 32, padding: '2px 4px' }}
                 />
                 <span style={{ flex: 1, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
