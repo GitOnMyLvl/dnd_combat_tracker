@@ -7,4 +7,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  test: {
+    setupFiles: ['./src/test/setup.js'],
+  },
 })

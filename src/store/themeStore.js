@@ -1,16 +1,10 @@
 import { create } from 'zustand'
+import { hexToRgba } from '../utils/color'
 
 const THEME_KEY  = 'dnd-tracker-theme'
 const ACCENT_KEY = 'dnd-tracker-accent'
 
 const DEFAULT_ACCENT = '#60a5fa' // soft blue
-
-function hexToRgba(hex, alpha) {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `rgba(${r},${g},${b},${alpha})`
-}
 
 function applyTheme(theme) {
   document.documentElement.classList.toggle('light', theme === 'light')

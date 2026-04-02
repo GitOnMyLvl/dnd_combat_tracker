@@ -8,8 +8,7 @@ import CharacterFormModal from '../shared/CharacterFormModal'
 import Modal from '../shared/Modal'
 import { useCharacterStore, combatantToTemplate, templateToCombatant, DEFAULT_ABILITIES } from '../../store/characterStore'
 import { CONDITION_NAMES } from '../../constants/conditions'
-
-const ABILITY_LABELS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
+import { ABILITY_LABELS, abilityModifier, formatModifier } from '../../utils/abilities'
 
 function AddManualModal({ tableType, onClose }) {
   const addCombatant = useEncounterStore(s => s.addCombatant)
@@ -137,11 +136,10 @@ function CombatantRow({ combatant, isSelected, isActive }) {
             const abilities = combatant.abilities ?? DEFAULT_ABILITIES
             return ABILITY_LABELS.map(a => {
               const score = abilities[a] ?? 10
-              const mod = Math.floor((score - 10) / 2)
               return (
                 <div key={a} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
                   <span className="label">{a.toUpperCase()}</span>
-                  <span style={{ fontWeight: 700, fontSize: '0.82rem' }}>{mod >= 0 ? `+${mod}` : mod}</span>
+                  <span style={{ fontWeight: 700, fontSize: '0.82rem' }}>{formatModifier(score)}</span>
                 </div>
               )
             })
@@ -216,11 +214,10 @@ function CombatantRow({ combatant, isSelected, isActive }) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
                 {ABILITY_LABELS.map(a => {
                   const score = abilities[a] ?? 10
-                  const m = Math.floor((score - 10) / 2)
                   return (
                     <StatPill
                       key={a}
-                      label={<>{a.toUpperCase()} <span style={{ fontWeight: 400, opacity: 0.6 }}>{m >= 0 ? `+${m}` : m}</span></>}
+                      label={<>{a.toUpperCase()} <span style={{ fontWeight: 400, opacity: 0.6 }}>{formatModifier(score)}</span></>}
                       value={score}
                       onChange={v => updateCombatant(combatant.id, { abilities: { ...abilities, [a]: v } })}
                     />

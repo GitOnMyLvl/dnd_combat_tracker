@@ -7,6 +7,7 @@ const MODULE_TITLES = {
   ConditionsPanel:   'Conditions',
   DiceRoller:        'Dice',
   NotesPad:          'Notes',
+  PartyManager:      'Party',
 }
 
 const MODULE_INFO = {

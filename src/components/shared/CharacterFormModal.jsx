@@ -1,12 +1,7 @@
 import { useState } from 'react'
 import { DEFAULT_ABILITIES } from '../../store/characterStore'
-
-const ABILITY_LABELS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
-
-function mod(score) {
-  const m = Math.floor((score - 10) / 2)
-  return m >= 0 ? `+${m}` : `${m}`
-}
+import { ABILITY_LABELS, formatModifier } from '../../utils/abilities'
+import Modal from './Modal'
 
 /**
  * Shared modal for creating and editing characters.
@@ -49,16 +44,7 @@ export default function CharacterFormModal({ initial, onClose, onSave, title, lo
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.75)', padding: 16, overflowY: 'auto' }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="card w-full" style={{ maxWidth: 400, padding: 20, boxShadow: '0 24px 64px var(--c-shadow)', margin: 'auto' }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{title}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 30, minWidth: 30, fontSize: '1rem', borderRadius: 6 }}>✕</button>
-        </div>
+    <Modal title={title} onClose={onClose} maxWidth={400}>
         <div className="flex flex-col" style={{ gap: 10 }}>
           {/* Name */}
           <input autoFocus placeholder="Name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && submit()} style={{ minHeight: 44, fontSize: '0.95rem' }} />
@@ -110,7 +96,7 @@ export default function CharacterFormModal({ initial, onClose, onSave, title, lo
                     onChange={e => setAbility(a, e.target.value)}
                     style={{ minHeight: 34, minWidth: 0, width: '100%', textAlign: 'center', fontSize: '0.8rem' }}
                   />
-                  <span style={{ fontSize: '0.6rem', color: 'var(--c-muted)' }}>{mod(parseInt(abilities[a], 10) || 10)}</span>
+                  <span style={{ fontSize: '0.6rem', color: 'var(--c-muted)' }}>{formatModifier(parseInt(abilities[a], 10) || 10)}</span>
                 </label>
               ))}
             </div>
@@ -145,7 +131,6 @@ export default function CharacterFormModal({ initial, onClose, onSave, title, lo
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </Modal>
   )
 }
