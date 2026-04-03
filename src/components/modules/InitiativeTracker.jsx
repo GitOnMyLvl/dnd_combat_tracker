@@ -43,7 +43,7 @@ function DeathSaves({ combatant }) {
           key={i}
           onClick={e => { e.stopPropagation(); setDeathSave(combatant.id, type, i < count ? i : i + 1) }}
           style={{
-            width: 10, height: 10, borderRadius: '50%', cursor: 'pointer',
+            width: 20, height: 20, borderRadius: '50%', cursor: 'pointer',
             background: i < count ? color : 'var(--c-elevated)',
             border: `1px solid ${i < count ? color : 'var(--c-border)'}`,
             transition: 'background 0.1s',
@@ -111,7 +111,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
           id={c.id}
           value={c.initiative.roll}
           onCommit={setInitiativeRoll}
-          style={{ width: 34, textAlign: 'center', fontWeight: 700, fontSize: '0.82rem', minHeight: 28, padding: '2px 4px' }}
+          style={{ width: 44, textAlign: 'center', fontWeight: 700, fontSize: '0.82rem', minHeight: 44, padding: '2px 4px' }}
         />
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -153,12 +153,12 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
           <button
             onClick={onMoveUp}
             disabled={idx === 0}
-            style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 'unset', minWidth: 'unset', padding: '1px 4px', fontSize: '0.6rem', lineHeight: 1, opacity: idx === 0 ? 0.2 : 0.6 }}
+            style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 22, minWidth: 44, padding: '1px 4px', fontSize: '0.7rem', lineHeight: 1, opacity: idx === 0 ? 0.2 : 0.6 }}
           >▲</button>
           <button
             onClick={onMoveDown}
             disabled={isLast}
-            style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 'unset', minWidth: 'unset', padding: '1px 4px', fontSize: '0.6rem', lineHeight: 1, opacity: isLast ? 0.2 : 0.6 }}
+            style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 22, minWidth: 44, padding: '1px 4px', fontSize: '0.7rem', lineHeight: 1, opacity: isLast ? 0.2 : 0.6 }}
           >▼</button>
         </div>
 
@@ -167,7 +167,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
             onClick={e => { e.stopPropagation(); setConfirmRemove(true) }}
             style={{
               background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)',
-              minHeight: 22, minWidth: 'unset', padding: '0 6px', fontSize: '0.6rem', fontWeight: 600,
+              minHeight: 44, minWidth: 'unset', padding: '0 8px', fontSize: '0.65rem', fontWeight: 600,
               cursor: 'pointer', flexShrink: 0, borderRadius: 5,
             }}
             onMouseEnter={e => { e.currentTarget.style.color = 'var(--c-danger)'; e.currentTarget.style.borderColor = 'var(--c-danger)' }}
@@ -179,7 +179,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
               onClick={() => onRemove(c.id)}
               style={{
                 background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)',
-                minHeight: 22, minWidth: 'unset', padding: '0 6px', fontSize: '0.6rem', fontWeight: 700,
+                minHeight: 44, minWidth: 'unset', padding: '0 8px', fontSize: '0.65rem', fontWeight: 700,
                 cursor: 'pointer', borderRadius: 5,
               }}
             >Yes</button>
@@ -187,7 +187,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
               onClick={() => setConfirmRemove(false)}
               style={{
                 background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)',
-                minHeight: 22, minWidth: 'unset', padding: '0 6px', fontSize: '0.6rem', fontWeight: 600,
+                minHeight: 44, minWidth: 'unset', padding: '0 8px', fontSize: '0.65rem', fontWeight: 600,
                 cursor: 'pointer', borderRadius: 5,
               }}
             >No</button>
@@ -209,15 +209,15 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
             value={amt}
             onChange={e => setAmt(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') applyHP('dmg') }}
-            style={{ width: 38, minHeight: 22, padding: '0 4px', fontSize: '0.72rem', textAlign: 'center' }}
+            style={{ width: 44, minHeight: 44, padding: '0 4px', fontSize: '0.82rem', textAlign: 'center' }}
           />
           <button
             onClick={() => applyHP('dmg')}
-            style={{ background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)', borderRadius: 5, padding: '0 6px', minHeight: 22, minWidth: 'unset', fontSize: '0.65rem', fontWeight: 600 }}
+            style={{ background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)', borderRadius: 5, padding: '0 8px', minHeight: 44, minWidth: 'unset', fontSize: '0.72rem', fontWeight: 600 }}
           >DMG</button>
           <button
             onClick={() => applyHP('heal')}
-            style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid var(--c-success)', color: 'var(--c-success)', borderRadius: 5, padding: '0 6px', minHeight: 22, minWidth: 'unset', fontSize: '0.65rem', fontWeight: 600 }}
+            style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid var(--c-success)', color: 'var(--c-success)', borderRadius: 5, padding: '0 8px', minHeight: 44, minWidth: 'unset', fontSize: '0.72rem', fontWeight: 600 }}
           >HEAL</button>
 
           {/* Death saves — inline, shown when downed */}
@@ -308,13 +308,13 @@ export default function InitiativeTracker() {
           <button
             onClick={prevTurn}
             className="btn-ghost"
-            style={{ minHeight: 38, minWidth: 38, padding: 0, justifyContent: 'center', fontSize: '0.8rem' }}
+            style={{ minHeight: 44, minWidth: 44, padding: 0, justifyContent: 'center', fontSize: '0.8rem' }}
             disabled={initiativeOrder.length === 0}
           >◀</button>
           <button
             onClick={nextTurn}
             className="btn-primary"
-            style={{ minHeight: 38, minWidth: 'unset', padding: '0 14px', fontSize: '0.8rem' }}
+            style={{ minHeight: 44, minWidth: 'unset', padding: '0 16px', fontSize: '0.8rem' }}
             disabled={initiativeOrder.length === 0}
           >Next ▶</button>
         </div>
@@ -328,7 +328,7 @@ export default function InitiativeTracker() {
               key={m}
               onClick={() => setInitiativeMode(m)}
               style={{
-                minHeight: 32, minWidth: 'unset', padding: '0 10px', fontSize: '0.72rem', fontWeight: 600,
+                minHeight: 44, minWidth: 'unset', padding: '0 12px', fontSize: '0.72rem', fontWeight: 600,
                 borderRadius: 0, border: 'none',
                 background: initiativeMode === m ? 'var(--c-accent-dim)' : 'transparent',
                 color: initiativeMode === m ? 'var(--c-accent)' : 'var(--c-muted)',
@@ -340,7 +340,7 @@ export default function InitiativeTracker() {
         <button
           onClick={sortInitiative}
           className="btn-ghost"
-          style={{ flex: 1, minHeight: 32, minWidth: 'unset', justifyContent: 'center', fontSize: '0.78rem' }}
+          style={{ flex: 1, minHeight: 44, minWidth: 'unset', justifyContent: 'center', fontSize: '0.78rem' }}
           disabled={combatants.length === 0}
         >Sort by Initiative</button>
       </div>
@@ -391,7 +391,7 @@ export default function InitiativeTracker() {
                   id={c.id}
                   value={c.initiative.roll}
                   onCommit={setInitiativeRoll}
-                  style={{ width: 38, textAlign: 'center', fontSize: '0.82rem', minHeight: 32, padding: '2px 4px' }}
+                  style={{ width: 44, textAlign: 'center', fontSize: '0.82rem', minHeight: 44, padding: '2px 4px' }}
                 />
                 <span style={{ flex: 1, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
                 <button
