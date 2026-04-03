@@ -52,6 +52,7 @@ function CombatantRow({ combatant, isSelected, isActive }) {
   const saveCharacter = useCharacterStore(s => s.saveCharacter)
   const [expanded, setExpanded] = useState(false)
   const [saveFlash, setSaveFlash] = useState(false)
+  const [confirmRemove, setConfirmRemove] = useState(false)
   const rowRef = useRef(null)
   const [rowWidth, setRowWidth] = useState(0)
 
@@ -290,9 +291,32 @@ function CombatantRow({ combatant, isSelected, isActive }) {
                 Reset to Default
               </button>
             )}
-            <button onClick={() => removeCombatant(combatant.id)} className="btn-danger" style={{ minHeight: 32, minWidth: 'unset', fontSize: '0.75rem' }}>
-              Remove
-            </button>
+            {!confirmRemove ? (
+              <button
+                onClick={() => setConfirmRemove(true)}
+                className="btn-danger"
+                style={{ minHeight: 32, minWidth: 'unset', fontSize: '0.75rem' }}
+              >Remove</button>
+            ) : (
+              <div className="flex" style={{ gap: 4 }}>
+                <button
+                  onClick={() => removeCombatant(combatant.id)}
+                  style={{
+                    background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)',
+                    minHeight: 32, minWidth: 'unset', padding: '0 10px', fontSize: '0.75rem', fontWeight: 700,
+                    cursor: 'pointer', borderRadius: 6,
+                  }}
+                >Yes</button>
+                <button
+                  onClick={() => setConfirmRemove(false)}
+                  style={{
+                    background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)',
+                    minHeight: 32, minWidth: 'unset', padding: '0 10px', fontSize: '0.75rem', fontWeight: 600,
+                    cursor: 'pointer', borderRadius: 6,
+                  }}
+                >No</button>
+              </div>
+            )}
           </div>
         </div>
       )}
