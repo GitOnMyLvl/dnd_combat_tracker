@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { v4 as uuid } from 'uuid'
 
-// Default widths per module type
+// Default sizes per module type. Heights sized for rowHeight=72 (see Canvas.jsx).
 const DEFAULT_SIZES = {
   InitiativeTracker: { w: 3, h: 7 },
   CombatantTable:    { w: 5, h: 7 },
