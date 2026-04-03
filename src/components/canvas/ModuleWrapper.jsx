@@ -13,15 +13,30 @@ const MODULE_TITLES = {
 const MODULE_INFO = {
   InitiativeTracker: {
     title: 'Initiative Tracker',
-    body: `Manages turn order and round count during combat.
+    body: `Manages turn order, HP, and round count during combat.
 
+Turn Order
 • Enter each combatant's dice roll in the small input on the left of their name
-• Auto mode: final initiative = roll + bonus. Manual mode: you type the total directly — useful when you want full control
+• Auto mode: final initiative = roll + bonus. Manual mode: you type the total directly
 • Hit "Sort by Initiative" to lock in the order
+• Use ▲ / ▼ to manually reorder combatants after sorting
 • ▶ / ◀ buttons step forward or backward through turns
 • The active combatant is highlighted and marked with ▶
-• DOWN badge + red border appears automatically when a combatant's HP hits 0
-• Use the DMG / HEAL buttons on each row to update HP on the fly`,
+• Combatants not yet added to the order appear in a "Not in initiative" section at the bottom — give them a roll and hit + to include them
+
+HP & Damage
+• Use the ± input + DMG / HEAL buttons on each row to update HP on the fly
+• The HP bar changes color: green → orange → red as HP drops
+• When HP hits 0, the combatant gets a DOWN badge and a red border
+
+Death Saves
+• Death save pips appear automatically when a combatant is downed (HP = 0)
+• Click the ✓ pips to record successes, ✗ pips for failures
+• 3 successes → STABLE · 3 failures → DEAD
+• Hit ↺ to reset death saves
+
+Ability Scores
+• When the panel is wide enough, each combatant's six ability scores are shown for quick reference`,
   },
   CombatantTable_ally: {
     title: 'Allies Table',
@@ -97,7 +112,7 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
   const info = getInfo(type, config)
 
   const btnStyle = {
-    height: 36, width: 36, minHeight: 36, minWidth: 36,
+    height: 44, width: 44, minHeight: 44, minWidth: 44,
     background: 'none', border: 'none',
     color: 'var(--c-muted)', fontSize: '0.85rem',
     borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -109,7 +124,7 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
       <div
         className="flex items-center justify-between px-3 flex-shrink-0 select-none"
         style={{
-          height: 40,
+          height: 52,
           borderBottom: minimized ? 'none' : '1px solid var(--c-border)',
         }}
       >
