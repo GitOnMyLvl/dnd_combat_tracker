@@ -19,12 +19,12 @@ function CharacterCard({ char, compact, onRemove, onEdit, actions }) {
         gap: 8,
       }}
     >
-      <span style={{ color: typeColor, fontSize: '0.55rem', flexShrink: 0 }}>●</span>
+      <span style={{ color: typeColor, fontSize: '0.65rem', flexShrink: 0 }}>●</span>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 600, fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ fontWeight: 600, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {char.name}
         </div>
-        <div style={{ fontSize: '0.68rem', color: 'var(--c-muted)' }}>
+        <div style={{ fontSize: '0.78rem', color: 'var(--c-muted)' }}>
           HP {char.hp} · AC {char.ac} · Init {char.initiativeBonus >= 0 ? '+' : ''}{char.initiativeBonus}
         </div>
       </div>
@@ -33,7 +33,7 @@ function CharacterCard({ char, compact, onRemove, onEdit, actions }) {
           <button
             onClick={onEdit}
             className="btn-primary"
-            style={{ minHeight: 26, minWidth: 'unset', fontSize: '0.7rem', padding: '0 8px', borderRadius: 6 }}
+            style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.8rem', padding: '0 12px', borderRadius: 6 }}
           >Edit</button>
         )}
         {actions}
@@ -42,7 +42,7 @@ function CharacterCard({ char, compact, onRemove, onEdit, actions }) {
             onClick={onRemove}
             style={{
               background: 'none', border: 'none', color: 'var(--c-muted)',
-              minHeight: 26, minWidth: 26, fontSize: '0.75rem', borderRadius: 6, padding: 0,
+              minHeight: 36, minWidth: 36, fontSize: '0.85rem', borderRadius: 6, padding: 0,
             }}
             title="Delete"
           >✕</button>
@@ -65,14 +65,14 @@ function CharactersTab() {
   return (
     <div className="flex flex-col" style={{ gap: 6 }}>
       <div className="flex justify-end">
-        <button onClick={() => setShowNew(true)} className="btn-primary" style={{ minHeight: 28, minWidth: 'unset', fontSize: '0.72rem' }}>+ New Character</button>
+        <button onClick={() => setShowNew(true)} className="btn-primary" style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.82rem' }}>+ New Character</button>
       </div>
 
       {characters.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--c-muted)', fontSize: '0.8rem' }}>
+        <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--c-muted)', fontSize: '0.9rem' }}>
           No saved characters yet.
           <br />
-          <span style={{ fontSize: '0.72rem' }}>
+          <span style={{ fontSize: '0.82rem' }}>
             Create one here or tap <strong>Save</strong> on a combatant.
           </span>
         </div>
@@ -88,7 +88,7 @@ function CharactersTab() {
             <button
               onClick={() => addToEncounter(char)}
               className="btn-primary"
-              style={{ minHeight: 26, minWidth: 'unset', fontSize: '0.7rem', padding: '0 8px', borderRadius: 6 }}
+              style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.8rem', padding: '0 12px', borderRadius: 6 }}
             >+ Add</button>
           }
         />
@@ -147,7 +147,7 @@ function CreatePartyModal({ onClose }) {
         />
 
         {characters.length === 0 ? (
-          <div style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '12px 0' }}>
+          <div style={{ color: 'var(--c-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '12px 0' }}>
             Save some characters first to create a party.
           </div>
         ) : (
@@ -166,9 +166,9 @@ function CreatePartyModal({ onClose }) {
                   transition: 'all 0.1s',
                 }}
               >
-                <span style={{ color: char.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.55rem' }}>●</span>
-                <span style={{ flex: 1, fontSize: '0.8rem', fontWeight: 600 }}>{char.name}</span>
-                <span style={{ fontSize: '0.7rem', color: 'var(--c-muted)' }}>
+                <span style={{ color: char.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.65rem' }}>●</span>
+                <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 600 }}>{char.name}</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--c-muted)' }}>
                   HP {char.hp} · AC {char.ac}
                 </span>
               </button>
@@ -177,11 +177,11 @@ function CreatePartyModal({ onClose }) {
         )}
 
         <div className="flex justify-end" style={{ gap: 8, marginTop: 4 }}>
-          <button onClick={onClose} className="btn-ghost" style={{ minHeight: 40, minWidth: 'unset' }}>Cancel</button>
+          <button onClick={onClose} className="btn-ghost" style={{ minHeight: 36, minWidth: 'unset' }}>Cancel</button>
           <button
             onClick={submit}
             className="btn-primary"
-            style={{ minHeight: 40, minWidth: 'unset', padding: '0 20px' }}
+            style={{ minHeight: 36, minWidth: 'unset', padding: '0 20px' }}
             disabled={!name.trim() || selected.size === 0}
           >Create</button>
         </div>
@@ -197,11 +197,11 @@ function AddToPartyModal({ party, onClose }) {
   if (available.length === 0) {
     return (
       <Modal title={`Add to ${party.name}`} onClose={onClose}>
-        <div style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '12px 0' }}>
+        <div style={{ color: 'var(--c-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '12px 0' }}>
           All saved characters are already in this party.
         </div>
         <div className="flex justify-end" style={{ marginTop: 8 }}>
-          <button onClick={onClose} className="btn-ghost" style={{ minHeight: 40, minWidth: 'unset' }}>Close</button>
+          <button onClick={onClose} className="btn-ghost" style={{ minHeight: 36, minWidth: 'unset' }}>Close</button>
         </div>
       </Modal>
     )
@@ -219,19 +219,19 @@ function AddToPartyModal({ party, onClose }) {
               border: '1px solid var(--c-border)', background: 'var(--c-surface)',
             }}
           >
-            <span style={{ color: char.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.55rem' }}>●</span>
-            <span style={{ flex: 1, fontSize: '0.8rem', fontWeight: 600 }}>{char.name}</span>
-            <span style={{ fontSize: '0.7rem', color: 'var(--c-muted)' }}>HP {char.hp} · AC {char.ac}</span>
+            <span style={{ color: char.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.65rem' }}>●</span>
+            <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 600 }}>{char.name}</span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--c-muted)' }}>HP {char.hp} · AC {char.ac}</span>
             <button
               onClick={() => addCharacterToParty(party.id, char.id)}
               className="btn-primary"
-              style={{ minHeight: 24, minWidth: 'unset', fontSize: '0.68rem', padding: '0 8px', borderRadius: 6 }}
+              style={{ minHeight: 24, minWidth: 'unset', fontSize: '0.78rem', padding: '0 8px', borderRadius: 6 }}
             >+ Add</button>
           </div>
         ))}
       </div>
       <div className="flex justify-end" style={{ marginTop: 12 }}>
-        <button onClick={onClose} className="btn-ghost" style={{ minHeight: 40, minWidth: 'unset' }}>Done</button>
+        <button onClick={onClose} className="btn-ghost" style={{ minHeight: 36, minWidth: 'unset' }}>Done</button>
       </div>
     </Modal>
   )
@@ -260,12 +260,12 @@ function PartiesTab() {
         <button
           onClick={() => setShowCreate(true)}
           className="btn-primary"
-          style={{ minHeight: 28, minWidth: 'unset', fontSize: '0.72rem' }}
+          style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.82rem' }}
         >+ New Party</button>
       </div>
 
       {parties.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--c-muted)', fontSize: '0.8rem' }}>
+        <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--c-muted)', fontSize: '0.9rem' }}>
           No parties saved yet.
         </div>
       )}
@@ -286,23 +286,23 @@ function PartiesTab() {
             }}
           >
             <div className="flex items-center" style={{ padding: '8px 10px', gap: 6 }}>
-              <span style={{ flex: 1, fontWeight: 700, fontSize: '0.85rem' }}>{party.name}</span>
-              <span style={{ color: 'var(--c-muted)', fontSize: '0.7rem' }}>{members.length}</span>
+              <span style={{ flex: 1, fontWeight: 700, fontSize: '0.95rem' }}>{party.name}</span>
+              <span style={{ color: 'var(--c-muted)', fontSize: '0.8rem' }}>{members.length}</span>
               <button
                 onClick={() => setAddingToParty(party)}
                 className="btn-primary"
-                style={{ minHeight: 26, minWidth: 'unset', fontSize: '0.7rem', padding: '0 8px', borderRadius: 6 }}
+                style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.8rem', padding: '0 12px', borderRadius: 6 }}
               >+ Add</button>
               <button
                 onClick={() => loadParty(party)}
                 className="btn-primary"
-                style={{ minHeight: 26, minWidth: 'unset', fontSize: '0.7rem', padding: '0 8px', borderRadius: 6 }}
+                style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.8rem', padding: '0 12px', borderRadius: 6 }}
               >Load All</button>
               <button
                 onClick={() => { if (window.confirm(`Delete party "${party.name}"?`)) removeParty(party.id) }}
                 style={{
                   background: 'none', border: 'none', color: 'var(--c-muted)',
-                  minHeight: 26, minWidth: 26, fontSize: '0.75rem', borderRadius: 6, padding: 0,
+                  minHeight: 36, minWidth: 36, fontSize: '0.85rem', borderRadius: 6, padding: 0,
                 }}
                 title="Delete party"
               >✕</button>
@@ -322,7 +322,7 @@ function PartiesTab() {
             )}
 
             {members.length === 0 && (
-              <div style={{ borderTop: '1px solid var(--c-border)', padding: '8px 10px', color: 'var(--c-muted)', fontSize: '0.72rem', textAlign: 'center' }}>
+              <div style={{ borderTop: '1px solid var(--c-border)', padding: '8px 10px', color: 'var(--c-muted)', fontSize: '0.82rem', textAlign: 'center' }}>
                 All members have been deleted.
               </div>
             )}
@@ -340,8 +340,8 @@ export default function PartyManager() {
   const [tab, setTab] = useState('characters')
 
   const tabStyle = (active) => ({
-    flex: 1, minHeight: 32, minWidth: 'unset',
-    fontSize: '0.75rem', fontWeight: 600, borderRadius: 6,
+    flex: 1, minHeight: 36, minWidth: 'unset',
+    fontSize: '0.85rem', fontWeight: 600, borderRadius: 6,
     background: active ? 'var(--c-accent-dim)' : 'transparent',
     color: active ? 'var(--c-accent)' : 'var(--c-muted)',
     border: active ? '1px solid var(--c-accent)' : '1px solid transparent',

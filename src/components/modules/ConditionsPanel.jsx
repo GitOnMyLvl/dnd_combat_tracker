@@ -10,17 +10,17 @@ export default function ConditionsPanel() {
       {/* Target indicator */}
       <div style={{ flexShrink: 0, minHeight: 28 }}>
         {selected ? (
-          <div style={{ fontSize: '0.8rem' }}>
+          <div style={{ fontSize: '0.9rem' }}>
             <span style={{ color: 'var(--c-muted)' }}>Targeting </span>
             <span style={{ fontWeight: 700, color: 'var(--c-text)' }}>{selected.name}</span>
             {selected.conditions.length > 0 && (
-              <span style={{ color: 'var(--c-muted)', marginLeft: 6, fontSize: '0.72rem' }}>
+              <span style={{ color: 'var(--c-muted)', marginLeft: 6, fontSize: '0.82rem' }}>
                 {selected.conditions.length} condition{selected.conditions.length !== 1 ? 's' : ''}
               </span>
             )}
           </div>
         ) : (
-          <div style={{ fontSize: '0.78rem', color: 'var(--c-muted)' }}>
+          <div style={{ fontSize: '0.88rem', color: 'var(--c-muted)' }}>
             Select a combatant to apply conditions
           </div>
         )}
@@ -46,10 +46,10 @@ export default function ConditionsPanel() {
                 transition: 'background 0.12s, border-color 0.12s',
               }}
             >
-              <span style={{ fontWeight: 600, fontSize: '0.78rem', color: active ? '#e8e8e8' : 'var(--c-text)' }}>
+              <span style={{ fontWeight: 600, fontSize: '0.88rem', color: active ? '#e8e8e8' : 'var(--c-text)' }}>
                 {active && <span style={{ color, marginRight: 4 }}>✓</span>}{name}
               </span>
-              <span style={{ fontSize: '0.65rem', color: 'var(--c-muted)', marginTop: 2, lineHeight: 1.3 }}>{desc}</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--c-muted)', marginTop: 2, lineHeight: 1.3 }}>{desc}</span>
             </button>
           )
         })}

@@ -28,8 +28,6 @@ function InitInput({ id, value, onCommit, style }) {
   )
 }
 
-const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha']
-const abilityMod = score => { const m = Math.floor((score - 10) / 2); return m >= 0 ? `+${m}` : `${m}` }
 
 function DeathSaves({ combatant }) {
   const { setDeathSave, resetDeathSaves } = useEncounterStore()
@@ -37,7 +35,7 @@ function DeathSaves({ combatant }) {
 
   const Pips = ({ count, max, color, type }) => (
     <div className="flex items-center" style={{ gap: 3 }}>
-      <span style={{ fontSize: '0.6rem', color: 'var(--c-muted)', minWidth: 10 }}>{type === 'successes' ? '✓' : '✗'}</span>
+      <span style={{ fontSize: '0.8rem', color: 'var(--c-muted)', minWidth: 10 }}>{type === 'successes' ? '✓' : '✗'}</span>
       {Array.from({ length: max }, (_, i) => (
         <span
           key={i}
@@ -55,23 +53,23 @@ function DeathSaves({ combatant }) {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 8, paddingLeft: 8, borderLeft: '1px solid var(--c-border)' }} onClick={e => e.stopPropagation()}>
-      <span style={{ fontSize: '0.55rem', color: 'var(--c-danger)', fontWeight: 700, whiteSpace: 'nowrap' }}>SAVES</span>
+      <span style={{ fontSize: '0.75rem', color: 'var(--c-danger)', fontWeight: 700, whiteSpace: 'nowrap' }}>SAVES</span>
       <Pips count={successes} max={3} color="var(--c-success)" type="successes" />
       <Pips count={failures} max={3} color="var(--c-danger)" type="failures" />
       {(successes > 0 || failures > 0) && (
         <button
           onClick={() => resetDeathSaves(combatant.id)}
-          style={{ background: 'none', border: 'none', color: 'var(--c-muted)', fontSize: '0.6rem', minHeight: 'unset', minWidth: 'unset', padding: '0 2px', cursor: 'pointer' }}
+          style={{ background: 'none', border: 'none', color: 'var(--c-muted)', fontSize: '0.8rem', minHeight: 'unset', minWidth: 'unset', padding: '0 2px', cursor: 'pointer' }}
           title="Reset death saves"
         >↺</button>
       )}
-      {failures >= 3 && <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--c-danger)' }}>DEAD</span>}
-      {successes >= 3 && <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--c-success)' }}>STABLE</span>}
+      {failures >= 3 && <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--c-danger)' }}>DEAD</span>}
+      {successes >= 3 && <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--c-success)' }}>STABLE</span>}
     </div>
   )
 }
 
-function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, onSelect, onMoveUp, onMoveDown, onRemove, rowRef }) {
+function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect, onMoveUp, onMoveDown, onRemove, rowRef }) {
   const [amt, setAmt] = useState('')
   const [confirmRemove, setConfirmRemove] = useState(false)
   const { setInitiativeRoll, updateHP } = useEncounterStore()
@@ -91,11 +89,11 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
   return (
     <div
       ref={rowRef}
-      onClick={() => onSelect(c.id)}
+      onClick={() => onSelect(isSelected ? null : c.id)}
       style={{
         borderRadius: 8, cursor: 'pointer', padding: '6px 8px',
         background: isActive ? 'var(--c-accent-dim)' : isSelected ? 'var(--c-elevated)' : 'transparent',
-        border: isActive ? '1px solid var(--c-accent)' : isDowned ? '1px solid var(--c-danger)' : '1px solid transparent',
+        border: isActive ? '1px solid var(--c-accent)' : '1px solid transparent',
         opacity: isDowned ? 0.7 : 1,
         transition: 'background 0.1s',
         display: 'flex', flexDirection: 'column', gap: 5,
@@ -103,7 +101,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
     >
       {/* Top row: position | roll | name + badges | AC | total | reorder */}
       <div className="flex items-center" style={{ gap: 6 }}>
-        <span style={{ width: 16, textAlign: 'center', fontSize: '0.65rem', color: isActive ? 'var(--c-accent)' : 'var(--c-muted)', fontWeight: 700, flexShrink: 0 }}>
+        <span style={{ width: 16, textAlign: 'center', fontSize: '0.75rem', color: isActive ? 'var(--c-accent)' : 'var(--c-muted)', fontWeight: 700, flexShrink: 0 }}>
           {isActive ? '▶' : idx + 1}
         </span>
 
@@ -111,21 +109,21 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
           id={c.id}
           value={c.initiative.roll}
           onCommit={setInitiativeRoll}
-          style={{ width: 44, textAlign: 'center', fontWeight: 700, fontSize: '0.82rem', minHeight: 44, padding: '2px 4px' }}
+          style={{ width: 44, textAlign: 'center', fontWeight: 700, fontSize: '0.92rem', minHeight: 36, padding: '2px 4px' }}
         />
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontWeight: 600, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ fontWeight: 600, fontSize: '0.92rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {c.name}
             </span>
             {isDowned && (
-              <span style={{ fontSize: '0.58rem', fontWeight: 800, color: 'var(--c-danger)', background: 'var(--c-danger-dim)', borderRadius: 4, padding: '1px 4px', flexShrink: 0, letterSpacing: '0.03em' }}>
+              <span style={{ fontSize: '0.98rem', fontWeight: 800, color: 'var(--c-danger)', background: 'var(--c-danger-dim)', borderRadius: 4, padding: '1px 4px', flexShrink: 0, letterSpacing: '0.03em' }}>
                 DOWN
               </span>
             )}
           </div>
-          <div style={{ fontSize: '0.65rem', color: 'var(--c-muted)', marginTop: 1, display: 'flex', gap: 6, alignItems: 'center' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--c-muted)', marginTop: 1, display: 'flex', gap: 6, alignItems: 'center' }}>
             <span style={{ color: c.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)' }}>●</span>
             <span>AC {c.ac}</span>
             {!isManual && c.initiative.bonus !== 0 && (
@@ -140,12 +138,12 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
         </div>
 
         {isManual && c.initiative.bonus !== 0 && (
-          <span style={{ fontSize: '0.68rem', color: 'var(--c-muted)', flexShrink: 0 }} title="Initiative bonus">
+          <span style={{ fontSize: '0.98rem', color: 'var(--c-muted)', flexShrink: 0 }} title="Initiative bonus">
             {c.initiative.bonus > 0 ? '+' : ''}{c.initiative.bonus}
           </span>
         )}
 
-        <span style={{ fontWeight: 700, fontSize: '0.88rem', color: isActive ? 'var(--c-accent)' : 'var(--c-text)', minWidth: 18, textAlign: 'right', flexShrink: 0 }}>
+        <span style={{ fontWeight: 700, fontSize: '0.98rem', color: isActive ? 'var(--c-accent)' : 'var(--c-text)', minWidth: 18, textAlign: 'right', flexShrink: 0 }}>
           {total}
         </span>
 
@@ -153,12 +151,12 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
           <button
             onClick={onMoveUp}
             disabled={idx === 0}
-            style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 22, minWidth: 44, padding: '1px 4px', fontSize: '0.7rem', lineHeight: 1, opacity: idx === 0 ? 0.2 : 0.6 }}
+            style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 18, minWidth: 36, padding: '1px 4px', fontSize: '0.8rem', lineHeight: 1, opacity: idx === 0 ? 0.2 : 0.6 }}
           >▲</button>
           <button
             onClick={onMoveDown}
             disabled={isLast}
-            style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 22, minWidth: 44, padding: '1px 4px', fontSize: '0.7rem', lineHeight: 1, opacity: isLast ? 0.2 : 0.6 }}
+            style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 18, minWidth: 36, padding: '1px 4px', fontSize: '0.8rem', lineHeight: 1, opacity: isLast ? 0.2 : 0.6 }}
           >▼</button>
         </div>
 
@@ -167,7 +165,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
             onClick={e => { e.stopPropagation(); setConfirmRemove(true) }}
             style={{
               background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)',
-              minHeight: 44, minWidth: 'unset', padding: '0 8px', fontSize: '0.65rem', fontWeight: 600,
+              minHeight: 36, minWidth: 'unset', padding: '0 8px', fontSize: '0.75rem', fontWeight: 600,
               cursor: 'pointer', flexShrink: 0, borderRadius: 5,
             }}
             onMouseEnter={e => { e.currentTarget.style.color = 'var(--c-danger)'; e.currentTarget.style.borderColor = 'var(--c-danger)' }}
@@ -179,7 +177,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
               onClick={() => onRemove(c.id)}
               style={{
                 background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)',
-                minHeight: 44, minWidth: 'unset', padding: '0 8px', fontSize: '0.65rem', fontWeight: 700,
+                minHeight: 36, minWidth: 'unset', padding: '0 8px', fontSize: '0.75rem', fontWeight: 700,
                 cursor: 'pointer', borderRadius: 5,
               }}
             >Yes</button>
@@ -187,7 +185,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
               onClick={() => setConfirmRemove(false)}
               style={{
                 background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)',
-                minHeight: 44, minWidth: 'unset', padding: '0 8px', fontSize: '0.65rem', fontWeight: 600,
+                minHeight: 36, minWidth: 'unset', padding: '0 8px', fontSize: '0.75rem', fontWeight: 600,
                 cursor: 'pointer', borderRadius: 5,
               }}
             >No</button>
@@ -195,51 +193,42 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
         )}
       </div>
 
-      {/* HP bar + quick DMG/HEAL + death saves */}
+      {/* HP bar — always visible */}
       <div style={{ paddingLeft: 22 }} onClick={e => e.stopPropagation()}>
-        <div style={{ height: 3, borderRadius: 2, background: 'var(--c-elevated)', overflow: 'hidden', marginBottom: 4 }}>
-          <div style={{ height: '100%', width: `${hpPct * 100}%`, background: barColor, borderRadius: 2, transition: 'width 0.3s, background 0.3s' }} />
+        <div className="flex items-center" style={{ gap: 6, marginBottom: isSelected ? 6 : 0 }}>
+          <div style={{ flex: 1, height: 2, borderRadius: 2, background: 'var(--c-elevated)', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${hpPct * 100}%`, background: barColor, borderRadius: 2, transition: 'width 0.3s, background 0.3s' }} />
+          </div>
+          <span style={{ fontSize: '0.72rem', color: 'var(--c-muted)', flexShrink: 0 }}>{c.hp.current}/{c.hp.max}</span>
         </div>
-        <div className="flex items-center" style={{ gap: 4, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.65rem', color: 'var(--c-muted)', minWidth: 32 }}>{c.hp.current}/{c.hp.max}</span>
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder="±"
-            value={amt}
-            onChange={e => setAmt(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') applyHP('dmg') }}
-            style={{ width: 44, minHeight: 44, padding: '0 4px', fontSize: '0.82rem', textAlign: 'center' }}
-          />
-          <button
-            onClick={() => applyHP('dmg')}
-            style={{ background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)', borderRadius: 5, padding: '0 8px', minHeight: 44, minWidth: 'unset', fontSize: '0.72rem', fontWeight: 600 }}
-          >DMG</button>
-          <button
-            onClick={() => applyHP('heal')}
-            style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid var(--c-success)', color: 'var(--c-success)', borderRadius: 5, padding: '0 8px', minHeight: 44, minWidth: 'unset', fontSize: '0.72rem', fontWeight: 600 }}
-          >HEAL</button>
 
-          {/* Death saves — inline, shown when downed */}
-          {isDowned && <DeathSaves combatant={c} />}
-        </div>
+        {/* HP controls — only when selected */}
+        {isSelected && (
+          <div className="flex items-center" style={{ gap: 4, flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="±"
+              value={amt}
+              onChange={e => setAmt(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') applyHP('dmg') }}
+              style={{ width: 44, minHeight: 36, padding: '0 4px', fontSize: '0.92rem', textAlign: 'center' }}
+            />
+            <button
+              onClick={() => applyHP('dmg')}
+              style={{ flex: 1, background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)', borderRadius: 5, padding: '0 8px', minHeight: 36, minWidth: 'unset', fontSize: '0.92rem', fontWeight: 600 }}
+            >DMG</button>
+            <button
+              onClick={() => applyHP('heal')}
+              style={{ flex: 1, background: 'rgba(74,222,128,0.1)', border: '1px solid var(--c-success)', color: 'var(--c-success)', borderRadius: 5, padding: '0 8px', minHeight: 36, minWidth: 'unset', fontSize: '0.92rem', fontWeight: 600 }}
+            >HEAL</button>
+
+          </div>
+        )}
+
+        {/* Death saves — only shown on that combatant's turn */}
+        {isActive && isDowned && <DeathSaves combatant={c} />}
       </div>
-
-      {/* Ability scores — only when panel is wide enough */}
-      {wide && (
-        <div style={{ paddingLeft: 22, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 2 }} onClick={e => e.stopPropagation()}>
-          {ABILITIES.map(a => {
-            const score = c.abilities?.[a] ?? 10
-            return (
-              <div key={a} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.55rem', color: 'var(--c-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>{a}</div>
-                <div style={{ fontSize: '0.72rem', fontWeight: 600, lineHeight: 1.2 }}>{score}</div>
-                <div style={{ fontSize: '0.6rem', color: 'var(--c-muted)' }}>{abilityMod(score)}</div>
-              </div>
-            )
-          })}
-        </div>
-      )}
     </div>
   )
 }
@@ -258,14 +247,6 @@ export default function InitiativeTracker() {
 
   const containerRef = useRef(null)
   const rowRefs = useRef({})
-  const [wide, setWide] = useState(false)
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const ro = new ResizeObserver(([entry]) => setWide(entry.contentRect.width >= 380))
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
 
   // Auto-scroll to current combatant on turn change
   useEffect(() => {
@@ -308,13 +289,13 @@ export default function InitiativeTracker() {
           <button
             onClick={prevTurn}
             className="btn-ghost"
-            style={{ minHeight: 44, minWidth: 44, padding: 0, justifyContent: 'center', fontSize: '0.8rem' }}
+            style={{ minHeight: 36, minWidth: 36, padding: 0, justifyContent: 'center', fontSize: '0.8rem' }}
             disabled={initiativeOrder.length === 0}
           >◀</button>
           <button
             onClick={nextTurn}
             className="btn-primary"
-            style={{ minHeight: 44, minWidth: 'unset', padding: '0 16px', fontSize: '0.8rem' }}
+            style={{ minHeight: 36, minWidth: 'unset', padding: '0 16px', fontSize: '0.8rem' }}
             disabled={initiativeOrder.length === 0}
           >Next ▶</button>
         </div>
@@ -328,7 +309,7 @@ export default function InitiativeTracker() {
               key={m}
               onClick={() => setInitiativeMode(m)}
               style={{
-                minHeight: 44, minWidth: 'unset', padding: '0 12px', fontSize: '0.72rem', fontWeight: 600,
+                minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.92rem', fontWeight: 600,
                 borderRadius: 0, border: 'none',
                 background: initiativeMode === m ? 'var(--c-accent-dim)' : 'transparent',
                 color: initiativeMode === m ? 'var(--c-accent)' : 'var(--c-muted)',
@@ -340,7 +321,7 @@ export default function InitiativeTracker() {
         <button
           onClick={sortInitiative}
           className="btn-ghost"
-          style={{ flex: 1, minHeight: 44, minWidth: 'unset', justifyContent: 'center', fontSize: '0.78rem' }}
+          style={{ flex: 1, minHeight: 36, minWidth: 'unset', justifyContent: 'center', fontSize: '0.98rem' }}
           disabled={combatants.length === 0}
         >Sort by Initiative</button>
       </div>
@@ -364,7 +345,6 @@ export default function InitiativeTracker() {
             isSelected={c.id === selectedCombatantId}
             isManual={isManual}
             isLast={idx === ordered.length - 1}
-            wide={wide}
             onSelect={selectCombatant}
             onMoveUp={() => moveUp(idx)}
             onMoveDown={() => moveDown(idx)}
@@ -375,7 +355,7 @@ export default function InitiativeTracker() {
 
         {unordered.length > 0 && (
           <>
-            <div style={{ color: 'var(--c-muted)', fontSize: '0.68rem', padding: '4px 4px 0', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Not in initiative</div>
+            <div style={{ color: 'var(--c-muted)', fontSize: '0.98rem', padding: '4px 4px 0', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Not in initiative</div>
             {unordered.map(c => (
               <div
                 key={c.id}
@@ -391,13 +371,13 @@ export default function InitiativeTracker() {
                   id={c.id}
                   value={c.initiative.roll}
                   onCommit={setInitiativeRoll}
-                  style={{ width: 44, textAlign: 'center', fontSize: '0.82rem', minHeight: 44, padding: '2px 4px' }}
+                  style={{ width: 44, textAlign: 'center', fontSize: '0.92rem', minHeight: 36, padding: '2px 4px' }}
                 />
-                <span style={{ flex: 1, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
+                <span style={{ flex: 1, fontSize: '0.92rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
                 <button
                   onClick={e => { e.stopPropagation(); addToInitiative(c.id) }}
                   className="btn-ghost"
-                  style={{ minHeight: 30, minWidth: 30, padding: 0, fontSize: '0.8rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ minHeight: 36, minWidth: 36, padding: 0, fontSize: '0.8rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   title="Add to initiative"
                 >+</button>
               </div>

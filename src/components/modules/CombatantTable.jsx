@@ -41,13 +41,13 @@ function StatPill({ label, value, onChange }) {
         placeholder="—"
         onChange={onChange}
         className="font-bold text-center"
-        style={{ fontSize: '0.9rem' }}
+        style={{ fontSize: '1.0rem' }}
       />
     </div>
   )
 }
 
-function CombatantRow({ combatant, isSelected, isActive }) {
+function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
   const { updateCombatant, removeCombatant, toggleCondition, selectCombatant, resetCombatantToApi, setExhaustion, toggleInspiration } = useEncounterStore()
   const saveCharacter = useCharacterStore(s => s.saveCharacter)
   const [expanded, setExpanded] = useState(false)
@@ -70,7 +70,7 @@ function CombatantRow({ combatant, isSelected, isActive }) {
 
   return (
     <div
-      ref={rowRef}
+      ref={el => { rowRef.current = el; scrollRef?.(el) }}
       style={{
         borderRadius: 10,
         border: isActive ? '1px solid var(--c-accent)' : '1px solid var(--c-border)',
@@ -86,7 +86,7 @@ function CombatantRow({ combatant, isSelected, isActive }) {
         onClick={() => { selectCombatant(combatant.id); setExpanded(v => !v) }}
       >
         {/* Type dot */}
-        <span style={{ color: combatant.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.55rem', flexShrink: 0 }}>●</span>
+        <span style={{ color: combatant.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.65rem', flexShrink: 0 }}>●</span>
 
         {/* Name + conditions */}
         <div style={{ flex: 1, minWidth: 0 }} onClick={e => e.stopPropagation()}>
@@ -94,17 +94,17 @@ function CombatantRow({ combatant, isSelected, isActive }) {
             value={combatant.name}
             onChange={v => updateCombatant(combatant.id, { name: v })}
             className="font-semibold"
-            style={{ fontSize: '0.85rem' }}
+            style={{ fontSize: '0.95rem' }}
           />
           {(combatant.conditions.length > 0 || exhaustion > 0 || inspiration) && (
             <div className="flex flex-wrap" style={{ gap: 3, marginTop: 3 }}>
               {inspiration && (
-                <span style={{ background: '#1d4ed833', border: '1px solid #1d4ed888', borderRadius: 100, padding: '1px 7px', fontSize: '0.68rem', fontWeight: 600, color: '#e8e8e8' }}>
+                <span style={{ background: '#1d4ed833', border: '1px solid #1d4ed888', borderRadius: 100, padding: '1px 7px', fontSize: '0.78rem', fontWeight: 600, color: '#e8e8e8' }}>
                   ✦ Inspired
                 </span>
               )}
               {exhaustion > 0 && (
-                <span style={{ background: '#78350f33', border: '1px solid #78350f88', borderRadius: 100, padding: '1px 7px', fontSize: '0.68rem', fontWeight: 600, color: '#e8e8e8' }}>
+                <span style={{ background: '#78350f33', border: '1px solid #78350f88', borderRadius: 100, padding: '1px 7px', fontSize: '0.78rem', fontWeight: 600, color: '#e8e8e8' }}>
                   Exhaustion {exhaustion} (−{exhaustion * 2})
                 </span>
               )}
@@ -128,7 +128,7 @@ function CombatantRow({ combatant, isSelected, isActive }) {
               value={combatant.ac}
               type="number"
               onChange={v => updateCombatant(combatant.id, { ac: v })}
-              style={{ fontWeight: 700, fontSize: '0.85rem', textAlign: 'center', width: 28, minHeight: 'unset' }}
+              style={{ fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', width: 28, minHeight: 'unset' }}
             />
           </div>
 
@@ -140,7 +140,7 @@ function CombatantRow({ combatant, isSelected, isActive }) {
               return (
                 <div key={a} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
                   <span className="label">{a.toUpperCase()}</span>
-                  <span style={{ fontWeight: 700, fontSize: '0.82rem' }}>{formatModifier(score)}</span>
+                  <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>{formatModifier(score)}</span>
                 </div>
               )
             })
@@ -149,13 +149,13 @@ function CombatantRow({ combatant, isSelected, isActive }) {
           {/* HP — always rightmost */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
             <span className="label">HP</span>
-            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: dying ? 'var(--c-danger)' : bloodied ? '#f97316' : 'var(--c-text)', whiteSpace: 'nowrap' }}>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: dying ? 'var(--c-danger)' : bloodied ? '#f97316' : 'var(--c-text)', whiteSpace: 'nowrap' }}>
               {combatant.hp.current}<span style={{ color: 'var(--c-muted)', fontWeight: 400 }}>/{combatant.hp.max}</span>
             </span>
           </div>
         </div>
 
-        <span style={{ color: 'var(--c-muted)', fontSize: '0.65rem', flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>
+        <span style={{ color: 'var(--c-muted)', fontSize: '0.75rem', flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>
       </div>
 
       {/* Expanded */}
@@ -191,18 +191,18 @@ function CombatantRow({ combatant, isSelected, isActive }) {
             <button
               onClick={() => setExhaustion(combatant.id, exhaustion - 1)}
               disabled={exhaustion === 0}
-              style={{ background: 'none', border: '1px solid var(--c-border)', borderRadius: 6, minHeight: 26, minWidth: 26, padding: 0, fontSize: '0.9rem', color: 'var(--c-muted)' }}
+              style={{ background: 'none', border: '1px solid var(--c-border)', borderRadius: 6, minHeight: 36, minWidth: 44, padding: 0, fontSize: '1rem', color: 'var(--c-muted)' }}
             >−</button>
-            <span style={{ fontWeight: 700, fontSize: '0.9rem', minWidth: 16, textAlign: 'center', color: exhaustion > 0 ? '#f97316' : 'var(--c-muted)' }}>
+            <span style={{ fontWeight: 700, fontSize: '1.0rem', minWidth: 16, textAlign: 'center', color: exhaustion > 0 ? '#f97316' : 'var(--c-muted)' }}>
               {exhaustion}
             </span>
             <button
               onClick={() => setExhaustion(combatant.id, exhaustion + 1)}
               disabled={exhaustion === 10}
-              style={{ background: 'none', border: '1px solid var(--c-border)', borderRadius: 6, minHeight: 26, minWidth: 26, padding: 0, fontSize: '0.9rem', color: 'var(--c-muted)' }}
+              style={{ background: 'none', border: '1px solid var(--c-border)', borderRadius: 6, minHeight: 36, minWidth: 44, padding: 0, fontSize: '1rem', color: 'var(--c-muted)' }}
             >+</button>
             {exhaustion > 0 && (
-              <span style={{ fontSize: '0.72rem', color: '#f97316', marginLeft: 4 }}>
+              <span style={{ fontSize: '0.82rem', color: '#f97316', marginLeft: 4 }}>
                 −{exhaustion * 2} to d20s{exhaustion >= 5 ? ' · speed halved' : ''}
               </span>
             )}
@@ -239,8 +239,8 @@ function CombatantRow({ combatant, isSelected, isActive }) {
                     key={cond}
                     onClick={() => toggleCondition(combatant.id, cond)}
                     style={{
-                      padding: '3px 8px', borderRadius: 100, fontSize: '0.72rem', fontWeight: 600,
-                      minHeight: 'unset', minWidth: 'unset',
+                      padding: '3px 10px', borderRadius: 100, fontSize: '0.82rem', fontWeight: 600,
+                      minHeight: 36, minWidth: 'unset',
                       border: active ? '1px solid var(--c-accent)' : '1px solid var(--c-border)',
                       background: active ? 'var(--c-accent-dim)' : 'transparent',
                       color: active ? 'var(--c-accent)' : 'var(--c-muted2)',
@@ -258,7 +258,7 @@ function CombatantRow({ combatant, isSelected, isActive }) {
             value={combatant.notes}
             onChange={e => updateCombatant(combatant.id, { notes: e.target.value })}
             rows={2}
-            style={{ width: '100%', resize: 'none', fontSize: '0.8rem', minHeight: 56 }}
+            style={{ width: '100%', resize: 'none', fontSize: '0.9rem', minHeight: 56 }}
           />
 
           {/* Actions */}
@@ -267,7 +267,7 @@ function CombatantRow({ combatant, isSelected, isActive }) {
               onClick={() => toggleInspiration(combatant.id)}
               className="btn-ghost"
               style={{
-                minHeight: 32, minWidth: 'unset', fontSize: '0.75rem',
+                minHeight: 36, minWidth: 'unset', fontSize: '0.85rem',
                 color: inspiration ? '#60a5fa' : undefined,
                 border: inspiration ? '1px solid #1d4ed888' : undefined,
                 background: inspiration ? '#1d4ed822' : undefined,
@@ -282,12 +282,12 @@ function CombatantRow({ combatant, isSelected, isActive }) {
                 setTimeout(() => setSaveFlash(false), 1200)
               }}
               className="btn-ghost"
-              style={{ minHeight: 32, minWidth: 'unset', fontSize: '0.75rem', color: saveFlash ? 'var(--c-success)' : undefined }}
+              style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.85rem', color: saveFlash ? 'var(--c-success)' : undefined }}
             >
               {saveFlash ? 'Saved!' : 'Save'}
             </button>
             {combatant._source === 'api' && combatant._apiData && (
-              <button onClick={() => resetCombatantToApi(combatant.id)} className="btn-ghost" style={{ minHeight: 32, minWidth: 'unset', fontSize: '0.75rem' }}>
+              <button onClick={() => resetCombatantToApi(combatant.id)} className="btn-ghost" style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.85rem' }}>
                 Reset to Default
               </button>
             )}
@@ -295,7 +295,7 @@ function CombatantRow({ combatant, isSelected, isActive }) {
               <button
                 onClick={() => setConfirmRemove(true)}
                 className="btn-danger"
-                style={{ minHeight: 32, minWidth: 'unset', fontSize: '0.75rem' }}
+                style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.85rem' }}
               >Remove</button>
             ) : (
               <div className="flex" style={{ gap: 4 }}>
@@ -303,7 +303,7 @@ function CombatantRow({ combatant, isSelected, isActive }) {
                   onClick={() => removeCombatant(combatant.id)}
                   style={{
                     background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)',
-                    minHeight: 32, minWidth: 'unset', padding: '0 10px', fontSize: '0.75rem', fontWeight: 700,
+                    minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.85rem', fontWeight: 700,
                     cursor: 'pointer', borderRadius: 6,
                   }}
                 >Yes</button>
@@ -311,7 +311,7 @@ function CombatantRow({ combatant, isSelected, isActive }) {
                   onClick={() => setConfirmRemove(false)}
                   style={{
                     background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)',
-                    minHeight: 32, minWidth: 'unset', padding: '0 10px', fontSize: '0.75rem', fontWeight: 600,
+                    minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.85rem', fontWeight: 600,
                     cursor: 'pointer', borderRadius: 6,
                   }}
                 >No</button>
@@ -329,24 +329,32 @@ export default function CombatantTable({ config = {} }) {
   const { encounter, selectedCombatantId } = useEncounterStore()
   const [showManual, setShowManual] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
+  const rowRefs = useRef({})
 
   const combatants = encounter.combatants.filter(c => c.type === tableType)
   const currentId = encounter.initiativeOrder[encounter.currentTurnIndex]
+
+  // Auto-scroll to active combatant on turn change
+  useEffect(() => {
+    if (currentId && rowRefs.current[currentId]) {
+      rowRefs.current[currentId].scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [currentId])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, gap: 8 }}>
       {/* Toolbar */}
       <div className="flex items-center justify-between flex-shrink-0">
-        <span style={{ color: 'var(--c-muted)', fontSize: '0.75rem', fontWeight: 600 }}>
+        <span style={{ color: 'var(--c-muted)', fontSize: '0.85rem', fontWeight: 600 }}>
           {combatants.length} {combatants.length === 1 ? 'combatant' : 'combatants'}
         </span>
         <div className="flex" style={{ gap: 5 }}>
           {tableType === 'enemy' && (
-            <button onClick={() => setShowSearch(true)} className="btn-ghost" style={{ minHeight: 32, minWidth: 'unset', fontSize: '0.75rem' }}>
+            <button onClick={() => setShowSearch(true)} className="btn-ghost" style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.85rem' }}>
               + Monster
             </button>
           )}
-          <button onClick={() => setShowManual(true)} className="btn-primary" style={{ minHeight: 32, minWidth: 'unset', fontSize: '0.75rem' }}>
+          <button onClick={() => setShowManual(true)} className="btn-primary" style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.85rem' }}>
             + Add
           </button>
         </div>
@@ -355,10 +363,10 @@ export default function CombatantTable({ config = {} }) {
       {/* Rows */}
       <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 5 }}>
         {combatants.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--c-muted)', fontSize: '0.8rem' }}>
+          <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--c-muted)', fontSize: '0.9rem' }}>
             No {tableType === 'ally' ? 'allies' : 'enemies'} yet.
             <br />
-            <span style={{ color: 'var(--c-muted)', fontSize: '0.72rem' }}>
+            <span style={{ color: 'var(--c-muted)', fontSize: '0.82rem' }}>
               {tableType === 'enemy' ? 'Add manually or search a monster.' : 'Add your party members.'}
             </span>
           </div>
@@ -369,6 +377,7 @@ export default function CombatantTable({ config = {} }) {
             combatant={c}
             isSelected={c.id === selectedCombatantId}
             isActive={c.id === currentId}
+            rowRef={el => { rowRefs.current[c.id] = el }}
           />
         ))}
       </div>

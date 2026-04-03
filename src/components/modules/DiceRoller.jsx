@@ -38,8 +38,8 @@ export default function DiceRoller() {
             onClick={() => rollSingle(d)}
             style={{
               background: 'var(--c-elevated)', border: '1px solid var(--c-border)',
-              borderRadius: 8, fontWeight: 700, fontSize: '0.72rem',
-              color: 'var(--c-text)', minHeight: 42, minWidth: 'unset',
+              borderRadius: 8, fontWeight: 700, fontSize: '0.82rem',
+              color: 'var(--c-text)', minHeight: 36, minWidth: 'unset',
               transition: 'background 0.1s, border-color 0.1s',
             }}
             onMouseEnter={e => { e.currentTarget.style.background = 'var(--c-hover)'; e.currentTarget.style.borderColor = 'var(--c-accent)' }}
@@ -59,7 +59,7 @@ export default function DiceRoller() {
             key={mode}
             onClick={() => setAdvantage(mode)}
             style={{
-              minHeight: 32, minWidth: 'unset', fontSize: '0.7rem', fontWeight: 600, borderRadius: 7,
+              minHeight: 36, minWidth: 'unset', fontSize: '0.8rem', fontWeight: 600, borderRadius: 7,
               border: `1px solid ${advantage === mode ? color : 'var(--c-border)'}`,
               background: advantage === mode ? `${color}18` : 'transparent',
               color: advantage === mode ? color : 'var(--c-muted)',
@@ -77,9 +77,9 @@ export default function DiceRoller() {
           value={expr}
           onChange={e => setExpr(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && rollExpr()}
-          style={{ flex: 1, minHeight: 40 }}
+          style={{ flex: 1, minHeight: 36 }}
         />
-        <button onClick={rollExpr} className="btn-primary" style={{ minHeight: 40, minWidth: 'unset', padding: '0 14px' }}>Roll</button>
+        <button onClick={rollExpr} className="btn-primary" style={{ minHeight: 36, minWidth: 'unset', padding: '0 14px' }}>Roll</button>
       </div>
 
       <hr className="divider flex-shrink-0" />
@@ -104,8 +104,8 @@ export default function DiceRoller() {
               }}
             >
               <div>
-                <span style={{ fontSize: '0.82rem', fontWeight: i === 0 ? 600 : 400 }}>{h.label}</span>
-                <span style={{ color: 'var(--c-muted)', fontSize: '0.68rem', marginLeft: 6 }}>{h.breakdown}</span>
+                <span style={{ fontSize: '0.92rem', fontWeight: i === 0 ? 600 : 400 }}>{h.label}</span>
+                <span style={{ color: 'var(--c-muted)', fontSize: '0.78rem', marginLeft: 6 }}>{h.breakdown}</span>
               </div>
               <span style={{
                 fontWeight: 800, fontSize: i === 0 ? '1.2rem' : '0.95rem',
