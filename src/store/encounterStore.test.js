@@ -455,4 +455,62 @@ describe('encounterStore', () => {
       expect(encounter().combatants[0].name).toBe('Manual')
     })
   })
+
+  // ─── Death Saves ───
+
+  describe('death saves', () => {
+    it('sets death save successes', () => {
+      const id = state().addCombatant({ name: 'Downed' })
+      state().setDeathSave(id, 'successes', 2)
+      expect(encounter().combatants[0].deathSaves.successes).toBe(2)
+    })
+
+    it('sets death save failures', () => {
+      const id = state().addCombatant({ name: 'Downed' })
+      state().setDeathSave(id, 'failures', 3)
+      expect(encounter().combatants[0].deathSaves.failures).toBe(3)
+    })
+
+    it('clamps death saves between 0 and 3', () => {
+      const id = state().addCombatant({ name: 'Downed' })
+      state().setDeathSave(id, 'successes', 5)
+      expect(encounter().combatants[0].deathSaves.successes).toBe(3)
+      state().setDeathSave(id, 'failures', -1)
+      expect(encounter().combatants[0].deathSaves.failures).toBe(0)
+    })
+
+    it('resets death saves', () => {
+      const id = state().addCombatant({ name: 'Downed' })
+      state().setDeathSave(id, 'successes', 2)
+      state().setDeathSave(id, 'failures', 1)
+      state().resetDeathSaves(id)
+      expect(encounter().combatants[0].deathSaves).toEqual({ successes: 0, failures: 0 })
+    })
+  })
+
+  // ─── Remove from Initiative ───
+
+  describe('removeFromInitiative', () => {
+    it('removes combatant from initiative order', () => {
+      const id1 = state().addCombatant({ name: 'A' })
+      const id2 = state().addCombatant({ name: 'B' })
+      state().sortInitiative()
+      expect(encounter().initiativeOrder).toContain(id1)
+
+      state().removeFromInitiative(id1)
+      expect(encounter().initiativeOrder).not.toContain(id1)
+      expect(encounter().initiativeOrder).toContain(id2)
+      // Combatant still exists in combatants list
+      expect(encounter().combatants.find(c => c.id === id1)).toBeTruthy()
+    })
+
+    it('clamps currentTurnIndex when removing', () => {
+      const id1 = state().addCombatant({ name: 'A' })
+      const id2 = state().addCombatant({ name: 'B' })
+      state().sortInitiative()
+      state().nextTurn() // index = 1
+      state().removeFromInitiative(id1) // now only 1 in order
+      expect(encounter().currentTurnIndex).toBeLessThanOrEqual(encounter().initiativeOrder.length - 1)
+    })
+  })
 })

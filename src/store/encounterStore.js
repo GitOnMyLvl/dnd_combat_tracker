@@ -25,6 +25,7 @@ const makeCombatant = (overrides = {}) => ({
   concentration: null,
   legendary: null,
   abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+  deathSaves: { successes: 0, failures: 0 },
   notes: '',
   exhaustion: 0,
   inspiration: false,
@@ -290,6 +291,45 @@ export const useEncounterStore = create(
             encounter: {
               ...s.encounter,
               initiativeOrder: newOrder,
+            }
+          }
+        })
+      },
+
+      // Death saves
+      setDeathSave: (id, type, value) => {
+        set(s => ({
+          encounter: {
+            ...s.encounter,
+            combatants: s.encounter.combatants.map(c =>
+              c.id === id
+                ? { ...c, deathSaves: { ...c.deathSaves, [type]: Math.max(0, Math.min(3, value)) } }
+                : c
+            ),
+          }
+        }))
+      },
+
+      resetDeathSaves: (id) => {
+        set(s => ({
+          encounter: {
+            ...s.encounter,
+            combatants: s.encounter.combatants.map(c =>
+              c.id === id ? { ...c, deathSaves: { successes: 0, failures: 0 } } : c
+            ),
+          }
+        }))
+      },
+
+      removeFromInitiative: (id) => {
+        set(s => {
+          const order = s.encounter.initiativeOrder.filter(i => i !== id)
+          const idx = Math.min(s.encounter.currentTurnIndex, Math.max(0, order.length - 1))
+          return {
+            encounter: {
+              ...s.encounter,
+              initiativeOrder: order,
+              currentTurnIndex: idx,
             }
           }
         })

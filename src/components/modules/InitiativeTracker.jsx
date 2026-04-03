@@ -31,8 +31,49 @@ function InitInput({ id, value, onCommit, style }) {
 const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 const abilityMod = score => { const m = Math.floor((score - 10) / 2); return m >= 0 ? `+${m}` : `${m}` }
 
-function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, onSelect, onMoveUp, onMoveDown }) {
+function DeathSaves({ combatant }) {
+  const { setDeathSave, resetDeathSaves } = useEncounterStore()
+  const { successes, failures } = combatant.deathSaves ?? { successes: 0, failures: 0 }
+
+  const Pips = ({ count, max, color, type }) => (
+    <div className="flex items-center" style={{ gap: 3 }}>
+      <span style={{ fontSize: '0.6rem', color: 'var(--c-muted)', minWidth: 10 }}>{type === 'successes' ? '✓' : '✗'}</span>
+      {Array.from({ length: max }, (_, i) => (
+        <span
+          key={i}
+          onClick={e => { e.stopPropagation(); setDeathSave(combatant.id, type, i < count ? i : i + 1) }}
+          style={{
+            width: 10, height: 10, borderRadius: '50%', cursor: 'pointer',
+            background: i < count ? color : 'var(--c-elevated)',
+            border: `1px solid ${i < count ? color : 'var(--c-border)'}`,
+            transition: 'background 0.1s',
+          }}
+        />
+      ))}
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 8, paddingLeft: 8, borderLeft: '1px solid var(--c-border)' }} onClick={e => e.stopPropagation()}>
+      <span style={{ fontSize: '0.55rem', color: 'var(--c-danger)', fontWeight: 700, whiteSpace: 'nowrap' }}>SAVES</span>
+      <Pips count={successes} max={3} color="var(--c-success)" type="successes" />
+      <Pips count={failures} max={3} color="var(--c-danger)" type="failures" />
+      {(successes > 0 || failures > 0) && (
+        <button
+          onClick={() => resetDeathSaves(combatant.id)}
+          style={{ background: 'none', border: 'none', color: 'var(--c-muted)', fontSize: '0.6rem', minHeight: 'unset', minWidth: 'unset', padding: '0 2px', cursor: 'pointer' }}
+          title="Reset death saves"
+        >↺</button>
+      )}
+      {failures >= 3 && <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--c-danger)' }}>DEAD</span>}
+      {successes >= 3 && <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--c-success)' }}>STABLE</span>}
+    </div>
+  )
+}
+
+function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, onSelect, onMoveUp, onMoveDown, onRemove, rowRef }) {
   const [amt, setAmt] = useState('')
+  const [confirmRemove, setConfirmRemove] = useState(false)
   const { setInitiativeRoll, updateHP } = useEncounterStore()
 
   const total = isManual ? c.initiative.roll : c.initiative.roll + c.initiative.bonus
@@ -49,6 +90,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
 
   return (
     <div
+      ref={rowRef}
       onClick={() => onSelect(c.id)}
       style={{
         borderRadius: 8, cursor: 'pointer', padding: '6px 8px',
@@ -97,6 +139,12 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
           </div>
         </div>
 
+        {isManual && c.initiative.bonus !== 0 && (
+          <span style={{ fontSize: '0.68rem', color: 'var(--c-muted)', flexShrink: 0 }} title="Initiative bonus">
+            {c.initiative.bonus > 0 ? '+' : ''}{c.initiative.bonus}
+          </span>
+        )}
+
         <span style={{ fontWeight: 700, fontSize: '0.88rem', color: isActive ? 'var(--c-accent)' : 'var(--c-text)', minWidth: 18, textAlign: 'right', flexShrink: 0 }}>
           {total}
         </span>
@@ -113,14 +161,46 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
             style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 'unset', minWidth: 'unset', padding: '1px 4px', fontSize: '0.6rem', lineHeight: 1, opacity: isLast ? 0.2 : 0.6 }}
           >▼</button>
         </div>
+
+        {!confirmRemove ? (
+          <button
+            onClick={e => { e.stopPropagation(); setConfirmRemove(true) }}
+            style={{
+              background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)',
+              minHeight: 22, minWidth: 'unset', padding: '0 6px', fontSize: '0.6rem', fontWeight: 600,
+              cursor: 'pointer', flexShrink: 0, borderRadius: 5,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--c-danger)'; e.currentTarget.style.borderColor = 'var(--c-danger)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--c-muted)'; e.currentTarget.style.borderColor = 'var(--c-border)' }}
+          >Remove</button>
+        ) : (
+          <div className="flex" style={{ gap: 3, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => onRemove(c.id)}
+              style={{
+                background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)',
+                minHeight: 22, minWidth: 'unset', padding: '0 6px', fontSize: '0.6rem', fontWeight: 700,
+                cursor: 'pointer', borderRadius: 5,
+              }}
+            >Yes</button>
+            <button
+              onClick={() => setConfirmRemove(false)}
+              style={{
+                background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)',
+                minHeight: 22, minWidth: 'unset', padding: '0 6px', fontSize: '0.6rem', fontWeight: 600,
+                cursor: 'pointer', borderRadius: 5,
+              }}
+            >No</button>
+          </div>
+        )}
       </div>
 
-      {/* HP bar + quick DMG/HEAL */}
+      {/* HP bar + quick DMG/HEAL + death saves */}
       <div style={{ paddingLeft: 22 }} onClick={e => e.stopPropagation()}>
         <div style={{ height: 3, borderRadius: 2, background: 'var(--c-elevated)', overflow: 'hidden', marginBottom: 4 }}>
           <div style={{ height: '100%', width: `${hpPct * 100}%`, background: barColor, borderRadius: 2, transition: 'width 0.3s, background 0.3s' }} />
         </div>
-        <div className="flex items-center" style={{ gap: 4 }}>
+        <div className="flex items-center" style={{ gap: 4, flexWrap: 'wrap' }}>
           <span style={{ fontSize: '0.65rem', color: 'var(--c-muted)', minWidth: 32 }}>{c.hp.current}/{c.hp.max}</span>
           <input
             type="text"
@@ -139,6 +219,9 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, wide, on
             onClick={() => applyHP('heal')}
             style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid var(--c-success)', color: 'var(--c-success)', borderRadius: 5, padding: '0 6px', minHeight: 22, minWidth: 'unset', fontSize: '0.65rem', fontWeight: 600 }}
           >HEAL</button>
+
+          {/* Death saves — inline, shown when downed */}
+          {isDowned && <DeathSaves combatant={c} />}
         </div>
       </div>
 
@@ -167,13 +250,14 @@ export default function InitiativeTracker() {
     nextTurn, prevTurn,
     sortInitiative, setInitiativeRoll, setInitiativeMode,
     selectCombatant, selectedCombatantId,
-    addToInitiative, reorderInitiative,
+    addToInitiative, reorderInitiative, removeFromInitiative,
   } = useEncounterStore()
 
   const { initiativeOrder, combatants, currentTurnIndex, round, initiativeMode = 'auto' } = encounter
   const isManual = initiativeMode === 'manual'
 
   const containerRef = useRef(null)
+  const rowRefs = useRef({})
   const [wide, setWide] = useState(false)
   useEffect(() => {
     const el = containerRef.current
@@ -182,6 +266,14 @@ export default function InitiativeTracker() {
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
+
+  // Auto-scroll to current combatant on turn change
+  useEffect(() => {
+    const id = initiativeOrder[currentTurnIndex]
+    if (id && rowRefs.current[id]) {
+      rowRefs.current[id].scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [currentTurnIndex, initiativeOrder])
 
   const ordered = initiativeOrder
     .map(id => combatants.find(c => c.id === id))
@@ -276,6 +368,8 @@ export default function InitiativeTracker() {
             onSelect={selectCombatant}
             onMoveUp={() => moveUp(idx)}
             onMoveDown={() => moveDown(idx)}
+            onRemove={removeFromInitiative}
+            rowRef={el => { rowRefs.current[c.id] = el }}
           />
         ))}
 

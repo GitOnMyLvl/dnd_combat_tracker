@@ -9,5 +9,6 @@ export default defineConfig({
   ],
   test: {
     setupFiles: ['./src/test/setup.js'],
+    exclude: ['e2e/**', 'node_modules/**'],
   },
 })
