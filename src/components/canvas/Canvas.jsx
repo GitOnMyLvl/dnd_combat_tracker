@@ -66,7 +66,7 @@ export default function Canvas() {
         layouts={layouts}
         breakpoints={{ lg: 768, md: 480, sm: 0 }}
         cols={{ lg: 12, md: 8, sm: 4 }}
-        rowHeight={60}
+        rowHeight={72}
         margin={[8, 8]}
         containerPadding={[8, 8]}
         draggableHandle=".drag-handle"

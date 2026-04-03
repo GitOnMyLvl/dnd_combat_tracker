@@ -4,12 +4,12 @@ import { v4 as uuid } from 'uuid'
 
 // Default widths per module type
 const DEFAULT_SIZES = {
-  InitiativeTracker: { w: 3, h: 8 },
-  CombatantTable:    { w: 5, h: 8 },
-  ConditionsPanel:   { w: 4, h: 6 },
-  DiceRoller:        { w: 4, h: 7 },
-  NotesPad:          { w: 4, h: 6 },
-  PartyManager:      { w: 4, h: 8 },
+  InitiativeTracker: { w: 3, h: 7 },
+  CombatantTable:    { w: 5, h: 7 },
+  ConditionsPanel:   { w: 4, h: 5 },
+  DiceRoller:        { w: 4, h: 6 },
+  NotesPad:          { w: 4, h: 5 },
+  PartyManager:      { w: 4, h: 7 },
 }
 
 export const useLayoutStore = create(
