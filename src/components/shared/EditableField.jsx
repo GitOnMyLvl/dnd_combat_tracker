@@ -14,7 +14,8 @@ export default function EditableField({ value, onChange, type = 'text', classNam
       setDraft(String(value ?? ''))
       setTimeout(() => inputRef.current?.select(), 0)
     }
-  }, [editing, value])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editing])
 
   const commit = () => {
     setEditing(false)

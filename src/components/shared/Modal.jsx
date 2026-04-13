@@ -1,4 +1,23 @@
-export default function Modal({ onClose, title, children, maxWidth = 380 }) {
+export default function Modal({ onClose, title, children, maxWidth = 380, inline = false }) {
+  if (inline) {
+    return (
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 10,
+        background: 'var(--c-bg)', overflowY: 'auto',
+        padding: 16,
+      }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
+          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{title}</span>
+          <button
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 30, minWidth: 30, fontSize: '1rem', borderRadius: 6 }}
+          >✕</button>
+        </div>
+        {children}
+      </div>
+    )
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"

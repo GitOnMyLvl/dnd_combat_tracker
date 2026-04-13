@@ -49,7 +49,7 @@ export default function HPEditor({ combatant }) {
       <div style={{ height: 5, borderRadius: 3, background: 'var(--c-elevated)', overflow: 'hidden', position: 'relative' }}>
         <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${pct * 100}%`, background: barColor, borderRadius: 3, transition: 'width 0.3s, background 0.3s' }} />
         {hp.temp > 0 && (
-          <div style={{ position: 'absolute', top: 0, height: '100%', left: `${pct * 100}%`, width: `${Math.min((hp.temp / hp.max) * 100, 100 - pct * 100)}%`, background: '#60a5fa', opacity: 0.7 }} />
+          <div style={{ position: 'absolute', top: 0, height: '100%', left: `${pct * 100}%`, width: `${hp.max > 0 ? Math.min((hp.temp / hp.max) * 100, 100 - pct * 100) : 0}%`, background: '#60a5fa', opacity: 0.7 }} />
         )}
       </div>
 

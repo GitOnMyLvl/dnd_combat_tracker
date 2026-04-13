@@ -44,7 +44,7 @@ export default function CharacterFormModal({ initial, onClose, onSave, title, lo
   }
 
   return (
-    <Modal title={title} onClose={onClose} maxWidth={400}>
+    <Modal title={title} onClose={onClose} maxWidth={400} inline>
         <div className="flex flex-col" style={{ gap: 10 }}>
           {/* Name */}
           <input autoFocus placeholder="Name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && submit()} style={{ minHeight: 44, fontSize: '0.95rem' }} />
