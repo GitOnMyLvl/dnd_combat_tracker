@@ -135,7 +135,7 @@ function CreatePartyModal({ onClose }) {
   }
 
   return (
-    <Modal title="Create Party" onClose={onClose}>
+    <Modal title="Create Party" onClose={onClose} inline>
       <div className="flex flex-col" style={{ gap: 10 }}>
         <input
           autoFocus
@@ -196,7 +196,7 @@ function AddToPartyModal({ party, onClose }) {
 
   if (available.length === 0) {
     return (
-      <Modal title={`Add to ${party.name}`} onClose={onClose}>
+      <Modal title={`Add to ${party.name}`} onClose={onClose} inline>
         <div style={{ color: 'var(--c-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '12px 0' }}>
           All saved characters are already in this party.
         </div>
@@ -208,7 +208,7 @@ function AddToPartyModal({ party, onClose }) {
   }
 
   return (
-    <Modal title={`Add to ${party.name}`} onClose={onClose}>
+    <Modal title={`Add to ${party.name}`} onClose={onClose} inline>
       <div className="flex flex-col" style={{ gap: 4, maxHeight: 300, overflowY: 'auto' }}>
         {available.map(char => (
           <div

@@ -25,7 +25,7 @@ function AddManualModal({ tableType, onClose }) {
 
 function MonsterSearchModal({ onClose }) {
   return (
-    <Modal title="Search Monster (Open5e)" onClose={onClose}>
+    <Modal title="Search Monster (Open5e)" onClose={onClose} inline>
       <MonsterSearch onClose={onClose} />
     </Modal>
   )
