@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { searchMonsters } from '../../api/open5e'
 import { useEncounterStore, mapApiToCombatant } from '../../store/encounterStore'
 
@@ -9,6 +9,8 @@ export default function MonsterSearch({ onClose }) {
   const [error, setError] = useState(null)
   const addCombatant = useEncounterStore(s => s.addCombatant)
   const debounceRef = useRef(null)
+
+  useEffect(() => () => clearTimeout(debounceRef.current), [])
 
   const handleSearch = (value) => {
     setQuery(value)

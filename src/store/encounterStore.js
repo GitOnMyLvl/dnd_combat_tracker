@@ -282,7 +282,7 @@ export const useEncounterStore = create(
             if (!c) return false
             const total = isManual ? c.initiative.roll : c.initiative.roll + c.initiative.bonus
             if (newTotal !== total) return newTotal > total
-            return (combatant.abilities?.dex ?? 10) > (c.abilities?.dex ?? 10)
+            return (combatant.abilities?.dex ?? 10) >= (c.abilities?.dex ?? 10)
           })
           const newOrder = insertAt === -1
             ? [...order, id]
@@ -324,7 +324,7 @@ export const useEncounterStore = create(
       removeFromInitiative: (id) => {
         set(s => {
           const order = s.encounter.initiativeOrder.filter(i => i !== id)
-          const idx = Math.min(s.encounter.currentTurnIndex, Math.max(0, order.length - 1))
+          const idx = order.length === 0 ? 0 : Math.min(s.encounter.currentTurnIndex, order.length - 1)
           return {
             encounter: {
               ...s.encounter,
