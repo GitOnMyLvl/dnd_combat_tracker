@@ -209,6 +209,7 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect
               type="text"
               inputMode="numeric"
               placeholder="±"
+              data-testid="hp-amount-input"
               value={amt}
               onChange={e => setAmt(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') applyHP('dmg') }}
@@ -283,7 +284,7 @@ export default function InitiativeTracker() {
       <div className="flex items-center justify-between flex-shrink-0" style={{ gap: 8 }}>
         <div>
           <div className="label">Round</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--c-accent)', lineHeight: 1 }}>{round}</div>
+          <div data-testid="round-number" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--c-accent)', lineHeight: 1 }}>{round}</div>
         </div>
         <div className="flex" style={{ gap: 5 }}>
           <button

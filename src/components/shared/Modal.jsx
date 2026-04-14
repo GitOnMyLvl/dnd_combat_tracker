@@ -1,4 +1,11 @@
+import { useEffect } from 'react'
+
 export default function Modal({ onClose, title, children, maxWidth = 380, inline = false }) {
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
   if (inline) {
     return (
       <div style={{

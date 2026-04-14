@@ -282,7 +282,7 @@ export const useEncounterStore = create(
             if (!c) return false
             const total = isManual ? c.initiative.roll : c.initiative.roll + c.initiative.bonus
             if (newTotal !== total) return newTotal > total
-            return (combatant.abilities?.dex ?? 10) >= (c.abilities?.dex ?? 10)
+            return (combatant.abilities?.dex ?? 10) > (c.abilities?.dex ?? 10)
           })
           const newOrder = insertAt === -1
             ? [...order, id]
@@ -363,6 +363,7 @@ export function mapApiToCombatant(data) {
     },
     spellSaveDC: data.spell_save_dc ?? null,
     spellAttackBonus: data.spell_attack_bonus ?? null,
+    conditions: [],
     legendary: data.legendary_actions
       ? { total: data.legendary_actions.length, remaining: data.legendary_actions.length }
       : null,

@@ -96,7 +96,7 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
             className="font-semibold"
             style={{ fontSize: '0.95rem' }}
           />
-          {(combatant.conditions.length > 0 || exhaustion > 0 || inspiration) && (
+          {((combatant.conditions?.length ?? 0) > 0 || exhaustion > 0 || inspiration) && (
             <div className="flex flex-wrap" style={{ gap: 3, marginTop: 3 }}>
               {inspiration && (
                 <span style={{ background: '#1d4ed833', border: '1px solid #1d4ed888', borderRadius: 100, padding: '1px 7px', fontSize: '0.78rem', fontWeight: 600, color: '#e8e8e8' }}>
