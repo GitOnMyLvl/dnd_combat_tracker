@@ -117,7 +117,7 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
     const w = el ? Math.max(320, Math.min(800, el.offsetWidth)) : 420
     const h = el ? Math.max(480, Math.min(900, el.offsetHeight)) : 680
     const cfg = encodeURIComponent(JSON.stringify(config))
-    const url = `${window.location.origin}${window.location.pathname}?popout=${type}&config=${cfg}`
+    const url = `${window.location.origin}${window.location.pathname}?popout=${encodeURIComponent(type)}&config=${cfg}`
     window.open(url, '_blank', `popup=yes,width=${w},height=${h}`)
   }
 
@@ -125,7 +125,7 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
     height: 44, width: 44, minHeight: 44, minWidth: 44,
     background: 'none', border: 'none',
     color: 'var(--c-muted)', fontSize: '0.85rem',
-    borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center',
+    borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
   }
 
   return (
