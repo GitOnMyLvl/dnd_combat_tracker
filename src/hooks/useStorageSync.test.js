@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 
 // Mock BroadcastChannel
@@ -127,25 +127,55 @@ describe('useStorageSync', () => {
     expect(useThemeStore.setState).toHaveBeenCalledWith({ accent: '#ff0000' })
   })
 
-  it('does not rehydrate when receiving own tab message', () => {
-    // Messages from the same TAB_ID should be ignored
-    // We can't know the exact TAB_ID, but we can test that messages
-    // with the same tabId as what was sent don't get processed.
-    // Instead test the inverse: two hooks on two "tabs" don't loop.
-    const { unmount: unmount1 } = renderHook(() => useStorageSync())
-    const { unmount: unmount2 } = renderHook(() => useStorageSync())
+  it('ignores messages from its own tab ID', () => {
+    // We need to simulate a message that has the same TAB_ID as our hook.
+    // Since TAB_ID is module-level, we simulate this by having the mock channel
+    // deliver a message from itself (which the real BroadcastChannel never does).
+    renderHook(() => useStorageSync())
+    const hookChannel = MockBroadcastChannel.instances[0]
 
-    // Simulate encounterStore subscribe callback firing on hook 1
-    // (this would happen when the store changes)
-    const subscribeCb1 = useEncounterStore.subscribe.mock.calls[0][0]
-    act(() => { subscribeCb1() })
+    // Verify that messages from a different tab ARE processed
+    act(() => {
+      hookChannel.onmessage({ data: { tabId: 'definitely-not-this-tab', key: 'dnd-tracker-encounter' } })
+    })
+    expect(useEncounterStore.persist.rehydrate).toHaveBeenCalledOnce()
 
-    // Hook 2 should have received the broadcast and rehydrated once
-    // Hook 1 should NOT have rehydrated (its own message)
-    // Since we can't easily distinguish, just verify rehydrate was called at most once
-    expect(useEncounterStore.persist.rehydrate.mock.calls.length).toBeLessThanOrEqual(1)
+    // Capture subscribe callback before clearing mocks
+    const unsubCb = useEncounterStore.subscribe.mock.calls[0][0]
+    vi.clearAllMocks()
 
-    unmount1()
-    unmount2()
+    // Trigger a broadcast from the hook itself — the mock channel does NOT deliver
+    // messages back to the same instance, simulating the real BroadcastChannel
+    // not echoing back to the sender. Verify no spurious rehydrate occurred.
+    act(() => { unsubCb() }) // trigger broadcast from hook
+    expect(useEncounterStore.persist.rehydrate).not.toHaveBeenCalled()
+  })
+
+  it('does not re-broadcast when rehydrating from an incoming message (no loop)', () => {
+    // Set up two hook instances (simulating main window and pop-out)
+    const { unmount: unmountA } = renderHook(() => useStorageSync())
+    const { unmount: unmountB } = renderHook(() => useStorageSync())
+
+    const channelB = MockBroadcastChannel.instances[1]
+
+    // Spy on postMessage to detect any re-broadcast from hook B
+    const postMessageSpy = vi.spyOn(channelB, 'postMessage')
+
+    // Directly deliver a message to hook B's onmessage as if it came from another tab.
+    // Both hooks share the same module-level TAB_ID, so we must use a foreign tabId
+    // to bypass the self-filter and exercise the suppressRef path.
+    act(() => {
+      channelB.onmessage({ data: { tabId: 'foreign-tab-id', key: 'dnd-tracker-encounter' } })
+    })
+
+    // B should have rehydrated once in response to the incoming message
+    expect(useEncounterStore.persist.rehydrate).toHaveBeenCalledOnce()
+
+    // B should NOT have re-broadcast (suppressRef prevented the store subscriber
+    // from calling broadcast while rehydrate was running)
+    expect(postMessageSpy).not.toHaveBeenCalled()
+
+    unmountA()
+    unmountB()
   })
 })
