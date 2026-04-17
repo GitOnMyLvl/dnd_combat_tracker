@@ -6,11 +6,11 @@ const ACCENT_KEY = 'dnd-tracker-accent'
 
 const DEFAULT_ACCENT = '#60a5fa' // soft blue
 
-function applyTheme(theme) {
+export function applyTheme(theme) {
   document.documentElement.classList.toggle('light', theme === 'light')
 }
 
-function applyAccent(color) {
+export function applyAccent(color) {
   const root = document.documentElement.style
   root.setProperty('--c-accent', color)
   root.setProperty('--c-accent-dim', hexToRgba(color, 0.14))
