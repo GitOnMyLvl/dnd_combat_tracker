@@ -79,7 +79,7 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
         overflow: 'hidden',
       }}
     >
-      {/* Summary row */}
+      {/* Summary row — entire row is clickable */}
       <div
         className="flex items-center"
         style={{ gap: 8, padding: '8px 10px', minHeight: 52, cursor: 'pointer' }}
@@ -88,16 +88,16 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
         {/* Type dot */}
         <span style={{ color: combatant.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.65rem', flexShrink: 0 }}>●</span>
 
-        {/* Name + conditions */}
-        <div style={{ flex: 1, minWidth: 0 }} onClick={e => e.stopPropagation()}>
-          <EditableField
-            value={combatant.name}
-            onChange={v => updateCombatant(combatant.id, { name: v })}
+        {/* Name + conditions — plain display, no stopPropagation */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span
             className="font-semibold"
-            style={{ fontSize: '0.95rem' }}
-          />
-          {((combatant.conditions?.length ?? 0) > 0 || exhaustion > 0 || inspiration) && (
-            <div className="flex flex-wrap" style={{ gap: 3, marginTop: 3 }}>
+            style={{ fontSize: '0.95rem', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          >
+            {combatant.name || <span style={{ opacity: 0.4 }}>—</span>}
+          </span>
+          {rowWidth >= 200 && (combatant.conditions.length > 0 || exhaustion > 0 || inspiration) && (
+            <div className="flex flex-wrap" style={{ gap: 3, marginTop: 3 }} onClick={e => e.stopPropagation()}>
               {inspiration && (
                 <span style={{ background: '#1d4ed833', border: '1px solid #1d4ed888', borderRadius: 100, padding: '1px 7px', fontSize: '0.78rem', fontWeight: 600, color: '#e8e8e8' }}>
                   ✦ Inspired
@@ -119,18 +119,15 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
           )}
         </div>
 
-        {/* Stats: AC + saves (when wide) + HP */}
-        <div className="flex items-center" style={{ gap: 10, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-          {/* AC */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
-            <span className="label">AC</span>
-            <EditableField
-              value={combatant.ac}
-              type="number"
-              onChange={v => updateCombatant(combatant.id, { ac: v })}
-              style={{ fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', width: 28, minHeight: 'unset' }}
-            />
-          </div>
+        {/* Stats: AC (when wide enough) + saves (when wide) + HP */}
+        <div className="flex items-center" style={{ gap: 10, flexShrink: 0 }}>
+          {/* AC — hidden when too narrow */}
+          {rowWidth >= 260 && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
+              <span className="label">AC</span>
+              <span style={{ fontWeight: 700, fontSize: '0.95rem', textAlign: 'center' }}>{combatant.ac ?? '—'}</span>
+            </div>
+          )}
 
           {/* Saving throw modifiers — visible when card is wide enough */}
           {rowWidth > 440 && (() => {
@@ -164,6 +161,28 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
           style={{ borderTop: '1px solid var(--c-border)', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 12 }}
           onClick={e => e.stopPropagation()}
         >
+          {/* Name + AC editing */}
+          <div className="flex items-center" style={{ gap: 10 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="label" style={{ marginBottom: 3 }}>Name</div>
+              <EditableField
+                value={combatant.name}
+                onChange={v => updateCombatant(combatant.id, { name: v })}
+                className="font-semibold"
+                style={{ fontSize: '0.95rem' }}
+              />
+            </div>
+            <div style={{ flexShrink: 0 }}>
+              <div className="label" style={{ marginBottom: 3 }}>AC</div>
+              <EditableField
+                value={combatant.ac}
+                type="number"
+                onChange={v => updateCombatant(combatant.id, { ac: v })}
+                style={{ fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', width: 52 }}
+              />
+            </div>
+          </div>
+
           <HPEditor combatant={combatant} />
 
           {/* Stat row */}
@@ -212,7 +231,7 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
           {(() => {
             const abilities = combatant.abilities ?? DEFAULT_ABILITIES
             return (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: rowWidth < 260 ? 'repeat(3, 1fr)' : 'repeat(6, 1fr)', gap: 6 }}>
                 {ABILITY_LABELS.map(a => {
                   const score = abilities[a] ?? 10
                   return (
@@ -331,7 +350,7 @@ export default function CombatantTable({ config = {} }) {
   const [showSearch, setShowSearch] = useState(false)
   const rowRefs = useRef({})
 
-  const combatants = encounter.combatants.filter(c => c.type === tableType)
+  const combatants = encounter.combatants.filter(c => c.type === tableType && !c._token)
   const currentId = encounter.initiativeOrder[encounter.currentTurnIndex]
 
   // Auto-scroll to active combatant on turn change

@@ -6,6 +6,7 @@ export default function HPEditor({ combatant }) {
   const [inputVal, setInputVal] = useState('')
   const [hpDraft, setHpDraft] = useState(null) // null = not editing
   const [maxHpDraft, setMaxHpDraft] = useState(null) // null = not editing
+  const [showControls, setShowControls] = useState(false)
   const { hp } = combatant
 
   const commitHP = () => {
@@ -81,30 +82,44 @@ export default function HPEditor({ combatant }) {
         )}
       </div>
 
-      {/* DMG / HEAL */}
-      <div className="flex items-center" style={{ gap: 5 }}>
-        <input
-          type="number"
-          min={1}
-          placeholder="Amount"
-          value={inputVal}
-          onChange={e => setInputVal(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && applyInput('dmg')}
-          style={{ flex: 1, minHeight: 36, padding: '2px 8px' }}
-        />
-        <button
-          onClick={() => applyInput('dmg')}
-          style={{ background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)', borderRadius: 7, padding: '0 10px', minHeight: 36, minWidth: 'unset', fontSize: '0.75rem', fontWeight: 600 }}
-        >DMG</button>
-        <button
-          onClick={() => applyInput('heal')}
-          style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid var(--c-success)', color: 'var(--c-success)', borderRadius: 7, padding: '0 10px', minHeight: 36, minWidth: 'unset', fontSize: '0.75rem', fontWeight: 600 }}
-        >HEAL</button>
-        <button
-          onClick={() => applyInput('temp')}
-          style={{ background: 'rgba(96,165,250,0.1)', border: '1px solid #60a5fa', color: '#60a5fa', borderRadius: 7, padding: '0 10px', minHeight: 36, minWidth: 'unset', fontSize: '0.75rem', fontWeight: 600 }}
-        >TMP</button>
-      </div>
+      {/* DMG / HEAL toggle */}
+      <button
+        onClick={() => setShowControls(v => !v)}
+        style={{
+          background: 'none', border: 'none', color: 'var(--c-muted)',
+          fontSize: '0.78rem', fontWeight: 600, padding: '2px 0',
+          minHeight: 'unset', minWidth: 'unset', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: 4, alignSelf: 'flex-start',
+        }}
+      >
+        ⚔ DMG / HEAL {showControls ? '▲' : '▼'}
+      </button>
+
+      {showControls && (
+        <div className="flex items-center" style={{ gap: 5 }}>
+          <input
+            type="number"
+            min={1}
+            placeholder="Amount"
+            value={inputVal}
+            onChange={e => setInputVal(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && applyInput('dmg')}
+            style={{ width: 80, flexShrink: 0, minHeight: 36, padding: '2px 8px' }}
+          />
+          <button
+            onClick={() => applyInput('dmg')}
+            style={{ background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)', borderRadius: 7, padding: '0 10px', minHeight: 36, minWidth: 'unset', fontSize: '0.75rem', fontWeight: 600 }}
+          >DMG</button>
+          <button
+            onClick={() => applyInput('heal')}
+            style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid var(--c-success)', color: 'var(--c-success)', borderRadius: 7, padding: '0 10px', minHeight: 36, minWidth: 'unset', fontSize: '0.75rem', fontWeight: 600 }}
+          >HEAL</button>
+          <button
+            onClick={() => applyInput('temp')}
+            style={{ background: 'rgba(96,165,250,0.1)', border: '1px solid #60a5fa', color: '#60a5fa', borderRadius: 7, padding: '0 10px', minHeight: 36, minWidth: 'unset', fontSize: '0.75rem', fontWeight: 600 }}
+          >TMP</button>
+        </div>
+      )}
     </div>
   )
 }

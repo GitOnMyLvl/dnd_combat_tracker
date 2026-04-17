@@ -18,6 +18,7 @@ const makeCombatant = (overrides = {}) => ({
   type: 'enemy', // 'ally' | 'enemy'
   hp: { current: 10, max: 10, temp: 0 },
   ac: 10,
+  speed: 30,
   initiative: { bonus: 0, roll: 0 },
   spellSaveDC: null,
   spellAttackBonus: null,
@@ -205,7 +206,10 @@ export const useEncounterStore = create(
       sortInitiative: () => {
         set(s => {
           const isManual = s.encounter.initiativeMode === 'manual'
-          const sorted = [...s.encounter.combatants]
+          const inOrder = s.encounter.initiativeOrder
+            .map(id => s.encounter.combatants.find(c => c.id === id))
+            .filter(Boolean)
+          const sorted = [...inOrder]
             .sort((a, b) => {
               const aTotal = isManual ? a.initiative.roll : a.initiative.roll + a.initiative.bonus
               const bTotal = isManual ? b.initiative.roll : b.initiative.roll + b.initiative.bonus

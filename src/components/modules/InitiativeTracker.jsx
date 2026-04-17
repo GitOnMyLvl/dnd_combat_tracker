@@ -1,5 +1,86 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useEncounterStore } from '../../store/encounterStore'
+
+const EMPTY_TOKEN = { name: '', init: '', init_mod: '', hp: '', ac: '', spell_dc: '', spell_atk: '', type: 'enemy' }
+
+function NumField({ label, fieldKey, fields, set, onKey, placeholder = '—', style }) {
+  const numStyle = { width: 44, minHeight: 36, textAlign: 'center', fontSize: '0.85rem', padding: '0 4px', ...style }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+      <span style={{ fontSize: '0.65rem', color: 'var(--c-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{label}</span>
+      <input type="text" inputMode="numeric" placeholder={placeholder} value={fields[fieldKey]} onChange={e => set(fieldKey, e.target.value)} onKeyDown={onKey} style={numStyle} />
+    </div>
+  )
+}
+
+function AddTokenForm({ onAdd, onCancel }) {
+  const [fields, setFields] = useState(EMPTY_TOKEN)
+  const nameRef = useRef(null)
+
+  useEffect(() => { nameRef.current?.focus() }, [])
+
+  const set = (k, v) => setFields(prev => ({ ...prev, [k]: v }))
+
+  const submit = () => {
+    const name = fields.name.trim() || 'Token'
+    const hp = Math.max(1, parseInt(fields.hp, 10) || 1)
+    const ac = parseInt(fields.ac, 10) || 10
+    const init = parseInt(fields.init, 10) || 0
+    const init_mod = parseInt(fields.init_mod, 10) || 0
+    const spell_dc = fields.spell_dc !== '' ? (parseInt(fields.spell_dc, 10) || null) : null
+    const spell_atk = fields.spell_atk !== '' ? (parseInt(fields.spell_atk, 10) || null) : null
+    onAdd({ name, hp, ac, init, init_mod, spell_dc, spell_atk, type: fields.type })
+  }
+
+  const onKey = (e) => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') onCancel() }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '8px 0', borderTop: '1px solid var(--c-border)' }}>
+      {/* Name row */}
+      <div className="flex items-center" style={{ gap: 5 }}>
+        <button
+          onClick={() => set('type', fields.type === 'enemy' ? 'ally' : 'enemy')}
+          title={fields.type === 'enemy' ? 'Enemy — click to toggle' : 'Ally — click to toggle'}
+          style={{
+            background: 'none', border: 'none', padding: 0,
+            color: fields.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)',
+            fontSize: '0.75rem', minHeight: 'unset', minWidth: 'unset', cursor: 'pointer', flexShrink: 0,
+          }}
+        >●</button>
+        <input
+          ref={nameRef}
+          placeholder="Name"
+          value={fields.name}
+          onChange={e => set('name', e.target.value)}
+          onKeyDown={onKey}
+          style={{ flex: 1, minHeight: 36, fontSize: '0.9rem', padding: '0 8px' }}
+        />
+      </div>
+
+      {/* Stats row */}
+      <div className="flex items-center" style={{ gap: 5 }}>
+        <NumField label="Init" fieldKey="init" fields={fields} set={set} onKey={onKey} placeholder="0" />
+        <NumField label="Init Mod" fieldKey="init_mod" fields={fields} set={set} onKey={onKey} placeholder="0" />
+        <NumField label="HP" fieldKey="hp" fields={fields} set={set} onKey={onKey} placeholder="10" />
+        <NumField label="AC" fieldKey="ac" fields={fields} set={set} onKey={onKey} placeholder="10" />
+        <NumField label="Spell DC" fieldKey="spell_dc" fields={fields} set={set} onKey={onKey} />
+        <NumField label="Spell Atk" fieldKey="spell_atk" fields={fields} set={set} onKey={onKey} />
+        <div style={{ flex: 1 }} />
+        <button
+          onClick={submit}
+          className="btn-primary"
+          style={{ minHeight: 36, minWidth: 'unset', padding: '0 14px', fontSize: '0.85rem', flexShrink: 0 }}
+        >Add</button>
+        <button
+          onClick={onCancel}
+          className="btn-ghost"
+          style={{ minHeight: 36, minWidth: 36, padding: 0, fontSize: '0.85rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          title="Close"
+        >✕</button>
+      </div>
+    </div>
+  )
+}
 
 function InitInput({ id, value, onCommit, style }) {
   const [draft, setDraft] = useState(null)
@@ -129,6 +210,10 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect
             {!isManual && c.initiative.bonus !== 0 && (
               <span>{c.initiative.bonus > 0 ? '+' : ''}{c.initiative.bonus} bonus</span>
             )}
+            {c._token && c.spellSaveDC != null && <span>DC {c.spellSaveDC}</span>}
+            {c._token && c.spellAttackBonus != null && (
+              <span>Spell {c.spellAttackBonus >= 0 ? '+' : ''}{c.spellAttackBonus}</span>
+            )}
             {c.conditions?.length > 0 && (
               <span style={{ color: 'var(--c-accent)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {c.conditions.join(', ')}
@@ -240,11 +325,27 @@ export default function InitiativeTracker() {
     nextTurn, prevTurn,
     sortInitiative, setInitiativeRoll, setInitiativeMode,
     selectCombatant, selectedCombatantId,
-    addToInitiative, reorderInitiative, removeFromInitiative,
+    addCombatant, addToInitiative, reorderInitiative, removeFromInitiative,
   } = useEncounterStore()
 
   const { initiativeOrder, combatants, currentTurnIndex, round, initiativeMode = 'auto' } = encounter
   const isManual = initiativeMode === 'manual'
+  const [showTokenForm, setShowTokenForm] = useState(false)
+  const [tab, setTab] = useState('combat')
+
+  const handleAddToken = useCallback(({ name, hp, ac, init, init_mod, spell_dc, spell_atk, type }) => {
+    const id = addCombatant({
+      name, type,
+      hp: { current: hp, max: hp, temp: 0 },
+      ac,
+      initiative: { bonus: init_mod, roll: init },
+      spellSaveDC: spell_dc,
+      spellAttackBonus: spell_atk,
+      _token: true,
+    })
+    addToInitiative(id)
+    setShowTokenForm(false)
+  }, [addCombatant, addToInitiative])
 
   const containerRef = useRef(null)
   const rowRefs = useRef({})
@@ -278,114 +379,149 @@ export default function InitiativeTracker() {
     reorderInitiative(next)
   }
 
+  const tabStyle = (active) => ({
+    flex: 1, minHeight: 36, minWidth: 'unset',
+    fontSize: '0.85rem', fontWeight: 600, borderRadius: 6,
+    background: active ? 'var(--c-accent-dim)' : 'transparent',
+    color: active ? 'var(--c-accent)' : 'var(--c-muted)',
+    border: active ? '1px solid var(--c-accent)' : '1px solid transparent',
+    transition: 'all 0.12s',
+  })
+
   return (
     <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 8 }}>
-      {/* Round row */}
-      <div className="flex items-center justify-between flex-shrink-0" style={{ gap: 8 }}>
-        <div>
-          <div className="label">Round</div>
-          <div data-testid="round-number" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--c-accent)', lineHeight: 1 }}>{round}</div>
-        </div>
-        <div className="flex" style={{ gap: 5 }}>
-          <button
-            onClick={prevTurn}
-            className="btn-ghost"
-            style={{ minHeight: 36, minWidth: 36, padding: 0, justifyContent: 'center', fontSize: '0.8rem' }}
-            disabled={initiativeOrder.length === 0}
-          >◀</button>
-          <button
-            onClick={nextTurn}
-            className="btn-primary"
-            style={{ minHeight: 36, minWidth: 'unset', padding: '0 16px', fontSize: '0.8rem' }}
-            disabled={initiativeOrder.length === 0}
-          >Next ▶</button>
-        </div>
+      {/* Tab bar */}
+      <div className="flex flex-shrink-0" style={{ gap: 4 }}>
+        <button style={tabStyle(tab === 'combat')} onClick={() => setTab('combat')}>In Combat</button>
+        <button style={tabStyle(tab === 'standby')} onClick={() => setTab('standby')}>Out of Combat</button>
       </div>
 
-      {/* Mode toggle + Sort */}
-      <div className="flex flex-shrink-0" style={{ gap: 6 }}>
-        <div style={{ display: 'flex', border: '1px solid var(--c-border)', borderRadius: 7, overflow: 'hidden', flexShrink: 0 }}>
-          {['auto', 'manual'].map(m => (
+      {tab === 'combat' && (
+        <>
+          {/* Round row */}
+          <div className="flex items-center justify-between flex-shrink-0" style={{ gap: 8 }}>
+            <div>
+              <div className="label">Round</div>
+              <div data-testid="round-number" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--c-accent)', lineHeight: 1 }}>{round}</div>
+            </div>
+            <div className="flex" style={{ gap: 5 }}>
+              <button
+                onClick={prevTurn}
+                className="btn-ghost"
+                style={{ minHeight: 36, minWidth: 36, padding: 0, justifyContent: 'center', fontSize: '0.8rem' }}
+                disabled={initiativeOrder.length === 0}
+              >◀</button>
+              <button
+                onClick={nextTurn}
+                className="btn-primary"
+                style={{ minHeight: 36, minWidth: 'unset', padding: '0 16px', fontSize: '0.8rem' }}
+                disabled={initiativeOrder.length === 0}
+              >Next ▶</button>
+            </div>
+          </div>
+
+          {/* Mode toggle + Sort + Add Token */}
+          <div className="flex flex-shrink-0" style={{ gap: 6 }}>
+            <div style={{ display: 'flex', border: '1px solid var(--c-border)', borderRadius: 7, overflow: 'hidden', flexShrink: 0 }}>
+              {['auto', 'manual'].map(m => (
+                <button
+                  key={m}
+                  onClick={() => setInitiativeMode(m)}
+                  style={{
+                    minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.92rem', fontWeight: 600,
+                    borderRadius: 0, border: 'none',
+                    background: initiativeMode === m ? 'var(--c-accent-dim)' : 'transparent',
+                    color: initiativeMode === m ? 'var(--c-accent)' : 'var(--c-muted)',
+                    textTransform: 'capitalize',
+                  }}
+                >{m}</button>
+              ))}
+            </div>
             <button
-              key={m}
-              onClick={() => setInitiativeMode(m)}
+              onClick={sortInitiative}
+              className="btn-ghost"
+              style={{ flex: 1, minHeight: 36, minWidth: 'unset', justifyContent: 'center', fontSize: '0.98rem' }}
+              disabled={initiativeOrder.length === 0}
+            >Sort</button>
+            <button
+              onClick={() => setShowTokenForm(v => !v)}
+              className={showTokenForm ? 'btn-ghost' : 'btn-primary'}
+              style={{ minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.85rem', flexShrink: 0 }}
+              title="Add a token directly to initiative"
+            >+ Token</button>
+          </div>
+
+          {showTokenForm && (
+            <AddTokenForm
+              onAdd={handleAddToken}
+              onCancel={() => setShowTokenForm(false)}
+            />
+          )}
+
+          <hr className="divider flex-shrink-0" />
+
+          <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {ordered.length === 0 && (
+              <p style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '16px 0' }}>
+                Add combatants, set rolls, then sort.
+              </p>
+            )}
+            {ordered.map((c, idx) => (
+              <CombatantRow
+                key={c.id}
+                c={c}
+                idx={idx}
+                isActive={c.id === currentId}
+                isSelected={c.id === selectedCombatantId}
+                isManual={isManual}
+                isLast={idx === ordered.length - 1}
+                onSelect={selectCombatant}
+                onMoveUp={() => moveUp(idx)}
+                onMoveDown={() => moveDown(idx)}
+                onRemove={removeFromInitiative}
+                rowRef={el => { rowRefs.current[c.id] = el }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {tab === 'standby' && (
+        <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {unordered.length === 0 && (
+            <p style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '16px 0' }}>
+              No entities out of combat.
+            </p>
+          )}
+          {unordered.map(c => (
+            <div
+              key={c.id}
               style={{
-                minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.92rem', fontWeight: 600,
-                borderRadius: 0, border: 'none',
-                background: initiativeMode === m ? 'var(--c-accent-dim)' : 'transparent',
-                color: initiativeMode === m ? 'var(--c-accent)' : 'var(--c-muted)',
-                textTransform: 'capitalize',
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '6px 8px', borderRadius: 8,
+                minHeight: 46, border: '1px solid var(--c-border)',
+                background: 'var(--c-surface)',
               }}
-            >{m}</button>
+            >
+              <span style={{ color: c.type === 'ally' ? 'var(--c-success)' : 'var(--c-danger)', fontSize: '0.65rem', flexShrink: 0 }}>●</span>
+              <span style={{ flex: 1, fontSize: '0.92rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
+              <span style={{ fontSize: '0.78rem', color: 'var(--c-muted)', flexShrink: 0 }}>AC {c.ac}</span>
+              <InitInput
+                id={c.id}
+                value={c.initiative.roll}
+                onCommit={setInitiativeRoll}
+                style={{ width: 44, textAlign: 'center', fontSize: '0.92rem', minHeight: 36, padding: '2px 4px' }}
+              />
+              <button
+                onClick={() => { addToInitiative(c.id); setTab('combat') }}
+                className="btn-primary"
+                style={{ minHeight: 36, minWidth: 'unset', padding: '0 10px', fontSize: '0.8rem', flexShrink: 0 }}
+                title="Move to combat"
+              >→ Combat</button>
+            </div>
           ))}
         </div>
-        <button
-          onClick={sortInitiative}
-          className="btn-ghost"
-          style={{ flex: 1, minHeight: 36, minWidth: 'unset', justifyContent: 'center', fontSize: '0.98rem' }}
-          disabled={combatants.length === 0}
-        >Sort by Initiative</button>
-      </div>
-
-      <hr className="divider flex-shrink-0" />
-
-      {/* List */}
-      <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {ordered.length === 0 && (
-          <p style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '16px 0' }}>
-            Add combatants, set rolls, then sort.
-          </p>
-        )}
-
-        {ordered.map((c, idx) => (
-          <CombatantRow
-            key={c.id}
-            c={c}
-            idx={idx}
-            isActive={c.id === currentId}
-            isSelected={c.id === selectedCombatantId}
-            isManual={isManual}
-            isLast={idx === ordered.length - 1}
-            onSelect={selectCombatant}
-            onMoveUp={() => moveUp(idx)}
-            onMoveDown={() => moveDown(idx)}
-            onRemove={removeFromInitiative}
-            rowRef={el => { rowRefs.current[c.id] = el }}
-          />
-        ))}
-
-        {unordered.length > 0 && (
-          <>
-            <div style={{ color: 'var(--c-muted)', fontSize: '0.98rem', padding: '4px 4px 0', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Not in initiative</div>
-            {unordered.map(c => (
-              <div
-                key={c.id}
-                onClick={() => selectCombatant(c.id)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '6px 8px', borderRadius: 8, cursor: 'pointer',
-                  opacity: 0.45, minHeight: 46,
-                  border: '1px solid transparent',
-                }}
-              >
-                <InitInput
-                  id={c.id}
-                  value={c.initiative.roll}
-                  onCommit={setInitiativeRoll}
-                  style={{ width: 44, textAlign: 'center', fontSize: '0.92rem', minHeight: 36, padding: '2px 4px' }}
-                />
-                <span style={{ flex: 1, fontSize: '0.92rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
-                <button
-                  onClick={e => { e.stopPropagation(); addToInitiative(c.id) }}
-                  className="btn-ghost"
-                  style={{ minHeight: 36, minWidth: 36, padding: 0, fontSize: '0.8rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  title="Add to initiative"
-                >+</button>
-              </div>
-            ))}
-          </>
-        )}
-      </div>
+      )}
     </div>
   )
 }
