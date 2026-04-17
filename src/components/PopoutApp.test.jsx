@@ -27,7 +27,7 @@ vi.mock('./canvas/Canvas', () => ({
 import PopoutApp from './PopoutApp'
 import { useEncounterStore } from '../store/encounterStore'
 import { useCharacterStore } from '../store/characterStore'
-import { applyTheme, applyAccent } from '../store/themeStore'
+import { applyTheme, applyAccent, useThemeStore } from '../store/themeStore'
 
 describe('PopoutApp', () => {
   beforeEach(() => {
@@ -84,6 +84,7 @@ describe('PopoutApp', () => {
       window.dispatchEvent(new StorageEvent('storage', { key: 'dnd-tracker-theme', newValue: 'light' }))
     })
     expect(applyTheme).toHaveBeenCalledWith('light')
+    expect(useThemeStore.setState).toHaveBeenCalledWith({ theme: 'light' })
   })
 
   it('applies accent on storage event for accent key', () => {
@@ -92,5 +93,15 @@ describe('PopoutApp', () => {
       window.dispatchEvent(new StorageEvent('storage', { key: 'dnd-tracker-accent', newValue: '#ff0000' }))
     })
     expect(applyAccent).toHaveBeenCalledWith('#ff0000')
+    expect(useThemeStore.setState).toHaveBeenCalledWith({ accent: '#ff0000' })
+  })
+
+  it('removes storage listener on unmount', () => {
+    const { unmount } = render(<PopoutApp type="DiceRoller" config={{}} />)
+    unmount()
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'dnd-tracker-encounter' }))
+    })
+    expect(useEncounterStore.persist.rehydrate).not.toHaveBeenCalled()
   })
 })
