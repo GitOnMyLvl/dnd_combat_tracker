@@ -129,7 +129,7 @@ function CreatePartyModal({ onClose }) {
   }
 
   const submit = () => {
-    if (!name.trim() || selected.size === 0) return
+    if (!name.trim()) return
     saveParty(name.trim(), [...selected])
     onClose()
   }
@@ -147,8 +147,8 @@ function CreatePartyModal({ onClose }) {
         />
 
         {characters.length === 0 ? (
-          <div style={{ color: 'var(--c-muted)', fontSize: '0.9rem', textAlign: 'center', padding: '12px 0' }}>
-            Save some characters first to create a party.
+          <div style={{ color: 'var(--c-muted)', fontSize: '0.85rem', fontStyle: 'italic', padding: '8px 0' }}>
+            No saved characters yet — you can add members later.
           </div>
         ) : (
           <div className="flex flex-col" style={{ gap: 4, maxHeight: 240, overflowY: 'auto' }}>
@@ -182,7 +182,7 @@ function CreatePartyModal({ onClose }) {
             onClick={submit}
             className="btn-primary"
             style={{ minHeight: 36, minWidth: 'unset', padding: '0 20px' }}
-            disabled={!name.trim() || selected.size === 0}
+            disabled={!name.trim()}
           >Create</button>
         </div>
       </div>
@@ -323,7 +323,7 @@ function PartiesTab() {
 
             {members.length === 0 && (
               <div style={{ borderTop: '1px solid var(--c-border)', padding: '8px 10px', color: 'var(--c-muted)', fontSize: '0.82rem', textAlign: 'center' }}>
-                All members have been deleted.
+                No members
               </div>
             )}
           </div>
