@@ -14,7 +14,7 @@ import PartyManager from '../modules/PartyManager'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
-const MODULE_COMPONENTS = {
+export const MODULE_COMPONENTS = {
   InitiativeTracker,
   CombatantTable,
   ConditionsPanel,
