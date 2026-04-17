@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useLayoutStore } from '../../store/layoutStore'
 
 const MODULE_TITLES = {
@@ -103,6 +103,7 @@ function getInfo(type, config) {
 export default function ModuleWrapper({ id, type, config = {}, minimized, children }) {
   const { removeModule, toggleMinimize } = useLayoutStore()
   const [infoOpen, setInfoOpen] = useState(false)
+  const wrapperRef = useRef(null)
 
   let title = MODULE_TITLES[type] ?? type
   if (type === 'CombatantTable') {
@@ -110,6 +111,15 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
   }
 
   const info = getInfo(type, config)
+
+  const popOut = () => {
+    const el = wrapperRef.current
+    const w = el ? Math.max(320, Math.min(800, el.offsetWidth)) : 420
+    const h = el ? Math.max(480, Math.min(900, el.offsetHeight)) : 680
+    const cfg = encodeURIComponent(JSON.stringify(config))
+    const url = `${window.location.origin}${window.location.pathname}?popout=${type}&config=${cfg}`
+    window.open(url, '_blank', `popup=yes,width=${w},height=${h}`)
+  }
 
   const btnStyle = {
     height: 44, width: 44, minHeight: 44, minWidth: 44,
@@ -119,7 +129,7 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
   }
 
   return (
-    <div className="card flex flex-col h-full" style={{ overflow: 'hidden' }}>
+    <div ref={wrapperRef} className="card flex flex-col h-full" style={{ overflow: 'hidden' }}>
       {/* Header */}
       <div
         className="flex items-center justify-between px-3 flex-shrink-0 select-none"
@@ -151,6 +161,14 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
               onMouseLeave={e => { e.currentTarget.style.color = infoOpen ? 'var(--c-accent)' : 'var(--c-muted)'; e.currentTarget.style.background = 'none' }}
             >?</button>
           )}
+          <button
+            onClick={popOut}
+            title="Open in new window"
+            aria-label="Open in new window"
+            style={btnStyle}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--c-text)'; e.currentTarget.style.background = 'var(--c-elevated)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--c-muted)'; e.currentTarget.style.background = 'none' }}
+          >⧉</button>
           <button
             onClick={() => toggleMinimize(id)}
             title={minimized ? 'Expand' : 'Collapse'}
