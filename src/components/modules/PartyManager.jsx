@@ -57,9 +57,12 @@ function CharactersTab() {
   const addCombatant = useEncounterStore(s => s.addCombatant)
   const [showNew, setShowNew] = useState(false)
   const [editing, setEditing] = useState(null) // character object or null
+  const [flashIds, setFlashIds] = useState(new Set())
 
   const addToEncounter = (char) => {
     addCombatant(templateToCombatant(char))
+    setFlashIds(prev => new Set([...prev, char.id]))
+    setTimeout(() => setFlashIds(prev => { const n = new Set(prev); n.delete(char.id); return n }), 1200)
   }
 
   return (
@@ -88,8 +91,13 @@ function CharactersTab() {
             <button
               onClick={() => addToEncounter(char)}
               className="btn-primary"
-              style={{ minHeight: 36, minWidth: 'unset', fontSize: '0.8rem', padding: '0 12px', borderRadius: 6 }}
-            >+ Add</button>
+              style={{
+                minHeight: 36, minWidth: 'unset', fontSize: '0.8rem', padding: '0 12px', borderRadius: 6,
+                color: flashIds.has(char.id) ? 'var(--c-success)' : undefined,
+                borderColor: flashIds.has(char.id) ? 'var(--c-success)' : undefined,
+                background: flashIds.has(char.id) ? 'rgba(74,222,128,0.1)' : undefined,
+              }}
+            >{flashIds.has(char.id) ? '✓ Added' : '+ Add'}</button>
           }
         />
       ))}
@@ -192,7 +200,13 @@ function CreatePartyModal({ onClose }) {
 
 function AddToPartyModal({ party, onClose }) {
   const { characters, addCharacterToParty } = useCharacterStore()
+  const [addedIds, setAddedIds] = useState(new Set())
   const available = characters.filter(c => !party.characterIds.includes(c.id))
+
+  const handleAdd = (charId) => {
+    addCharacterToParty(party.id, charId)
+    setAddedIds(prev => new Set([...prev, charId]))
+  }
 
   if (available.length === 0) {
     return (
@@ -223,10 +237,16 @@ function AddToPartyModal({ party, onClose }) {
             <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 600 }}>{char.name}</span>
             <span style={{ fontSize: '0.8rem', color: 'var(--c-muted)' }}>HP {char.hp} · AC {char.ac}</span>
             <button
-              onClick={() => addCharacterToParty(party.id, char.id)}
-              className="btn-primary"
-              style={{ minHeight: 24, minWidth: 'unset', fontSize: '0.78rem', padding: '0 8px', borderRadius: 6 }}
-            >+ Add</button>
+              onClick={() => !addedIds.has(char.id) && handleAdd(char.id)}
+              disabled={addedIds.has(char.id)}
+              style={{
+                minHeight: 24, minWidth: 'unset', fontSize: '0.78rem', padding: '0 8px', borderRadius: 6,
+                border: addedIds.has(char.id) ? '1px solid var(--c-success)' : '1px solid var(--c-accent)',
+                background: addedIds.has(char.id) ? 'rgba(74,222,128,0.1)' : 'var(--c-accent)',
+                color: addedIds.has(char.id) ? 'var(--c-success)' : '#fff',
+                cursor: addedIds.has(char.id) ? 'default' : 'pointer',
+              }}
+            >{addedIds.has(char.id) ? '✓' : '+ Add'}</button>
           </div>
         ))}
       </div>

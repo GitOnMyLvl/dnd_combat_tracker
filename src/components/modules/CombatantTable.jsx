@@ -350,7 +350,7 @@ export default function CombatantTable({ config = {} }) {
   const [showSearch, setShowSearch] = useState(false)
   const rowRefs = useRef({})
 
-  const combatants = encounter.combatants.filter(c => c.type === tableType)
+  const combatants = encounter.combatants.filter(c => c.type === tableType && !c._token)
   const currentId = encounter.initiativeOrder[encounter.currentTurnIndex]
 
   // Auto-scroll to active combatant on turn change
