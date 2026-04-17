@@ -1,8 +1,5 @@
 import { useEffect } from 'react'
 import { MODULE_COMPONENTS } from './canvas/Canvas'
-import { useEncounterStore } from '../store/encounterStore'
-import { useCharacterStore } from '../store/characterStore'
-import { applyTheme, applyAccent, useThemeStore } from '../store/themeStore'
 
 const MODULE_TITLES = {
   InitiativeTracker: 'Initiative',
@@ -20,24 +17,6 @@ export default function PopoutApp({ type, config }) {
     const title = MODULE_TITLES[type] ?? type
     document.title = `${title} — D&D Battle Tracker`
   }, [type])
-
-  useEffect(() => {
-    const onStorage = (e) => {
-      if (e.key === 'dnd-tracker-encounter') {
-        useEncounterStore.persist.rehydrate()
-      } else if (e.key === 'dnd-tracker-characters') {
-        useCharacterStore.persist.rehydrate()
-      } else if (e.key === 'dnd-tracker-theme' && e.newValue) {
-        applyTheme(e.newValue)
-        useThemeStore.setState({ theme: e.newValue })
-      } else if (e.key === 'dnd-tracker-accent' && e.newValue) {
-        applyAccent(e.newValue)
-        useThemeStore.setState({ accent: e.newValue })
-      }
-    }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
-  }, [])
 
   useEffect(() => {
     const onKeyDown = (e) => { if (e.key === 'Escape') window.close() }
@@ -68,9 +47,8 @@ export default function PopoutApp({ type, config }) {
       <div style={{ flex: 1, minHeight: 0, padding: '10px 12px 12px', overflowY: 'auto', overflowX: 'hidden' }}>
         <Component config={config} />
       </div>
-      {/* One-way sync notice */}
       <div style={{ flexShrink: 0, padding: '4px 12px 6px', borderTop: '1px solid var(--c-border)', fontSize: '0.7rem', color: 'var(--c-muted)', textAlign: 'center' }}>
-        Edits here won't sync back — edit in the main window
+        Changes sync automatically between windows
       </div>
       <button
         style={btnStyle}

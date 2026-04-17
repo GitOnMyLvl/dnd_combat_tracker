@@ -1,8 +1,11 @@
 import TopBar from './components/TopBar'
 import Canvas from './components/canvas/Canvas'
 import PopoutApp from './components/PopoutApp'
+import { useStorageSync } from './hooks/useStorageSync'
 
 export default function App() {
+  useStorageSync()
+
   const params = new URLSearchParams(window.location.search)
   const popoutType = params.get('popout')
 
