@@ -38,13 +38,13 @@ export default function ModulePicker({ onClose }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.55)', padding: 16, backdropFilter: 'blur(2px)' }}
+      style={{ background: 'rgba(0,0,0,0.55)', padding: 'var(--sp-4)', backdropFilter: 'blur(2px)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="card w-full" style={{ maxWidth: 560, padding: 22, boxShadow: 'var(--shadow-pop)', position: 'relative' }}>
+      <div className="card w-full" style={{ maxWidth: 560, padding: 'var(--sp-5)', boxShadow: 'var(--shadow-pop)', position: 'relative' }}>
         <div className="accent-stripe" />
 
-        <div className="flex items-center justify-between" style={{ marginBottom: 18 }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 'var(--sp-4)' }}>
           <span className="display" style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '0.08em' }}>Add Module</span>
           <button
             onClick={onClose}
@@ -62,7 +62,7 @@ export default function ModulePicker({ onClose }) {
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-            gap: 8,
+            gap: 'var(--sp-2)',
             maxHeight: '70vh',
             overflowY: 'auto',
           }}
@@ -72,8 +72,8 @@ export default function ModulePicker({ onClose }) {
               key={`${m.type}-${m.label}`}
               onClick={() => add(m.type, m.config)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: '14px', borderRadius: 10,
+                display: 'flex', alignItems: 'center', gap: 'var(--sp-3)',
+                padding: 'var(--sp-3)', borderRadius: 10,
                 background: 'var(--c-elevated)',
                 border: '1px solid var(--c-border)',
                 textAlign: 'left', minHeight: 70, minWidth: 'unset',

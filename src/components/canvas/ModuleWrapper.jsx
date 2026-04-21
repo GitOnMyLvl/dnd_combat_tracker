@@ -135,9 +135,10 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
 
       {/* Header */}
       <div
-        className="flex items-center justify-between px-3 flex-shrink-0 select-none"
+        className="flex items-center justify-between flex-shrink-0 select-none"
         style={{
           height: 52,
+          padding: '0 var(--sp-3)',
           borderBottom: minimized ? 'none' : '1px solid var(--c-border)',
           background: 'linear-gradient(180deg, var(--c-elevated) 0%, transparent 140%)',
         }}
@@ -204,14 +205,14 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
       {/* Content */}
       {!minimized && (
         <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
-          <div style={{ position: 'absolute', inset: 0, padding: '10px 12px 12px', overflowY: 'auto', overflowX: 'hidden' }}>
+          <div style={{ position: 'absolute', inset: 0, padding: 'var(--sp-3)', overflowY: 'auto', overflowX: 'hidden' }}>
             {children}
           </div>
 
           {/* Info overlay */}
           {infoOpen && info && (
-            <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'var(--c-bg)', overflowY: 'auto', padding: '14px 16px' }}>
-              <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+            <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'var(--c-bg)', overflowY: 'auto', padding: 'var(--sp-4)' }}>
+              <div className="flex items-center justify-between" style={{ marginBottom: 'var(--sp-3)' }}>
                 <span className="display" style={{ fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.06em' }}>{info.title}</span>
                 <button
                   onClick={() => setInfoOpen(false)}

@@ -68,10 +68,12 @@ export default function TopBar() {
 
   return (
     <div
-      className="flex items-center gap-2 px-4 flex-shrink-0 w-full relative"
+      className="flex items-center flex-shrink-0 w-full relative"
       style={{
         height: 56,
         minHeight: 56,
+        padding: '0 var(--sp-4)',
+        gap: 'var(--sp-2)',
         background: 'linear-gradient(180deg, var(--c-surface) 0%, var(--c-bg) 100%)',
         borderBottom: '1px solid var(--c-border)',
         boxShadow: '0 1px 0 var(--c-border)',
@@ -96,7 +98,7 @@ export default function TopBar() {
         </span>
       </div>
 
-      <div style={{ width: 1, height: 24, background: 'var(--c-border)', flexShrink: 0, margin: '0 8px' }} />
+      <div style={{ width: 1, height: 24, background: 'var(--c-border)', flexShrink: 0, margin: '0 var(--sp-1)' }} />
 
       {/* Encounter name */}
       {editingName ? (
@@ -136,7 +138,7 @@ export default function TopBar() {
         <PlusIcon /> Module
       </button>
 
-      <div style={{ width: 1, height: 22, background: 'var(--c-border)', flexShrink: 0, margin: '0 6px' }} />
+      <div style={{ width: 1, height: 22, background: 'var(--c-border)', flexShrink: 0, margin: '0 var(--sp-1)' }} />
 
       {/* Save */}
       <button
@@ -201,18 +203,18 @@ export default function TopBar() {
         <div
           className="card"
           style={{
-            position: 'absolute', top: 62, right: 12, zIndex: 50,
-            width: 300, padding: 14,
+            position: 'absolute', top: 62, right: 'var(--sp-3)', zIndex: 50,
+            width: 300, padding: 'var(--sp-3)',
             boxShadow: 'var(--shadow-pop)',
           }}
         >
-          <div className="label" style={{ marginBottom: 10 }}>Saved Encounters</div>
+          <div className="label" style={{ marginBottom: 'var(--sp-2)' }}>Saved Encounters</div>
           {savedEncounters.length === 0 && (
             <p style={{ color: 'var(--c-muted)', fontSize: '0.82rem', padding: '8px 0', fontStyle: 'italic' }}>
               No saved encounters yet.
             </p>
           )}
-          <div className="flex flex-col" style={{ gap: 5 }}>
+          <div className="flex flex-col" style={{ gap: 'var(--sp-1)' }}>
             {savedEncounters.map(e => (
               <div key={e.id} className="flex items-center" style={{ gap: 6 }}>
                 <button

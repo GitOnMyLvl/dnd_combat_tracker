@@ -82,8 +82,8 @@ export default function Canvas() {
         breakpoints={{ lg: 768, md: 480, sm: 0 }}
         cols={{ lg: 12, md: 8, sm: 4 }}
         rowHeight={72}
-        margin={[8, 8]}
-        containerPadding={[8, 8]}
+        margin={[12, 12]}
+        containerPadding={[12, 12]}
         draggableHandle=".drag-handle"
         onLayoutChange={onLayoutChange}
         useCSSTransforms

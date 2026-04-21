@@ -361,7 +361,7 @@ export default function CombatantTable({ config = {} }) {
   }, [currentId])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, gap: 'var(--sp-2)' }}>
       {/* Toolbar */}
       <div className="flex items-center justify-between flex-shrink-0">
         <span style={{ color: 'var(--c-muted)', fontSize: '0.85rem', fontWeight: 600 }}>
@@ -380,7 +380,7 @@ export default function CombatantTable({ config = {} }) {
       </div>
 
       {/* Rows */}
-      <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 5 }}>
+      <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
         {combatants.length === 0 && (
           <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--c-muted)', fontSize: '0.9rem' }}>
             No {tableType === 'ally' ? 'allies' : 'enemies'} yet.
