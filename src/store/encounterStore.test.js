@@ -243,6 +243,7 @@ describe('encounterStore', () => {
       const a = state().addCombatant({ name: 'Slow', initiative: { bonus: 0, roll: 5 } })
       const b = state().addCombatant({ name: 'Fast', initiative: { bonus: 3, roll: 15 } })
       const c = state().addCombatant({ name: 'Mid', initiative: { bonus: 1, roll: 10 } })
+      ;[a, b, c].forEach(id => state().addToInitiative(id))
 
       state().sortInitiative()
       expect(encounter().initiativeOrder).toEqual([b, c, a])
@@ -259,6 +260,7 @@ describe('encounterStore', () => {
         initiative: { bonus: 2, roll: 10 },
         abilities: { str: 10, dex: 18, con: 10, int: 10, wis: 10, cha: 10 },
       })
+      ;[a, b].forEach(id => state().addToInitiative(id))
 
       state().sortInitiative()
       expect(encounter().initiativeOrder).toEqual([b, a])
@@ -278,6 +280,7 @@ describe('encounterStore', () => {
     it('adds combatant to initiative in correct position', () => {
       const a = state().addCombatant({ name: 'A', initiative: { bonus: 0, roll: 20 } })
       const b = state().addCombatant({ name: 'B', initiative: { bonus: 0, roll: 5 } })
+      ;[a, b].forEach(id => state().addToInitiative(id))
       state().sortInitiative()
 
       const c = state().addCombatant({ name: 'C', initiative: { bonus: 0, roll: 10 } })
@@ -311,6 +314,7 @@ describe('encounterStore', () => {
         state().addCombatant({ name: 'B', initiative: { bonus: 0, roll: 15 } }),
         state().addCombatant({ name: 'C', initiative: { bonus: 0, roll: 10 } }),
       ]
+      ids.forEach(id => state().addToInitiative(id))
       state().sortInitiative()
     })
 
@@ -494,6 +498,7 @@ describe('encounterStore', () => {
     it('removes combatant from initiative order', () => {
       const id1 = state().addCombatant({ name: 'A' })
       const id2 = state().addCombatant({ name: 'B' })
+      ;[id1, id2].forEach(id => state().addToInitiative(id))
       state().sortInitiative()
       expect(encounter().initiativeOrder).toContain(id1)
 
@@ -507,6 +512,7 @@ describe('encounterStore', () => {
     it('clamps currentTurnIndex when removing', () => {
       const id1 = state().addCombatant({ name: 'A' })
       const id2 = state().addCombatant({ name: 'B' })
+      ;[id1, id2].forEach(id => state().addToInitiative(id))
       state().sortInitiative()
       state().nextTurn() // index = 1
       state().removeFromInitiative(id1) // now only 1 in order

@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom'
+
 // Provide a minimal localStorage mock for Zustand persist middleware
 const storage = {}
 globalThis.localStorage = {
