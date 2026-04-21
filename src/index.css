@@ -15,8 +15,8 @@
   --c-border:        rgba(255,240,220,0.09);
   --c-border-strong: rgba(255,240,220,0.17);
   --c-text:          #f3f0ea;
-  --c-muted:         #8f8aa6;
-  --c-muted2:        #b5b0c7;
+  --c-muted:         #a8a3bf;
+  --c-muted2:        #cfcadf;
   --c-accent:        #60a5fa;
   --c-accent-dim:    rgba(96,165,250,0.14);
   --c-accent-soft:   rgba(96,165,250,0.08);
@@ -66,8 +66,8 @@
   --c-border:        rgba(80,60,40,0.12);
   --c-border-strong: rgba(80,60,40,0.24);
   --c-text:          #1a150f;
-  --c-muted:         #7a6a54;
-  --c-muted2:        #4a3e2e;
+  --c-muted:         #5a4a36;
+  --c-muted2:        #3a2f22;
   --c-accent:        #2563eb;
   --c-accent-dim:    rgba(37,99,235,0.10);
   --c-accent-soft:   rgba(37,99,235,0.06);
@@ -241,12 +241,13 @@ button:focus-visible {
    Primitives
    ============================================================ */
 .label {
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  color: var(--c-muted);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: var(--c-muted2);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-weight: 600;
+  letter-spacing: 0.09em;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .card {

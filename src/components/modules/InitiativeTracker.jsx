@@ -7,7 +7,7 @@ function NumField({ label, fieldKey, fields, set, onKey, placeholder = '—', st
   const numStyle = { width: 44, minHeight: 36, textAlign: 'center', fontSize: '0.85rem', padding: '0 4px', ...style }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-      <span style={{ fontSize: '0.65rem', color: 'var(--c-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{label}</span>
+      <span className="label" style={{ whiteSpace: 'nowrap' }}>{label}</span>
       <input type="text" inputMode="numeric" placeholder={placeholder} value={fields[fieldKey]} onChange={e => set(fieldKey, e.target.value)} onKeyDown={onKey} style={numStyle} />
     </div>
   )
