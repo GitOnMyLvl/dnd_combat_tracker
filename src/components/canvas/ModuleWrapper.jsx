@@ -8,6 +8,7 @@ const MODULE_TITLES = {
   DiceRoller:        'Dice',
   NotesPad:          'Notes',
   PartyManager:      'Party',
+  AoeDamage:         'AoE Damage',
 }
 
 const MODULE_INFO = {
@@ -90,6 +91,16 @@ Ability Scores
 • Characters tab: create reusable character cards with full stats. Load any character directly into the current encounter
 • Parties tab: group characters into a named party and load the whole group into the encounter at once
 • Characters saved here persist between sessions`,
+  },
+  AoeDamage: {
+    title: 'AoE Damage',
+    body: `Apply damage or healing to multiple combatants at once.
+
+• Pick Damage or Heal, then enter an amount
+• Tap combatant rows to select them, or use "All Allies" / "All Enemies"
+• Save for half: halves the damage (rounded down) for every selected combatant
+• Hit the big red/green button (or press Enter in the amount field) to apply
+• HP updates immediately in every other module; selection clears after applying`,
   },
 }
 

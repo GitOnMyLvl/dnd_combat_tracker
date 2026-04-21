@@ -49,3 +49,31 @@ Lift the visual identity from generic SaaS-dark into a cohesive, understated D&D
 
 ## Review
 (to fill in at end)
+
+---
+
+# AoE Damage/Heal Module
+
+## Goal
+A module where the DM multi-selects combatants, types a number, and applies it as damage or heal to all at once. Support "Save for half" toggle (floor-halves damage globally).
+
+## Spec
+- Mode toggle: **Damage** | **Heal**
+- Amount input (numeric)
+- Save-for-half toggle (damage mode only; halves amount, round down)
+- Combatant list with checkboxes, grouped by Allies / Enemies
+- Quick actions: All Allies, All Enemies, Clear
+- Apply button — hits each selected via `updateHP`
+- Shows live preview: "Apply -5 to 3 combatants"
+
+## Files
+- [ ] `src/components/modules/AoeDamage.jsx` (new)
+- [ ] `src/components/modules/AoeDamage.test.jsx` (new — cover half-round-down, heal, selection)
+- [ ] Register in `Canvas.jsx` (MODULE_COMPONENTS)
+- [ ] Register in `ModuleWrapper.jsx` (MODULE_TITLES + MODULE_INFO)
+- [ ] Register in `ModulePicker.jsx` (AVAILABLE_MODULES + icon)
+
+## Verification
+- [ ] Unit test for half-round-down math
+- [ ] `npm run build` + `npm run test`
+

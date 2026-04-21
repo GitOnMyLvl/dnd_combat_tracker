@@ -11,6 +11,7 @@ import ConditionsPanel from '../modules/ConditionsPanel'
 import DiceRoller from '../modules/DiceRoller'
 import NotesPad from '../modules/NotesPad'
 import PartyManager from '../modules/PartyManager'
+import AoeDamage from '../modules/AoeDamage'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -21,6 +22,7 @@ export const MODULE_COMPONENTS = {
   DiceRoller,
   NotesPad,
   PartyManager,
+  AoeDamage,
 }
 
 export default function Canvas() {

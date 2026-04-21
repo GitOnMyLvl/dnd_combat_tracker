@@ -15,6 +15,7 @@ const ICONS = {
   DiceRoller:        <Icon><path d="M12 3 L21 8 L12 13 L3 8 Z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></Icon>,
   NotesPad:          <Icon><path d="M6 3h9l4 4v14H6z" /><path d="M15 3v4h4M9 11h6M9 15h6M9 19h4" /></Icon>,
   PartyManager:      <Icon><circle cx="8" cy="9" r="2.5" /><circle cx="16" cy="9" r="2.5" /><path d="M3 19c0-2.8 2.2-5 5-5s5 2.2 5 5M13 19c0-2.8 2.2-5 5-5s3 1 3 3" /></Icon>,
+  AoeDamage:         <Icon><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="7" opacity="0.55" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" /></Icon>,
 }
 
 const AVAILABLE_MODULES = [
@@ -25,6 +26,7 @@ const AVAILABLE_MODULES = [
   { type: 'DiceRoller',        icon: ICONS.DiceRoller,        label: 'Dice Roller',        desc: 'd4–d100, advantage, custom rolls', config: {} },
   { type: 'NotesPad',          icon: ICONS.NotesPad,          label: 'Notes',              desc: 'Free text, auto-saved', config: {} },
   { type: 'PartyManager',      icon: ICONS.PartyManager,      label: 'Party Manager',      desc: 'Save characters & parties', config: {} },
+  { type: 'AoeDamage',         icon: ICONS.AoeDamage,         label: 'AoE Damage',         desc: 'Damage or heal many at once', config: {} },
 ]
 
 export default function ModulePicker({ onClose }) {
