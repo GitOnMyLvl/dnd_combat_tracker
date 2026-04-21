@@ -129,23 +129,36 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
   }
 
   return (
-    <div ref={wrapperRef} className="card flex flex-col h-full" style={{ overflow: 'hidden' }}>
+    <div ref={wrapperRef} className="card flex flex-col h-full" style={{ overflow: 'hidden', position: 'relative' }}>
+      {/* Accent stripe */}
+      <div className="accent-stripe" />
+
       {/* Header */}
       <div
         className="flex items-center justify-between px-3 flex-shrink-0 select-none"
         style={{
           height: 52,
           borderBottom: minimized ? 'none' : '1px solid var(--c-border)',
+          background: 'linear-gradient(180deg, var(--c-elevated) 0%, transparent 140%)',
         }}
       >
         {/* Drag handle: grip + title */}
         <div className="drag-handle flex items-center gap-2" style={{ flex: 1, cursor: 'grab', height: '100%' }}>
-          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" style={{ opacity: 0.25, flexShrink: 0 }}>
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" style={{ opacity: 0.3, flexShrink: 0 }}>
             {[0,4,8,12].map(y => [0,4].map(x => (
               <circle key={`${x}-${y}`} cx={x+1} cy={y+2} r={1} fill="currentColor"/>
             )))}
           </svg>
-          <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--c-muted2)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          <span
+            className="display"
+            style={{
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              color: 'var(--c-text)',
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+            }}
+          >
             {title}
           </span>
         </div>
@@ -199,7 +212,7 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
           {infoOpen && info && (
             <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'var(--c-bg)', overflowY: 'auto', padding: '14px 16px' }}>
               <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
-                <span style={{ fontWeight: 700, fontSize: '0.88rem' }}>{info.title}</span>
+                <span className="display" style={{ fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.06em' }}>{info.title}</span>
                 <button
                   onClick={() => setInfoOpen(false)}
                   style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 28, minWidth: 28, fontSize: '0.9rem', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
