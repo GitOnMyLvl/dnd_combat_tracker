@@ -9,6 +9,7 @@ import Modal from '../shared/Modal'
 import { useCharacterStore, combatantToTemplate, templateToCombatant, DEFAULT_ABILITIES } from '../../store/characterStore'
 import { CONDITION_NAMES } from '../../constants/conditions'
 import { ABILITY_LABELS, abilityModifier, formatModifier } from '../../utils/abilities'
+import { getHpStatus } from '../../utils/hpStatus'
 
 function AddManualModal({ tableType, onClose }) {
   const addCombatant = useEncounterStore(s => s.addCombatant)
@@ -63,8 +64,7 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
     return () => ro.disconnect()
   }, [])
 
-  const dying = combatant.hp.current === 0
-  const bloodied = !dying && combatant.hp.current <= Math.floor(combatant.hp.max / 2)
+  const { color: hpColor } = getHpStatus(combatant.hp)
   const exhaustion = combatant.exhaustion ?? 0
   const inspiration = combatant.inspiration ?? false
 
@@ -146,7 +146,7 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
           {/* HP — always rightmost */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
             <span className="label">HP</span>
-            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: dying ? 'var(--c-danger)' : bloodied ? '#f97316' : 'var(--c-text)', whiteSpace: 'nowrap' }}>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: hpColor, whiteSpace: 'nowrap' }}>
               {combatant.hp.current}<span style={{ color: 'var(--c-muted)', fontWeight: 400 }}>/{combatant.hp.max}</span>
             </span>
           </div>

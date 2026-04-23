@@ -92,6 +92,8 @@ export default function TopBar() {
             letterSpacing: '0.18em',
             fontWeight: 700,
             whiteSpace: 'nowrap',
+            lineHeight: 1,
+            transform: 'translateY(2px)',
           }}
         >
           BATTLE TRACKER
@@ -120,6 +122,8 @@ export default function TopBar() {
             borderRadius: 6, flexShrink: 1, maxWidth: 220,
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             fontFamily: 'var(--font-display)', letterSpacing: '0.03em',
+            lineHeight: 1,
+            transform: 'translateY(2px)',
             transition: 'background 0.12s, border-color 0.12s',
           }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--c-elevated)'; e.currentTarget.style.borderColor = 'var(--c-border)' }}

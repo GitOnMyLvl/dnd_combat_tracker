@@ -1,26 +1,62 @@
-import { useState, useMemo } from 'react'
+import { Fragment, useState, useMemo } from 'react'
 import { useEncounterStore } from '../../store/encounterStore'
+import { getHpStatus } from '../../utils/hpStatus'
 
-export function computeApplied(rawAmount, mode, saveForHalf) {
+function bucketizeMods(selectedIds, savedIds, resistIds) {
+  let full = 0, half = 0, quarter = 0
+  selectedIds.forEach(id => {
+    const s = savedIds.has(id), r = resistIds.has(id)
+    if (s && r) quarter++
+    else if (s || r) half++
+    else full++
+  })
+  return { full, half, quarter }
+}
+
+export function computeApplied(rawAmount, mode, saved = false, resist = false) {
   const n = parseInt(rawAmount, 10)
   if (isNaN(n) || n <= 0) return 0
   if (mode === 'heal') return n
-  return saveForHalf ? Math.floor(n / 2) : n
+  let x = n
+  if (saved)  x = Math.floor(x / 2)
+  if (resist) x = Math.floor(x / 2)
+  return x
 }
 
-function CombatantRow({ c, selected, onToggle }) {
-  const dying = c.hp.current === 0
-  const bloodied = !dying && c.hp.current <= Math.floor(c.hp.max / 2)
-  const hpColor = dying ? 'var(--c-danger)' : bloodied ? '#f97316' : 'var(--c-text)'
+function ModToggle({ label, active, onClick, ariaLabel }) {
   return (
     <button
+      onClick={e => { e.stopPropagation(); onClick() }}
+      aria-label={ariaLabel}
+      aria-pressed={active}
+      style={{
+        minHeight: 26, minWidth: 'unset', padding: '0 8px',
+        fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.04em',
+        borderRadius: 6,
+        border: `1px solid ${active ? 'var(--c-accent)' : 'var(--c-border-strong)'}`,
+        background: active ? 'var(--c-accent-soft)' : 'transparent',
+        color: active ? 'var(--c-accent)' : 'var(--c-muted2)',
+        flexShrink: 0,
+        transition: 'all 0.1s',
+      }}
+    >{label}</button>
+  )
+}
+
+function CombatantRow({ c, selected, saved, resist, showMods, onToggle, onToggleSave, onToggleResist }) {
+  const { dying, color: hpColor } = getHpStatus(c.hp)
+  return (
+    <div
       onClick={onToggle}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle() } }}
       style={{
         display: 'flex', alignItems: 'center', gap: 'var(--sp-2)',
         padding: '6px 10px', borderRadius: 8,
         border: selected ? '1px solid var(--c-accent)' : '1px solid var(--c-border)',
         background: selected ? 'var(--c-accent-dim)' : 'var(--c-elevated)',
-        minHeight: 40, minWidth: 'unset',
+        minHeight: 40,
         textAlign: 'left', cursor: 'pointer',
         opacity: dying ? 0.65 : 1,
         transition: 'background 0.1s, border-color 0.1s',
@@ -44,10 +80,26 @@ function CombatantRow({ c, selected, onToggle }) {
       }}>
         {c.name}
       </span>
+      {showMods && selected && (
+        <>
+          <ModToggle
+            label="SAVE"
+            active={saved}
+            onClick={onToggleSave}
+            ariaLabel={`Saved: ${c.name}`}
+          />
+          <ModToggle
+            label="RES"
+            active={resist}
+            onClick={onToggleResist}
+            ariaLabel={`Resist: ${c.name}`}
+          />
+        </>
+      )}
       <span style={{ fontSize: '0.78rem', color: hpColor, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
         {c.hp.current}<span style={{ color: 'var(--c-muted)' }}>/{c.hp.max}</span>
       </span>
-    </button>
+    </div>
   )
 }
 
@@ -56,17 +108,25 @@ export default function AoeDamage() {
   const updateHP = useEncounterStore(s => s.updateHP)
 
   const [selectedIds, setSelectedIds] = useState(() => new Set())
+  const [savedIds, setSavedIds] = useState(() => new Set())
+  const [resistIds, setResistIds] = useState(() => new Set())
   const [amount, setAmount] = useState('')
   const [mode, setMode] = useState('damage')
-  const [saveForHalf, setSaveForHalf] = useState(false)
   const [flash, setFlash] = useState(null)
 
   const allies  = useMemo(() => combatants.filter(c => c.type === 'ally'), [combatants])
   const enemies = useMemo(() => combatants.filter(c => c.type === 'enemy'), [combatants])
 
-  const applied = computeApplied(amount, mode, saveForHalf)
+  const full = computeApplied(amount, mode, false, false)
   const selectedCount = selectedIds.size
-  const canApply = applied > 0 && selectedCount > 0
+  const canApply = full > 0 && selectedCount > 0
+
+  const dropFromSet = (set, id) => {
+    if (!set.has(id)) return set
+    const next = new Set(set)
+    next.delete(id)
+    return next
+  }
 
   const toggle = (id) => {
     setSelectedIds(prev => {
@@ -74,7 +134,19 @@ export default function AoeDamage() {
       if (next.has(id)) next.delete(id); else next.add(id)
       return next
     })
+    setSavedIds(prev => dropFromSet(prev, id))
+    setResistIds(prev => dropFromSet(prev, id))
   }
+
+  const toggleIn = (setState) => (id) => {
+    setState(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+  const toggleSave   = toggleIn(setSavedIds)
+  const toggleResist = toggleIn(setResistIds)
 
   const selectAll = (list) => setSelectedIds(prev => {
     const next = new Set(prev)
@@ -82,21 +154,47 @@ export default function AoeDamage() {
     return next
   })
 
-  const clear = () => setSelectedIds(new Set())
+  const clear = () => {
+    setSelectedIds(new Set())
+    setSavedIds(new Set())
+    setResistIds(new Set())
+  }
 
   const apply = () => {
     if (!canApply) return
-    const delta = mode === 'heal' ? applied : -applied
-    selectedIds.forEach(id => updateHP(id, delta))
+    const isDamage = mode === 'damage'
+    const buckets = isDamage
+      ? bucketizeMods(selectedIds, savedIds, resistIds)
+      : { full: selectedCount, half: 0, quarter: 0 }
+    selectedIds.forEach(id => {
+      const s = isDamage && savedIds.has(id)
+      const r = isDamage && resistIds.has(id)
+      const applied = computeApplied(amount, mode, s, r)
+      updateHP(id, isDamage ? -applied : applied)
+    })
     setFlash({
-      mode, amount: applied, count: selectedCount, halved: mode === 'damage' && saveForHalf,
+      mode,
+      count: selectedCount,
+      fullAmt:    computeApplied(amount, mode, false, false),
+      halfAmt:    computeApplied(amount, mode, true,  false),
+      quarterAmt: computeApplied(amount, mode, true,  true),
+      buckets,
     })
     setAmount('')
     setSelectedIds(new Set())
-    setTimeout(() => setFlash(null), 1800)
+    setSavedIds(new Set())
+    setResistIds(new Set())
+    setTimeout(() => setFlash(null), 2200)
   }
 
   const modeColor = mode === 'heal' ? 'var(--c-success)' : 'var(--c-danger)'
+
+  const hintParts = []
+  if (mode === 'damage' && amount && selectedCount > 0) {
+    const { half, quarter } = bucketizeMods(selectedIds, savedIds, resistIds)
+    if (half)    hintParts.push(`${half} × ${computeApplied(amount, mode, true, false)}`)
+    if (quarter) hintParts.push(`${quarter} × ${computeApplied(amount, mode, true, true)} (¼)`)
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 'var(--sp-2)' }}>
@@ -146,37 +244,31 @@ export default function AoeDamage() {
           onMouseEnter={e => { if (canApply) e.currentTarget.style.filter = 'brightness(1.1)' }}
           onMouseLeave={e => { e.currentTarget.style.filter = 'none' }}
         >
-          {mode === 'heal' ? '+' : '−'}{applied || 0}
+          {mode === 'heal' ? '+' : '−'}{full || 0}
         </button>
       </div>
 
-      {/* Save for half (damage mode only) */}
-      {mode === 'damage' && (
-        <label
-          className="flex items-center"
+      {/* Modifier hint */}
+      {mode === 'damage' && selectedCount > 0 && amount && (
+        <div
           style={{
-            gap: 'var(--sp-2)', fontSize: '0.82rem',
-            padding: '6px 10px', borderRadius: 7,
-            background: saveForHalf ? 'var(--c-accent-soft)' : 'transparent',
-            border: `1px solid ${saveForHalf ? 'var(--c-accent)' : 'var(--c-border)'}`,
-            color: saveForHalf ? 'var(--c-accent)' : 'var(--c-muted2)',
-            cursor: 'pointer', userSelect: 'none', minHeight: 34,
-            transition: 'all 0.12s',
+            padding: '6px 10px', borderRadius: 7, flexShrink: 0,
+            background: 'var(--c-elevated)',
+            border: '1px solid var(--c-border)',
+            color: 'var(--c-muted2)', fontSize: '0.76rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: 'var(--sp-2)',
           }}
         >
-          <input
-            type="checkbox"
-            checked={saveForHalf}
-            onChange={e => setSaveForHalf(e.target.checked)}
-            style={{ width: 16, height: 16, minHeight: 'unset', accentColor: 'var(--c-accent)', cursor: 'pointer' }}
-          />
-          <span style={{ fontWeight: 600 }}>Save for half</span>
-          {saveForHalf && amount && (
-            <span style={{ color: 'var(--c-muted)', fontSize: '0.78rem', marginLeft: 'auto' }}>
-              {amount} → {applied}
+          <span>
+            Per-target: <strong style={{ color: 'var(--c-text)' }}>SAVE</strong> or <strong style={{ color: 'var(--c-text)' }}>RES</strong> halves · both stack to ¼.
+          </span>
+          {hintParts.length > 0 && (
+            <span style={{ color: 'var(--c-accent)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+              {hintParts.join(' · ')} HP
             </span>
           )}
-        </label>
+        </div>
       )}
 
       {/* Flash */}
@@ -187,8 +279,16 @@ export default function AoeDamage() {
           color: flash.mode === 'heal' ? 'var(--c-success)' : 'var(--c-danger)',
           fontSize: '0.82rem', fontWeight: 600, textAlign: 'center',
         }}>
-          {flash.mode === 'heal' ? 'Healed' : 'Dealt'} {flash.amount}
-          {flash.halved ? ' (halved)' : ''} to {flash.count} combatant{flash.count === 1 ? '' : 's'}
+          {(() => {
+            if (flash.mode === 'heal') {
+              return `Healed ${flash.fullAmt} HP · ${flash.count} target${flash.count === 1 ? '' : 's'}`
+            }
+            const parts = []
+            if (flash.buckets.full)    parts.push(`${flash.buckets.full} × ${flash.fullAmt}`)
+            if (flash.buckets.half)    parts.push(`${flash.buckets.half} × ${flash.halfAmt} (½)`)
+            if (flash.buckets.quarter) parts.push(`${flash.buckets.quarter} × ${flash.quarterAmt} (¼)`)
+            return `Dealt: ${parts.join(' · ')} HP`
+          })()}
         </div>
       )}
 
@@ -224,37 +324,29 @@ export default function AoeDamage() {
           </p>
         )}
 
-        {allies.length > 0 && (
-          <>
-            <div className="label">Allies</div>
+        {[
+          { label: 'Allies',  list: allies },
+          { label: 'Enemies', list: enemies },
+        ].map(({ label, list }) => list.length > 0 && (
+          <Fragment key={label}>
+            <div className="label">{label}</div>
             <div className="flex flex-col" style={{ gap: 'var(--sp-1)' }}>
-              {allies.map(c => (
+              {list.map(c => (
                 <CombatantRow
                   key={c.id}
                   c={c}
                   selected={selectedIds.has(c.id)}
+                  saved={savedIds.has(c.id)}
+                  resist={resistIds.has(c.id)}
+                  showMods={mode === 'damage'}
                   onToggle={() => toggle(c.id)}
+                  onToggleSave={() => toggleSave(c.id)}
+                  onToggleResist={() => toggleResist(c.id)}
                 />
               ))}
             </div>
-          </>
-        )}
-
-        {enemies.length > 0 && (
-          <>
-            <div className="label">Enemies</div>
-            <div className="flex flex-col" style={{ gap: 'var(--sp-1)' }}>
-              {enemies.map(c => (
-                <CombatantRow
-                  key={c.id}
-                  c={c}
-                  selected={selectedIds.has(c.id)}
-                  onToggle={() => toggle(c.id)}
-                />
-              ))}
-            </div>
-          </>
-        )}
+          </Fragment>
+        ))}
       </div>
     </div>
   )

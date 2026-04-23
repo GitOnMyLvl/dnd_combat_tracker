@@ -98,7 +98,7 @@ Ability Scores
 
 • Pick Damage or Heal, then enter an amount
 • Tap combatant rows to select them, or use "All Allies" / "All Enemies"
-• Save for half: halves the damage (rounded down) for every selected combatant
+• Per-target modifiers: tap SAVE or RES on any selected row to halve that combatant's damage; tapping both stacks to ¼ (rounded down at each step)
 • Hit the big red/green button (or press Enter in the amount field) to apply
 • HP updates immediately in every other module; selection clears after applying`,
   },
@@ -169,6 +169,8 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
               color: 'var(--c-text)',
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
+              lineHeight: 1,
+              transform: 'translateY(2px)',
             }}
           >
             {title}

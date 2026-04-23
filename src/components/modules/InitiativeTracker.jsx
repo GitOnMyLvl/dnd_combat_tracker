@@ -513,7 +513,7 @@ export default function InitiativeTracker() {
                 style={{ width: 44, textAlign: 'center', fontSize: '0.92rem', minHeight: 36, padding: '2px 4px' }}
               />
               <button
-                onClick={() => { addToInitiative(c.id); setTab('combat') }}
+                onClick={() => addToInitiative(c.id)}
                 className="btn-primary"
                 style={{ minHeight: 36, minWidth: 'unset', padding: '0 10px', fontSize: '0.8rem', flexShrink: 0 }}
                 title="Move to combat"

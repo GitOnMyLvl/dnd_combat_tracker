@@ -27,6 +27,17 @@ describe('computeApplied', () => {
     expect(computeApplied('10', 'heal', true)).toBe(10)
     expect(computeApplied('7', 'heal', false)).toBe(7)
   })
+
+  it('applies resist to quarter damage when combined with save', () => {
+    expect(computeApplied('20', 'damage', false, true)).toBe(10)     // resist only
+    expect(computeApplied('20', 'damage', true,  true)).toBe(5)      // save + resist → floor(floor(20/2)/2)
+    expect(computeApplied('11', 'damage', true,  true)).toBe(2)      // floor(floor(11/2)/2) = floor(5/2) = 2
+    expect(computeApplied('3',  'damage', true,  true)).toBe(0)
+  })
+
+  it('ignores resist in heal mode', () => {
+    expect(computeApplied('10', 'heal', true, true)).toBe(10)
+  })
 })
 
 describe('AoeDamage component', () => {
@@ -82,17 +93,55 @@ describe('AoeDamage component', () => {
     expect(useEncounterStore.getState().encounter.combatants.find(c => c.id === 'a1').hp.current).toBe(30)
   })
 
-  it('halves damage when save-for-half is enabled', async () => {
+  it('halves damage per-combatant via SAVE toggle', async () => {
     render(<AoeDamage />)
     const user = userEvent.setup()
 
     await user.click(screen.getByText('All Enemies'))
-    await user.click(screen.getByLabelText('Save for half'))
+    // Only e1 saves
+    await user.click(screen.getByLabelText('Saved: Goblin A'))
     await user.type(screen.getByLabelText('Amount'), '11')
-    await user.click(screen.getByRole('button', { name: /^−5$/ }))
+    await user.click(screen.getByRole('button', { name: /^−11$/ }))
 
     const combatants = useEncounterStore.getState().encounter.combatants
     expect(combatants.find(c => c.id === 'e1').hp.current).toBe(7) // 12 - floor(11/2) = 7
+    expect(combatants.find(c => c.id === 'e2').hp.current).toBe(1) // 12 - 11 = 1
+  })
+
+  it('SAVE + RES together deal 1/4 damage to that combatant', async () => {
+    render(<AoeDamage />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByText('All Enemies'))
+    await user.click(screen.getByLabelText('Saved: Goblin A'))
+    await user.click(screen.getByLabelText('Resist: Goblin A'))
+    await user.click(screen.getByLabelText('Resist: Goblin B'))
+    await user.type(screen.getByLabelText('Amount'), '20')
+    await user.click(screen.getByRole('button', { name: /^−20$/ }))
+
+    const combatants = useEncounterStore.getState().encounter.combatants
+    // e1: save + resist → floor(floor(20/2)/2) = 5 → 12 - 5 = 7
+    expect(combatants.find(c => c.id === 'e1').hp.current).toBe(7)
+    // e2: resist only → floor(20/2) = 10 → 12 - 10 = 2
+    expect(combatants.find(c => c.id === 'e2').hp.current).toBe(2)
+  })
+
+  it('deselecting a row clears its SAVE and RES state', async () => {
+    render(<AoeDamage />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByText('All Enemies'))
+    await user.click(screen.getByLabelText('Saved: Goblin A'))
+    await user.click(screen.getByLabelText('Resist: Goblin A'))
+    // Deselect Goblin A by clicking its row
+    await user.click(screen.getByText('Goblin A'))
+    // Re-select
+    await user.click(screen.getByText('Goblin A'))
+    await user.type(screen.getByLabelText('Amount'), '10')
+    await user.click(screen.getByRole('button', { name: /^−10$/ }))
+
+    // Goblin A should have taken full damage (SAVE/RES were cleared on deselect)
+    expect(useEncounterStore.getState().encounter.combatants.find(c => c.id === 'e1').hp.current).toBe(2)
   })
 
   it('clears selection after apply', async () => {
