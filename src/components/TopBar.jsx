@@ -5,11 +5,15 @@ import { useLayoutStore } from '../store/layoutStore'
 import { useUIStore } from '../store/uiStore'
 import AccentPicker from './AccentPicker'
 
-function D20Icon({ size = 18, color = 'currentColor' }) {
+function D20Icon({ size = 18 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 2.5 L21 8 L18 20 L6 20 L3 8 Z" />
-      <path d="M12 2.5 L12 12 L3 8 M12 12 L21 8 M12 12 L6 20 M12 12 L18 20" opacity="0.55" />
+    <svg width={size} height={size} viewBox="0 0 512 512" aria-hidden="true">
+      <polygon points="256,97.3 421.8,217.2 256,280.7" fill="currentColor" fillOpacity="0.95" />
+      <polygon points="256,97.3 256,280.7 90.2,217.2" fill="currentColor" fillOpacity="0.75" />
+      <polygon points="421.8,217.2 358.3,432.3 256,280.7" fill="currentColor" fillOpacity="0.55" />
+      <polygon points="90.2,217.2 256,280.7 153.7,432.3" fill="currentColor" fillOpacity="0.45" />
+      <polygon points="256,280.7 358.3,432.3 153.7,432.3" fill="currentColor" fillOpacity="0.3" />
+      <polygon points="256,97.3 421.8,217.2 358.3,432.3 153.7,432.3 90.2,217.2" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round" />
     </svg>
   )
 }

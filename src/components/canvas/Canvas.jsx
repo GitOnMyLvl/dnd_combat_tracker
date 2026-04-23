@@ -57,14 +57,16 @@ export default function Canvas() {
           alignItems: 'center', justifyContent: 'center', gap: 20, pointerEvents: 'none',
           padding: 24, textAlign: 'center',
         }}>
-          <svg width="88" height="88" viewBox="0 0 24 24" fill="none"
-            stroke="var(--c-border-strong)" strokeWidth="0.8" strokeLinejoin="round"
-            style={{ opacity: 0.9 }}
-          >
-            <path d="M12 2.5 L21 8 L18 20 L6 20 L3 8 Z" />
-            <path d="M12 2.5 L12 12 L3 8 M12 12 L21 8 M12 12 L6 20 M12 12 L18 20" />
-            <circle cx="12" cy="12" r="1.3" fill="var(--c-accent)" opacity="0.7" stroke="none" />
-          </svg>
+          <span style={{ color: 'var(--c-accent)', display: 'flex', opacity: 0.6 }}>
+            <svg width="88" height="88" viewBox="0 0 512 512">
+              <polygon points="256,97.3 421.8,217.2 256,280.7" fill="currentColor" fillOpacity="0.95" />
+              <polygon points="256,97.3 256,280.7 90.2,217.2" fill="currentColor" fillOpacity="0.75" />
+              <polygon points="421.8,217.2 358.3,432.3 256,280.7" fill="currentColor" fillOpacity="0.55" />
+              <polygon points="90.2,217.2 256,280.7 153.7,432.3" fill="currentColor" fillOpacity="0.45" />
+              <polygon points="256,280.7 358.3,432.3 153.7,432.3" fill="currentColor" fillOpacity="0.3" />
+              <polygon points="256,97.3 421.8,217.2 358.3,432.3 153.7,432.3 90.2,217.2" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round" />
+            </svg>
+          </span>
           <div className="display" style={{
             fontSize: '1.6rem', fontWeight: 700, letterSpacing: '0.22em',
             color: 'var(--c-muted2)', opacity: 0.45,
