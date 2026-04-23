@@ -6,7 +6,7 @@ export default function ConditionsPanel() {
   const selected = encounter.combatants.find(c => c.id === selectedCombatantId)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 'var(--sp-2)' }}>
       {/* Target indicator */}
       <div style={{ flexShrink: 0, minHeight: 28 }}>
         {selected ? (
@@ -26,7 +26,7 @@ export default function ConditionsPanel() {
         )}
       </div>
 
-      <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, alignContent: 'start' }}>
+      <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-2)', alignContent: 'start' }}>
         {CONDITIONS.map(({ name, color, desc }) => {
           const active = selected?.conditions.includes(name)
           return (

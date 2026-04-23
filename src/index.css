@@ -2,42 +2,84 @@
 @import "react-grid-layout/css/styles.css";
 @import "react-resizable/css/styles.css";
 
-/* Dark theme (default) */
+/* ============================================================
+   Dark theme (default) — warm charcoal with plum undertone
+   ============================================================ */
 :root {
-  --c-bg:           #0d0d12;
-  --c-surface:      #14141c;
-  --c-elevated:     #1e1e2a;
-  --c-hover:        #26263a;
-  --c-border:       rgba(255,255,255,0.10);
-  --c-border-strong:rgba(255,255,255,0.18);
-  --c-text:         #f2f2f5;
-  --c-muted:        #8080b0;
-  --c-muted2:       #a0a0c0;
-  --c-accent:       #60a5fa;
-  --c-accent-dim:   rgba(96,165,250,0.14);
-  --c-danger:       #f87171;
-  --c-danger-dim:   rgba(248,113,113,0.13);
-  --c-success:      #4ade80;
-  --c-shadow:       rgba(0,0,0,0.5);
+  --c-bg:            #0f0e13;
+  --c-bg-pattern:    radial-gradient(ellipse at top, rgba(120,90,160,0.06) 0%, transparent 55%),
+                     radial-gradient(ellipse at bottom, rgba(180,120,70,0.04) 0%, transparent 60%);
+  --c-surface:       #16151d;
+  --c-elevated:      #1f1e29;
+  --c-hover:         #2a2836;
+  --c-border:        rgba(255,240,220,0.09);
+  --c-border-strong: rgba(255,240,220,0.17);
+  --c-text:          #f3f0ea;
+  --c-muted:         #a8a3bf;
+  --c-muted2:        #cfcadf;
+  --c-accent:        #60a5fa;
+  --c-accent-dim:    rgba(96,165,250,0.14);
+  --c-accent-soft:   rgba(96,165,250,0.08);
+  --c-danger:        #f87171;
+  --c-danger-dim:    rgba(248,113,113,0.13);
+  --c-success:       #4ade80;
+  --c-shadow:        rgba(0,0,0,0.55);
+  --c-shadow-lift:   rgba(0,0,0,0.7);
+
+  --font-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
+  --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+
+  /* Spacing scale — 4px base */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+
+  /* Semantic spacing */
+  --sp-module-pad:  var(--sp-3);   /* inner padding of module content */
+  --sp-section-gap: var(--sp-2);   /* gap between sections inside a module */
+  --sp-canvas-gut:  var(--sp-3);   /* canvas grid gutter */
+  --sp-page-pad:    var(--sp-4);   /* top bar / outer container */
+  --sp-modal-pad:   var(--sp-5);   /* modal inner padding */
+
+  --shadow-card:       0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.25);
+  --shadow-card-hover: 0 2px 6px rgba(0,0,0,0.35), 0 12px 28px rgba(0,0,0,0.35);
+  --shadow-pop:        0 16px 48px rgba(0,0,0,0.6);
 }
 
-/* Light theme */
+/* ============================================================
+   Light theme — parchment with warm stone borders
+   ============================================================ */
 :root.light {
-  --c-bg:           #eeeef4;
-  --c-surface:      #f8f8fc;
-  --c-elevated:     #ffffff;
-  --c-hover:        #e8e8f0;
-  --c-border:       rgba(0,0,0,0.10);
-  --c-border-strong:rgba(0,0,0,0.20);
-  --c-text:         #111118;
-  --c-muted:        #5d5d8a;
-  --c-muted2:       #444460;
-  --c-accent:       #2563eb;
-  --c-accent-dim:   rgba(37,99,235,0.10);
-  --c-danger:       #dc2626;
-  --c-danger-dim:   rgba(220,38,38,0.09);
-  --c-success:      #15803d;
-  --c-shadow:       rgba(0,0,0,0.08);
+  --c-bg:            #f2ece0;
+  --c-bg-pattern:    radial-gradient(ellipse at top, rgba(140,100,60,0.05) 0%, transparent 55%),
+                     radial-gradient(ellipse at bottom, rgba(90,70,50,0.03) 0%, transparent 60%);
+  --c-surface:       #faf5e9;
+  --c-elevated:      #ffffff;
+  --c-hover:         #ede5d2;
+  --c-border:        rgba(80,60,40,0.12);
+  --c-border-strong: rgba(80,60,40,0.24);
+  --c-text:          #1a150f;
+  --c-muted:         #5a4a36;
+  --c-muted2:        #3a2f22;
+  --c-accent:        #2563eb;
+  --c-accent-dim:    rgba(37,99,235,0.10);
+  --c-accent-soft:   rgba(37,99,235,0.06);
+  --c-danger:        #b91c1c;
+  --c-danger-dim:    rgba(185,28,28,0.10);
+  --c-success:       #15803d;
+  --c-shadow:        rgba(70,50,30,0.10);
+  --c-shadow-lift:   rgba(70,50,30,0.18);
+
+  --shadow-card:       0 1px 2px rgba(70,50,30,0.06), 0 4px 12px rgba(70,50,30,0.08);
+  --shadow-card-hover: 0 2px 6px rgba(70,50,30,0.10), 0 12px 28px rgba(70,50,30,0.14);
+  --shadow-pop:        0 16px 48px rgba(70,50,30,0.22);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -47,11 +89,20 @@ html, body, #root {
   margin: 0;
   padding: 0;
   background: var(--c-bg);
+  background-image: var(--c-bg-pattern);
   color: var(--c-text);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Display typography — titles/logo */
+.display {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  font-weight: 600;
 }
 
 /* Scrollable module content */
@@ -61,12 +112,14 @@ html, body, #root {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Grid layout */
+/* ============================================================
+   react-grid-layout
+   ============================================================ */
 .react-grid-item.react-grid-placeholder {
   background: var(--c-accent-dim);
   border: 1.5px dashed var(--c-accent);
-  border-radius: 10px;
-  opacity: 0.8;
+  border-radius: var(--radius-lg);
+  opacity: 0.85;
 }
 
 .react-resizable-handle {
@@ -75,12 +128,16 @@ html, body, #root {
   transition: opacity 0.15s;
 }
 .light .react-resizable-handle { filter: none; }
-.react-resizable-handle:hover { opacity: 0.7; }
+.react-resizable-handle:hover { opacity: 0.75; }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--c-border-strong); border-radius: 2px; }
+::-webkit-scrollbar-thumb {
+  background: var(--c-border-strong);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--c-muted); }
 
 /* Touch targets */
 button, [role="button"] {
@@ -89,16 +146,18 @@ button, [role="button"] {
   cursor: pointer;
 }
 
-/* Inputs */
+/* ============================================================
+   Inputs
+   ============================================================ */
 input, select, textarea {
   background: var(--c-elevated);
   color: var(--c-text);
   border: 1px solid var(--c-border-strong);
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   padding: 0.35rem 0.6rem;
   font-size: 0.875rem;
   font-family: inherit;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 .light input, .light select, .light textarea {
   background: var(--c-bg);
@@ -106,66 +165,135 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px var(--c-accent-dim);
+}
+input:disabled, textarea:disabled, select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 input[type="number"] { -moz-appearance: textfield; }
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-/* Ghost button base */
+/* ============================================================
+   Buttons
+   ============================================================ */
 .btn-ghost {
   background: transparent;
   border: 1px solid var(--c-border-strong);
   color: var(--c-muted2);
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   padding: 0 12px;
   font-size: 0.8rem;
   font-weight: 500;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.12s, color 0.12s, border-color 0.12s, transform 0.06s;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
-.btn-ghost:hover { background: var(--c-elevated); color: var(--c-text); }
+.btn-ghost:hover {
+  background: var(--c-elevated);
+  color: var(--c-text);
+  border-color: var(--c-border-strong);
+}
+.btn-ghost:active { transform: translateY(1px); }
 
-/* Primary button */
 .btn-primary {
   background: var(--c-accent);
   border: none;
   color: #fff;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   padding: 0 14px;
   font-size: 0.8rem;
   font-weight: 600;
-  transition: opacity 0.12s;
+  transition: filter 0.12s, transform 0.06s, box-shadow 0.12s;
+  box-shadow: 0 1px 2px var(--c-shadow);
 }
-.btn-primary:hover { opacity: 0.88; }
+.btn-primary:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 2px 8px var(--c-accent-dim);
+}
+.btn-primary:active { transform: translateY(1px); }
 
-/* Danger button */
 .btn-danger {
   background: transparent;
   border: 1px solid var(--c-border);
   color: var(--c-danger);
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   padding: 0 12px;
   font-size: 0.8rem;
   font-weight: 500;
-  transition: background 0.12s;
+  transition: background 0.12s, border-color 0.12s, transform 0.06s;
 }
-.btn-danger:hover { background: var(--c-danger-dim); }
+.btn-danger:hover {
+  background: var(--c-danger-dim);
+  border-color: var(--c-danger);
+}
+.btn-danger:active { transform: translateY(1px); }
 
-/* Disabled */
 button:disabled { opacity: 0.3; cursor: not-allowed; }
-
-/* Label text */
-.label { font-size: 0.7rem; color: var(--c-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
-
-/* Card */
-.card {
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px var(--c-shadow);
+button:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
 }
 
-/* Divider */
-.divider { border: none; border-top: 1px solid var(--c-border); margin: 0; }
+/* ============================================================
+   Primitives
+   ============================================================ */
+.label {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: var(--c-muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.card {
+  background: linear-gradient(180deg, var(--c-surface) 0%, var(--c-bg) 180%);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+/* Module card — cards inside the grid get a subtle hover glow */
+.react-grid-item .card:hover {
+  border-color: var(--c-border-strong);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Accent stripe — use inside module header as top-border hint */
+.accent-stripe {
+  position: absolute;
+  top: 0; left: 12px; right: 12px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--c-accent), transparent);
+  opacity: 0.55;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--c-border);
+  margin: 0;
+}
+
+/* Ornamental flourish for big empty states */
+.ornament {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--c-border-strong);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.ornament::before, .ornament::after {
+  content: '';
+  width: 42px;
+  height: 1px;
+  background: currentColor;
+}

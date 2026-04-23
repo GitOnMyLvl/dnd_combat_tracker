@@ -7,7 +7,7 @@ function NumField({ label, fieldKey, fields, set, onKey, placeholder = '—', st
   const numStyle = { width: 44, minHeight: 36, textAlign: 'center', fontSize: '0.85rem', padding: '0 4px', ...style }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-      <span style={{ fontSize: '0.65rem', color: 'var(--c-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{label}</span>
+      <span className="label" style={{ whiteSpace: 'nowrap' }}>{label}</span>
       <input type="text" inputMode="numeric" placeholder={placeholder} value={fields[fieldKey]} onChange={e => set(fieldKey, e.target.value)} onKeyDown={onKey} style={numStyle} />
     </div>
   )
@@ -389,9 +389,9 @@ export default function InitiativeTracker() {
   })
 
   return (
-    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 8 }}>
+    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 'var(--sp-2)' }}>
       {/* Tab bar */}
-      <div className="flex flex-shrink-0" style={{ gap: 4 }}>
+      <div className="flex flex-shrink-0" style={{ gap: 'var(--sp-1)' }}>
         <button style={tabStyle(tab === 'combat')} onClick={() => setTab('combat')}>In Combat</button>
         <button style={tabStyle(tab === 'standby')} onClick={() => setTab('standby')}>Out of Combat</button>
       </div>
@@ -399,12 +399,12 @@ export default function InitiativeTracker() {
       {tab === 'combat' && (
         <>
           {/* Round row */}
-          <div className="flex items-center justify-between flex-shrink-0" style={{ gap: 8 }}>
+          <div className="flex items-center justify-between flex-shrink-0" style={{ gap: 'var(--sp-2)' }}>
             <div>
               <div className="label">Round</div>
               <div data-testid="round-number" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--c-accent)', lineHeight: 1 }}>{round}</div>
             </div>
-            <div className="flex" style={{ gap: 5 }}>
+            <div className="flex" style={{ gap: 'var(--sp-1)' }}>
               <button
                 onClick={prevTurn}
                 className="btn-ghost"
@@ -421,7 +421,7 @@ export default function InitiativeTracker() {
           </div>
 
           {/* Mode toggle + Sort + Add Token */}
-          <div className="flex flex-shrink-0" style={{ gap: 6 }}>
+          <div className="flex flex-shrink-0" style={{ gap: 'var(--sp-1)' }}>
             <div style={{ display: 'flex', border: '1px solid var(--c-border)', borderRadius: 7, overflow: 'hidden', flexShrink: 0 }}>
               {['auto', 'manual'].map(m => (
                 <button
@@ -460,7 +460,7 @@ export default function InitiativeTracker() {
 
           <hr className="divider flex-shrink-0" />
 
-          <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 'var(--sp-1)' }}>
             {ordered.length === 0 && (
               <p style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '16px 0' }}>
                 Add combatants, set rolls, then sort.
@@ -487,7 +487,7 @@ export default function InitiativeTracker() {
       )}
 
       {tab === 'standby' && (
-        <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div className="module-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 'var(--sp-1)' }}>
           {unordered.length === 0 && (
             <p style={{ color: 'var(--c-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '16px 0' }}>
               No entities out of combat.
@@ -513,7 +513,7 @@ export default function InitiativeTracker() {
                 style={{ width: 44, textAlign: 'center', fontSize: '0.92rem', minHeight: 36, padding: '2px 4px' }}
               />
               <button
-                onClick={() => { addToInitiative(c.id); setTab('combat') }}
+                onClick={() => addToInitiative(c.id)}
                 className="btn-primary"
                 style={{ minHeight: 36, minWidth: 'unset', padding: '0 10px', fontSize: '0.8rem', flexShrink: 0 }}
                 title="Move to combat"

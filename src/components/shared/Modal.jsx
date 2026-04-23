@@ -11,10 +11,10 @@ export default function Modal({ onClose, title, children, maxWidth = 380, inline
       <div style={{
         position: 'absolute', inset: 0, zIndex: 10,
         background: 'var(--c-bg)', overflowY: 'auto',
-        padding: 16,
+        padding: 'var(--sp-5)',
       }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{title}</span>
+        <div className="flex items-center justify-between" style={{ marginBottom: 'var(--sp-4)' }}>
+          <span className="display" style={{ fontWeight: 700, fontSize: '1rem', letterSpacing: '0.06em' }}>{title}</span>
           <button
             onClick={onClose}
             style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 30, minWidth: 30, fontSize: '1rem', borderRadius: 6 }}
@@ -28,12 +28,12 @@ export default function Modal({ onClose, title, children, maxWidth = 380, inline
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.75)', padding: 16 }}
+      style={{ background: 'rgba(0,0,0,0.75)', padding: 'var(--sp-4)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="card w-full" style={{ maxWidth, padding: 20, boxShadow: '0 24px 64px var(--c-shadow)' }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{title}</span>
+      <div className="card w-full" style={{ maxWidth, padding: 'var(--sp-5)', boxShadow: 'var(--shadow-pop)' }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 'var(--sp-4)' }}>
+          <span className="display" style={{ fontWeight: 700, fontSize: '1rem', letterSpacing: '0.06em' }}>{title}</span>
           <button
             onClick={onClose}
             style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 30, minWidth: 30, fontSize: '1rem', borderRadius: 6 }}

@@ -17,7 +17,7 @@ export default function NotesPad() {
   }, [text, save])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 6 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 'var(--sp-2)' }}>
       <div className="flex items-center justify-between flex-shrink-0">
         <span className="label">Session Notes</span>
         <span style={{ fontSize: '0.68rem', color: saved ? 'var(--c-muted)' : 'var(--c-accent)', transition: 'color 0.2s' }}>
