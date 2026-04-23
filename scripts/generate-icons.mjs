@@ -1,97 +1,91 @@
-import { deflateSync } from 'zlib'
-import { writeFileSync } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
+import sharp from 'sharp'
+import { writeFile, mkdir } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+const PUBLIC = join(__dirname, '..', 'public')
 
-const crcTable = new Uint32Array(256)
-for (let i = 0; i < 256; i++) {
-  let c = i
-  for (let j = 0; j < 8; j++) c = (c & 1) ? 0xEDB88320 ^ (c >>> 1) : c >>> 1
-  crcTable[i] = c
-}
-function crc32(buf) {
-  let crc = 0xFFFFFFFF
-  for (const b of buf) crc = crcTable[(crc ^ b) & 0xFF] ^ (crc >>> 8)
-  return (crc ^ 0xFFFFFFFF) >>> 0
-}
+const BG_TOP = '#1a1a20'
+const BG_BOT = '#0a0a10'
+const HI = '#f5f5f7'   // light edge / brightest facet
+const MID = '#9ca3af'  // mid grey
+const LO = '#374151'   // shadow grey
 
-function chunk(type, data) {
-  const typeBuf = Buffer.from(type)
-  const len = Buffer.alloc(4)
-  len.writeUInt32BE(data.length)
-  const crcBuf = Buffer.alloc(4)
-  crcBuf.writeUInt32BE(crc32(Buffer.concat([typeBuf, data])))
-  return Buffer.concat([len, typeBuf, data, crcBuf])
-}
+// Faceted d20 — face-on view. Front face is the central upward triangle whose
+// bottom edge sits on the pentagon's bottom edge; back facets fan out around it.
+function buildSvg({ size = 512, padding = 0.08, bgRadius = 0.18 } = {}) {
+  const r = size * bgRadius
+  const cx = size / 2
+  const cy = size / 2
+  const inset = size * padding
+  const inner = size - inset * 2
 
-// D20 polygon vertices (normalized 0..1), pointing up
-const D20_POINTS = [
-  [0.50, 0.05], // top
-  [0.82, 0.28], // top-right
-  [0.95, 0.62], // mid-right
-  [0.72, 0.95], // bot-right
-  [0.28, 0.95], // bot-left
-  [0.05, 0.62], // mid-left
-  [0.18, 0.28], // top-left
-]
+  const s = inner * 0.82
+  const ox = cx - s / 2
+  const oy = cy - s / 2 + s * 0.03
+  const P = (x, y) => [ox + x * s, oy + y * s]
 
-function pointInPolygon(px, py, poly) {
-  let inside = false
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const [xi, yi] = poly[i], [xj, yj] = poly[j]
-    if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi) inside = !inside
-  }
-  return inside
-}
+  // Pentagon (top-pointing): top, upper-right, lower-right, lower-left, upper-left
+  const V0 = P(0.50, 0.02)
+  const V1 = P(0.97, 0.36)
+  const V2 = P(0.79, 0.97)
+  const V3 = P(0.21, 0.97)
+  const V4 = P(0.03, 0.36)
 
-function makePNG(size) {
-  const ihdr = Buffer.alloc(13)
-  ihdr.writeUInt32BE(size, 0)
-  ihdr.writeUInt32BE(size, 4)
-  ihdr[8] = 8
-  ihdr[9] = 2
+  // Front face apex — sits just above the geometric center
+  const F = P(0.50, 0.54)
 
-  const raw = Buffer.alloc(size * (1 + size * 3))
-  const pad = size * 0.06
+  const poly = (pts, fill, opacity = 1) =>
+    `<polygon points="${pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ')}" fill="${fill}" fill-opacity="${opacity}" />`
 
-  for (let y = 0; y < size; y++) {
-    const row = y * (1 + size * 3)
-    raw[row] = 0
-    for (let x = 0; x < size; x++) {
-      const nx = (x - pad) / (size - pad * 2)
-      const ny = (y - pad) / (size - pad * 2)
-      const inside = pointInPolygon(nx, ny, D20_POINTS)
+  // 5 back facets + 1 front face. Top facets brightest, sides mid, bottom face darker.
+  const facets = [
+    poly([V0, V1, F], HI,  0.85),  // top-right back — brightest
+    poly([V0, F, V4], HI,  0.70),  // top-left back
+    poly([V1, V2, F], MID, 0.55),  // right side
+    poly([V4, F, V3], MID, 0.45),  // left side
+    poly([F, V2, V3], LO,  0.70),  // front face — in shadow
+  ].join('\n  ')
 
-      let r, g, b
-      if (inside) {
-        // Blue accent: #60a5fa with slight gradient
-        const t = (nx + ny) / 2
-        r = Math.round(60 + t * 20)
-        g = Math.round(120 + t * 25)
-        b = Math.round(220 + t * 35)
-      } else {
-        // Dark bg: #0d0d12
-        r = 13; g = 13; b = 18
-      }
+  const outerPoints = [V0, V1, V2, V3, V4]
+    .map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
+  const stroke = Math.max(2, size * 0.014)
+  const edge = Math.max(1, size * 0.005)
 
-      raw[row + 1 + x * 3] = r
-      raw[row + 1 + x * 3 + 1] = g
-      raw[row + 1 + x * 3 + 2] = b
-    }
-  }
+  // Internal facet edges (no extra bottom band)
+  const facetLines = [
+    [V0, F], [V1, F], [V2, F], [V3, F], [V4, F],
+  ].map(([a, b]) =>
+    `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="${HI}" stroke-width="${edge}" stroke-opacity="0.55" stroke-linecap="round" />`
+  ).join('\n  ')
 
-  const compressed = deflateSync(raw)
-  return Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
-    chunk('IHDR', ihdr),
-    chunk('IDAT', compressed),
-    chunk('IEND', Buffer.alloc(0)),
-  ])
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${BG_TOP}" />
+      <stop offset="1" stop-color="${BG_BOT}" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="${size}" height="${size}" rx="${r}" ry="${r}" fill="url(#bg)" />
+  ${facets}
+  ${facetLines}
+  <polygon points="${outerPoints}" fill="none" stroke="${HI}" stroke-width="${stroke}" stroke-linejoin="round" />
+</svg>`
 }
 
-const publicDir = join(__dirname, '..', 'public')
-writeFileSync(join(publicDir, 'icon-192.png'), makePNG(192))
-writeFileSync(join(publicDir, 'icon-512.png'), makePNG(512))
-console.log('Icons generated: public/icon-192.png, public/icon-512.png')
+async function render(svg, outPath) {
+  const buf = await sharp(Buffer.from(svg)).png().toBuffer()
+  await writeFile(outPath, buf)
+  console.log(`wrote ${outPath} (${buf.length} bytes)`)
+}
+
+await mkdir(PUBLIC, { recursive: true })
+
+await render(buildSvg({ size: 192 }), join(PUBLIC, 'icon-192.png'))
+await render(buildSvg({ size: 512 }), join(PUBLIC, 'icon-512.png'))
+// Maskable: extra safe-area padding, no rounded corners (PWA mask handles that)
+await render(buildSvg({ size: 512, padding: 0.18, bgRadius: 0 }), join(PUBLIC, 'icon-512-maskable.png'))
+await writeFile(join(PUBLIC, 'icon.svg'), buildSvg({ size: 512 }))
+console.log(`wrote ${join(PUBLIC, 'icon.svg')}`)
