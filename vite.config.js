@@ -10,9 +10,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'D&D Battle Tracker',
-        short_name: 'Battle Tracker',
-        description: 'D&D 5e combat tracker for dungeon masters',
+        name: 'Initiative Tracker',
+        short_name: 'Initiative',
+        description: 'Track initiative, manage combat, and run battles for any tabletop RPG.',
         theme_color: '#0c0c0e',
         background_color: '#0d0d12',
         display: 'standalone',
