@@ -491,6 +491,7 @@ export default function InitiativeTracker() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}
             >↺</button>
+            </div>
           </div>
 
           {/* Setup row: mode + roll enemies + token */}
