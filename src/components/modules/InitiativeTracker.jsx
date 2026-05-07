@@ -281,14 +281,14 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect
               title="Remove from combat"
               aria-label="Remove from combat"
               style={{
-                background: 'none', border: 'none', color: 'var(--c-muted)',
-                minHeight: 28, minWidth: 24, padding: 0, fontSize: '1rem',
-                cursor: 'pointer', opacity: 0.5, lineHeight: 1,
+                background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)',
+                minHeight: 28, minWidth: 28, padding: 0, fontSize: '0.95rem', fontWeight: 700,
+                cursor: 'pointer', lineHeight: 1,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: 4, transition: 'opacity 0.12s, color 0.12s',
+                borderRadius: 5, transition: 'color 0.12s, border-color 0.12s, background 0.12s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--c-danger)' }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = '0.5'; e.currentTarget.style.color = 'var(--c-muted)' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--c-danger)'; e.currentTarget.style.borderColor = 'var(--c-danger)'; e.currentTarget.style.background = 'var(--c-danger-dim)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--c-muted)'; e.currentTarget.style.borderColor = 'var(--c-border)'; e.currentTarget.style.background = 'none' }}
             >✕</button>
           ) : (
             <div className="flex" style={{ gap: 3 }}>
