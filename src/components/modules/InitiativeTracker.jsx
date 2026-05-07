@@ -421,37 +421,42 @@ export default function InitiativeTracker() {
 
       {tab === 'combat' && (
         <>
-          {/* Combat row: round + turn nav + quick-apply damage */}
-          <div className="flex items-center flex-shrink-0" style={{ gap: 6, justifyContent: 'center' }}>
-            <span data-testid="round-number" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--c-accent)', minWidth: 36, flexShrink: 0 }}>
-              R{round}
-            </span>
-            <button
-              onClick={prevTurn}
-              className="btn-ghost"
-              style={{ minHeight: 36, minWidth: 36, padding: 0, justifyContent: 'center', fontSize: '0.8rem', flexShrink: 0 }}
-              disabled={initiativeOrder.length === 0}
-            >◀</button>
-            <button
-              onClick={nextTurn}
-              className="btn-primary"
-              style={{ minHeight: 36, minWidth: 'unset', padding: '0 16px', fontSize: '0.8rem', flexShrink: 0 }}
-              disabled={initiativeOrder.length === 0}
-            >Next ▶</button>
-            <input
-              ref={quickInputRef}
-              type="text"
-              inputMode="numeric"
-              placeholder="HP"
-              value={quickAmt}
-              onChange={e => setQuickAmt(e.target.value.replace(/\D/g, ''))}
-              onKeyDown={e => { if (e.key === 'Escape') setQuickAmt('') }}
-              style={{
-                width: 48, minHeight: 36, textAlign: 'center', fontSize: '0.95rem', fontWeight: 700,
-                padding: '0 4px',
-                border: quickAmt ? `1px solid ${quickMode === 'heal' ? 'var(--c-success)' : 'var(--c-danger)'}` : undefined,
-              }}
-            />
+          {/* Combat row: [round + nav] [hp + dmg] */}
+          <div className="flex items-center flex-shrink-0" style={{ gap: 16, justifyContent: 'center' }}>
+            {/* Group 1: round counter + turn navigation */}
+            <div className="flex items-center" style={{ gap: 6 }}>
+              <span data-testid="round-number" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--c-accent)', minWidth: 36, flexShrink: 0 }}>
+                R{round}
+              </span>
+              <button
+                onClick={prevTurn}
+                className="btn-ghost"
+                style={{ minHeight: 36, minWidth: 36, padding: 0, justifyContent: 'center', fontSize: '0.8rem', flexShrink: 0 }}
+                disabled={initiativeOrder.length === 0}
+              >◀</button>
+              <button
+                onClick={nextTurn}
+                className="btn-primary"
+                style={{ minHeight: 36, minWidth: 'unset', padding: '0 16px', fontSize: '0.8rem', flexShrink: 0 }}
+                disabled={initiativeOrder.length === 0}
+              >Next ▶</button>
+            </div>
+            {/* Group 2: HP input + dmg/heal mode + undo */}
+            <div className="flex items-center" style={{ gap: 6 }}>
+              <input
+                ref={quickInputRef}
+                type="text"
+                inputMode="numeric"
+                placeholder="HP"
+                value={quickAmt}
+                onChange={e => setQuickAmt(e.target.value.replace(/\D/g, ''))}
+                onKeyDown={e => { if (e.key === 'Escape') setQuickAmt('') }}
+                style={{
+                  width: 48, minHeight: 36, textAlign: 'center', fontSize: '0.95rem', fontWeight: 700,
+                  padding: '0 4px',
+                  border: quickAmt ? `1px solid ${quickMode === 'heal' ? 'var(--c-success)' : 'var(--c-danger)'}` : undefined,
+                }}
+              />
             <div style={{ display: 'flex', border: '1px solid var(--c-border)', borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
               {['dmg', 'heal'].map(m => (
                 <button
