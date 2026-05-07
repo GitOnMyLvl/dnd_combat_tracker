@@ -412,7 +412,7 @@ export default function InitiativeTracker() {
   })
 
   return (
-    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 'var(--sp-2)' }}>
+    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: 'var(--sp-2)', paddingInline: 4 }}>
       {/* Tab bar */}
       <div className="flex flex-shrink-0" style={{ gap: 'var(--sp-1)' }}>
         <button style={tabStyle(tab === 'combat')} onClick={() => setTab('combat')}>In Combat</button>
@@ -422,7 +422,7 @@ export default function InitiativeTracker() {
       {tab === 'combat' && (
         <>
           {/* Combat row: round + turn nav + quick-apply damage */}
-          <div className="flex items-center flex-shrink-0" style={{ gap: 6, paddingTop: 4 }}>
+          <div className="flex items-center flex-shrink-0" style={{ gap: 6 }}>
             <span data-testid="round-number" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--c-accent)', minWidth: 48, flexShrink: 0 }}>
               R{round}
             </span>
