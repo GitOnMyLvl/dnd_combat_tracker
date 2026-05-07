@@ -421,89 +421,35 @@ export default function InitiativeTracker() {
 
       {tab === 'combat' && (
         <>
-          {/* Round row */}
-          <div className="flex items-center justify-between flex-shrink-0" style={{ gap: 'var(--sp-2)' }}>
-            <div>
-              <div className="label">Round</div>
-              <div data-testid="round-number" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--c-accent)', lineHeight: 1 }}>{round}</div>
-            </div>
-            <div className="flex" style={{ gap: 'var(--sp-1)' }}>
-              <button
-                onClick={prevTurn}
-                className="btn-ghost"
-                style={{ minHeight: 36, minWidth: 36, padding: 0, justifyContent: 'center', fontSize: '0.8rem' }}
-                disabled={initiativeOrder.length === 0}
-              >◀</button>
-              <button
-                onClick={nextTurn}
-                className="btn-primary"
-                style={{ minHeight: 36, minWidth: 'unset', padding: '0 16px', fontSize: '0.8rem' }}
-                disabled={initiativeOrder.length === 0}
-              >Next ▶</button>
-            </div>
-          </div>
-
-          {/* Mode toggle + Sort + Add Token */}
-          <div className="flex flex-shrink-0" style={{ gap: 'var(--sp-1)' }}>
-            <div style={{ display: 'flex', border: '1px solid var(--c-border)', borderRadius: 7, overflow: 'hidden', flexShrink: 0 }}>
-              {['auto', 'manual'].map(m => (
-                <button
-                  key={m}
-                  onClick={() => setInitiativeMode(m)}
-                  style={{
-                    minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.92rem', fontWeight: 600,
-                    borderRadius: 0, border: 'none',
-                    background: initiativeMode === m ? 'var(--c-accent-dim)' : 'transparent',
-                    color: initiativeMode === m ? 'var(--c-accent)' : 'var(--c-muted)',
-                    textTransform: 'capitalize',
-                  }}
-                >{m}</button>
-              ))}
-            </div>
-            <button
-              onClick={rollAllEnemyInitiative}
-              className="btn-ghost"
-              style={{ flex: 1, minHeight: 36, minWidth: 'unset', justifyContent: 'center', fontSize: '0.85rem' }}
-              disabled={combatants.filter(c => c.type === 'enemy').length === 0}
-              title="Auto-roll d20 + bonus for all enemies"
-            >Roll Enemies</button>
-            <button
-              onClick={sortInitiative}
-              className="btn-ghost"
-              style={{ flex: 1, minHeight: 36, minWidth: 'unset', justifyContent: 'center', fontSize: '0.98rem' }}
-              disabled={initiativeOrder.length === 0}
-            >Sort</button>
-            <button
-              onClick={() => setShowTokenForm(v => !v)}
-              className={showTokenForm ? 'btn-ghost' : 'btn-primary'}
-              style={{ minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.85rem', flexShrink: 0 }}
-              title="Add a token directly to initiative"
-            >+ Token</button>
-          </div>
-
-          {showTokenForm && (
-            <AddTokenForm
-              onAdd={handleAddToken}
-              onCancel={() => setShowTokenForm(false)}
-            />
-          )}
-
-          {/* Quick-Apply Damage Bar */}
+          {/* Combat row: round + turn nav + quick-apply damage */}
           <div className="flex items-center flex-shrink-0" style={{ gap: 6 }}>
-            <span className="label" style={{ flexShrink: 0 }}>
-              {quickMode === 'dmg' ? 'DMG' : 'HEAL'}
+            <span data-testid="round-number" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--c-accent)', minWidth: 48, flexShrink: 0 }}>
+              R{round}
             </span>
+            <button
+              onClick={prevTurn}
+              className="btn-ghost"
+              style={{ minHeight: 36, minWidth: 36, padding: 0, justifyContent: 'center', fontSize: '0.8rem', flexShrink: 0 }}
+              disabled={initiativeOrder.length === 0}
+            >◀</button>
+            <button
+              onClick={nextTurn}
+              className="btn-primary"
+              style={{ minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.8rem', flexShrink: 0 }}
+              disabled={initiativeOrder.length === 0}
+            >Next ▶</button>
+            <div style={{ width: 1, alignSelf: 'stretch', background: 'var(--c-border)', margin: '4px 2px', flexShrink: 0 }} />
             <input
               ref={quickInputRef}
               type="text"
               inputMode="numeric"
-              placeholder="0"
+              placeholder="HP"
               value={quickAmt}
               onChange={e => setQuickAmt(e.target.value.replace(/\D/g, ''))}
               onKeyDown={e => { if (e.key === 'Escape') setQuickAmt('') }}
               style={{
-                width: 52, minHeight: 36, textAlign: 'center', fontSize: '1rem', fontWeight: 700,
-                padding: '0 6px',
+                width: 48, minHeight: 36, textAlign: 'center', fontSize: '0.95rem', fontWeight: 700,
+                padding: '0 4px',
                 border: quickAmt ? `1px solid ${quickMode === 'heal' ? 'var(--c-success)' : 'var(--c-danger)'}` : undefined,
               }}
             />
@@ -513,7 +459,7 @@ export default function InitiativeTracker() {
                   key={m}
                   onClick={() => setQuickMode(m)}
                   style={{
-                    minHeight: 36, minWidth: 'unset', padding: '0 10px', fontSize: '0.8rem', fontWeight: 600,
+                    minHeight: 36, minWidth: 'unset', padding: '0 8px', fontSize: '0.75rem', fontWeight: 600,
                     borderRadius: 0, border: 'none',
                     background: quickMode === m
                       ? (m === 'heal' ? 'rgba(74,222,128,0.15)' : 'var(--c-danger-dim)')
@@ -542,6 +488,49 @@ export default function InitiativeTracker() {
               }}
             >↺</button>
           </div>
+
+          {/* Setup row: mode + roll enemies + token */}
+          <div className="flex flex-shrink-0" style={{ gap: 6 }}>
+            <div style={{ display: 'flex', border: '1px solid var(--c-border)', borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
+              {['auto', 'manual'].map(m => (
+                <button
+                  key={m}
+                  onClick={() => setInitiativeMode(m)}
+                  style={{
+                    minHeight: 28, minWidth: 'unset', padding: '0 8px', fontSize: '0.75rem', fontWeight: 600,
+                    borderRadius: 0, border: 'none',
+                    background: initiativeMode === m ? 'var(--c-accent-dim)' : 'transparent',
+                    color: initiativeMode === m ? 'var(--c-accent)' : 'var(--c-muted)',
+                    textTransform: 'capitalize',
+                  }}
+                >{m}</button>
+              ))}
+            </div>
+            <button
+              onClick={() => { rollAllEnemyInitiative(); sortInitiative() }}
+              style={{
+                minHeight: 28, minWidth: 'unset', padding: '0 8px', fontSize: '0.75rem', fontWeight: 500,
+                background: 'transparent', border: '1px solid var(--c-border)', borderRadius: 6,
+                color: 'var(--c-muted)', cursor: 'pointer',
+              }}
+              disabled={combatants.filter(c => c.type === 'enemy').length === 0}
+              title="Auto-roll d20 + bonus for all enemies, then sort"
+            >🎲 Roll enemies</button>
+            <div style={{ flex: 1 }} />
+            <button
+              onClick={() => setShowTokenForm(v => !v)}
+              className={showTokenForm ? 'btn-ghost' : 'btn-primary'}
+              style={{ minHeight: 28, minWidth: 'unset', padding: '0 10px', fontSize: '0.75rem', flexShrink: 0 }}
+              title="Add a token directly to initiative"
+            >+ Token</button>
+          </div>
+
+          {showTokenForm && (
+            <AddTokenForm
+              onAdd={handleAddToken}
+              onCancel={() => setShowTokenForm(false)}
+            />
+          )}
 
           <hr className="divider flex-shrink-0" />
 
