@@ -465,7 +465,7 @@ export default function InitiativeTracker() {
       {tab === 'combat' && (
         <>
           {/* Combat row: round + nav + damage + setup menu */}
-          <div className="flex items-center flex-shrink-0" style={{ gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="flex items-center flex-shrink-0" style={{ columnGap: 28, rowGap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
             {/* Group 1: round + turn navigation */}
             <div className="flex items-center" style={{ gap: 8 }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1, flexShrink: 0 }}>
