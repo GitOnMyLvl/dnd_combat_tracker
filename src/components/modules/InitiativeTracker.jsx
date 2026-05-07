@@ -191,12 +191,8 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect
         borderRadius: 8, cursor: 'pointer', padding: '6px 8px',
         background: flash
           ? (quickMode === 'heal' ? 'rgba(74,222,128,0.15)' : 'rgba(248,113,113,0.15)')
-          : isApplyMode
-            ? 'var(--c-surface)'
-            : isActive ? 'var(--c-accent-dim)' : isSelected ? 'var(--c-elevated)' : 'transparent',
-        border: isApplyMode
-          ? `1px solid ${quickMode === 'heal' ? 'var(--c-success)' : 'var(--c-danger)'}`
-          : isActive ? '1px solid var(--c-accent)' : '1px solid transparent',
+          : isActive ? 'var(--c-accent-dim)' : isSelected ? 'var(--c-elevated)' : 'transparent',
+        border: isActive ? '1px solid var(--c-accent)' : '1px solid transparent',
         opacity: isDowned ? 0.7 : 1,
         transition: 'background 0.15s',
         display: 'flex', flexDirection: 'column', gap: 5,
