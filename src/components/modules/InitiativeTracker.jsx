@@ -150,10 +150,13 @@ function DeathSaves({ combatant }) {
   )
 }
 
-function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect, onMoveUp, onMoveDown, onRemove, rowRef }) {
+function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect, onMoveUp, onMoveDown, onRemove, rowRef, quickAmt, quickMode, onQuickApply }) {
   const [amt, setAmt] = useState('')
   const [confirmRemove, setConfirmRemove] = useState(false)
+  const [flash, setFlash] = useState(false)
   const { setInitiativeRoll, updateHP } = useEncounterStore()
+
+  const isApplyMode = quickAmt !== '' && !isNaN(parseInt(quickAmt, 10)) && parseInt(quickAmt, 10) > 0
 
   const total = isManual ? c.initiative.roll : c.initiative.roll + c.initiative.bonus
   const isDowned = c.hp.current === 0
@@ -167,16 +170,35 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect
     setAmt('')
   }
 
+  const handleRowClick = () => {
+    if (isApplyMode) {
+      const n = parseInt(quickAmt, 10)
+      const delta = quickMode === 'heal' ? n : -n
+      updateHP(c.id, delta)
+      onQuickApply({ id: c.id, delta })
+      setFlash(true)
+      setTimeout(() => setFlash(false), 400)
+    } else {
+      onSelect(isSelected ? null : c.id)
+    }
+  }
+
   return (
     <div
       ref={rowRef}
-      onClick={() => onSelect(isSelected ? null : c.id)}
+      onClick={handleRowClick}
       style={{
         borderRadius: 8, cursor: 'pointer', padding: '6px 8px',
-        background: isActive ? 'var(--c-accent-dim)' : isSelected ? 'var(--c-elevated)' : 'transparent',
-        border: isActive ? '1px solid var(--c-accent)' : '1px solid transparent',
+        background: flash
+          ? (quickMode === 'heal' ? 'rgba(74,222,128,0.15)' : 'rgba(248,113,113,0.15)')
+          : isApplyMode
+            ? 'var(--c-surface)'
+            : isActive ? 'var(--c-accent-dim)' : isSelected ? 'var(--c-elevated)' : 'transparent',
+        border: isApplyMode
+          ? `1px solid ${quickMode === 'heal' ? 'var(--c-success)' : 'var(--c-danger)'}`
+          : isActive ? '1px solid var(--c-accent)' : '1px solid transparent',
         opacity: isDowned ? 0.7 : 1,
-        transition: 'background 0.1s',
+        transition: 'background 0.15s',
         display: 'flex', flexDirection: 'column', gap: 5,
       }}
     >
@@ -326,12 +348,17 @@ export default function InitiativeTracker() {
     sortInitiative, setInitiativeRoll, setInitiativeMode,
     selectCombatant, selectedCombatantId,
     addCombatant, addToInitiative, reorderInitiative, removeFromInitiative,
+    updateHP, rollAllEnemyInitiative,
   } = useEncounterStore()
 
   const { initiativeOrder, combatants, currentTurnIndex, round, initiativeMode = 'auto' } = encounter
   const isManual = initiativeMode === 'manual'
   const [showTokenForm, setShowTokenForm] = useState(false)
   const [tab, setTab] = useState('combat')
+  const [quickAmt, setQuickAmt] = useState('')
+  const [quickMode, setQuickMode] = useState('dmg')
+  const [lastHpChange, setLastHpChange] = useState(null)
+  const quickInputRef = useRef(null)
 
   const handleAddToken = useCallback(({ name, hp, ac, init, init_mod, spell_dc, spell_atk, type }) => {
     const id = addCombatant({
@@ -438,6 +465,13 @@ export default function InitiativeTracker() {
               ))}
             </div>
             <button
+              onClick={rollAllEnemyInitiative}
+              className="btn-ghost"
+              style={{ flex: 1, minHeight: 36, minWidth: 'unset', justifyContent: 'center', fontSize: '0.85rem' }}
+              disabled={combatants.filter(c => c.type === 'enemy').length === 0}
+              title="Auto-roll d20 + bonus for all enemies"
+            >Roll Enemies</button>
+            <button
               onClick={sortInitiative}
               className="btn-ghost"
               style={{ flex: 1, minHeight: 36, minWidth: 'unset', justifyContent: 'center', fontSize: '0.98rem' }}
@@ -457,6 +491,61 @@ export default function InitiativeTracker() {
               onCancel={() => setShowTokenForm(false)}
             />
           )}
+
+          {/* Quick-Apply Damage Bar */}
+          <div className="flex items-center flex-shrink-0" style={{ gap: 6 }}>
+            <span className="label" style={{ flexShrink: 0 }}>
+              {quickMode === 'dmg' ? 'DMG' : 'HEAL'}
+            </span>
+            <input
+              ref={quickInputRef}
+              type="text"
+              inputMode="numeric"
+              placeholder="0"
+              value={quickAmt}
+              onChange={e => setQuickAmt(e.target.value.replace(/\D/g, ''))}
+              onKeyDown={e => { if (e.key === 'Escape') setQuickAmt('') }}
+              style={{
+                width: 52, minHeight: 36, textAlign: 'center', fontSize: '1rem', fontWeight: 700,
+                padding: '0 6px',
+                border: quickAmt ? `1px solid ${quickMode === 'heal' ? 'var(--c-success)' : 'var(--c-danger)'}` : undefined,
+              }}
+            />
+            <div style={{ display: 'flex', border: '1px solid var(--c-border)', borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
+              {['dmg', 'heal'].map(m => (
+                <button
+                  key={m}
+                  onClick={() => setQuickMode(m)}
+                  style={{
+                    minHeight: 36, minWidth: 'unset', padding: '0 10px', fontSize: '0.8rem', fontWeight: 600,
+                    borderRadius: 0, border: 'none',
+                    background: quickMode === m
+                      ? (m === 'heal' ? 'rgba(74,222,128,0.15)' : 'var(--c-danger-dim)')
+                      : 'transparent',
+                    color: quickMode === m
+                      ? (m === 'heal' ? 'var(--c-success)' : 'var(--c-danger)')
+                      : 'var(--c-muted)',
+                  }}
+                >{m === 'dmg' ? 'DMG' : 'HEAL'}</button>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                if (lastHpChange) {
+                  updateHP(lastHpChange.id, -lastHpChange.delta)
+                  setLastHpChange(null)
+                }
+              }}
+              disabled={!lastHpChange}
+              title="Undo last HP change"
+              style={{
+                background: 'none', border: '1px solid var(--c-border)', borderRadius: 6,
+                color: lastHpChange ? 'var(--c-muted)' : 'var(--c-border)',
+                minHeight: 36, minWidth: 36, padding: 0, fontSize: '1rem', cursor: lastHpChange ? 'pointer' : 'default',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}
+            >↺</button>
+          </div>
 
           <hr className="divider flex-shrink-0" />
 
@@ -480,6 +569,9 @@ export default function InitiativeTracker() {
                 onMoveDown={() => moveDown(idx)}
                 onRemove={removeFromInitiative}
                 rowRef={el => { rowRefs.current[c.id] = el }}
+                quickAmt={quickAmt}
+                quickMode={quickMode}
+                onQuickApply={setLastHpChange}
               />
             ))}
           </div>
