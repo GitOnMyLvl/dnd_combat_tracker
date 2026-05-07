@@ -272,6 +272,37 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect
         }}>
           {total}
         </span>
+
+        {/* Quick remove — always visible */}
+        <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
+          {!confirmRemove ? (
+            <button
+              onClick={() => setConfirmRemove(true)}
+              title="Remove from combat"
+              aria-label="Remove from combat"
+              style={{
+                background: 'none', border: 'none', color: 'var(--c-muted)',
+                minHeight: 28, minWidth: 24, padding: 0, fontSize: '1rem',
+                cursor: 'pointer', opacity: 0.5, lineHeight: 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 4, transition: 'opacity 0.12s, color 0.12s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--c-danger)' }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '0.5'; e.currentTarget.style.color = 'var(--c-muted)' }}
+            >✕</button>
+          ) : (
+            <div className="flex" style={{ gap: 3 }}>
+              <button
+                onClick={() => onRemove(c.id)}
+                style={{ background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)', minHeight: 28, minWidth: 'unset', padding: '0 8px', fontSize: '0.72rem', fontWeight: 700, borderRadius: 5, cursor: 'pointer' }}
+              >Yes</button>
+              <button
+                onClick={() => setConfirmRemove(false)}
+                style={{ background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)', minHeight: 28, minWidth: 'unset', padding: '0 8px', fontSize: '0.72rem', fontWeight: 600, borderRadius: 5, cursor: 'pointer' }}
+              >No</button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* HP bar — always visible */}
@@ -326,26 +357,6 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect
               title="Move down"
               style={{ background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)', minHeight: 32, minWidth: 28, padding: 0, fontSize: '0.75rem', borderRadius: 5, opacity: isLast ? 0.3 : 1, cursor: isLast ? 'default' : 'pointer' }}
             >▼</button>
-            {!confirmRemove ? (
-              <button
-                onClick={() => setConfirmRemove(true)}
-                title="Remove"
-                style={{ background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)', minHeight: 32, minWidth: 28, padding: 0, fontSize: '0.85rem', borderRadius: 5, cursor: 'pointer' }}
-                onMouseEnter={e => { e.currentTarget.style.color = 'var(--c-danger)'; e.currentTarget.style.borderColor = 'var(--c-danger)' }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'var(--c-muted)'; e.currentTarget.style.borderColor = 'var(--c-border)' }}
-              >✕</button>
-            ) : (
-              <>
-                <button
-                  onClick={() => onRemove(c.id)}
-                  style={{ background: 'var(--c-danger-dim)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)', minHeight: 32, minWidth: 'unset', padding: '0 8px', fontSize: '0.75rem', fontWeight: 700, borderRadius: 5, cursor: 'pointer' }}
-                >Yes</button>
-                <button
-                  onClick={() => setConfirmRemove(false)}
-                  style={{ background: 'none', border: '1px solid var(--c-border)', color: 'var(--c-muted)', minHeight: 32, minWidth: 'unset', padding: '0 8px', fontSize: '0.75rem', fontWeight: 600, borderRadius: 5, cursor: 'pointer' }}
-                >No</button>
-              </>
-            )}
           </div>
         </div>
       )}
