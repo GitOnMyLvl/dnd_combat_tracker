@@ -421,7 +421,7 @@ export default function InitiativeTracker() {
 
       {tab === 'combat' && (
         <>
-          {/* Combat row: round + turn nav (left) | damage controls (right) */}
+          {/* Combat row: round + turn nav + quick-apply damage */}
           <div className="flex items-center flex-shrink-0" style={{ gap: 6 }}>
             <span data-testid="round-number" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--c-accent)', minWidth: 36, flexShrink: 0 }}>
               R{round}
@@ -435,10 +435,9 @@ export default function InitiativeTracker() {
             <button
               onClick={nextTurn}
               className="btn-primary"
-              style={{ minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.8rem', flexShrink: 0 }}
+              style={{ flex: 1, minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.8rem' }}
               disabled={initiativeOrder.length === 0}
             >Next ▶</button>
-            <div style={{ flex: 1 }} />
             <input
               ref={quickInputRef}
               type="text"
