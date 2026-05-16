@@ -1,10 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { v4 as uuid } from 'uuid'
 import { rollDie } from '../utils/dice'
 
 const defaultEncounter = () => ({
-  id: uuid(),
+  id: crypto.randomUUID(),
   name: 'New Encounter',
   round: 1,
   currentTurnIndex: 0,
@@ -14,7 +13,7 @@ const defaultEncounter = () => ({
 })
 
 const makeCombatant = (overrides = {}) => ({
-  id: uuid(),
+  id: crypto.randomUUID(),
   name: 'Unknown',
   type: 'enemy', // 'ally' | 'enemy'
   hp: { current: 10, max: 10, temp: 0 },

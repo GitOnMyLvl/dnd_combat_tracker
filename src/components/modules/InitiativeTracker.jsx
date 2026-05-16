@@ -210,15 +210,22 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect
         transition: 'background 0.15s, opacity 0.15s',
       }} />
 
-      {/* Top row: idx | roll | name | total */}
-      <div className="flex items-center" style={{ gap: 8 }}>
-        <span style={{
-          width: 14, textAlign: 'center', fontSize: '0.72rem',
-          color: isActive ? 'var(--c-accent)' : 'var(--c-muted)',
-          fontWeight: 700, flexShrink: 0, opacity: isActive ? 1 : 0.55,
-        }}>
-          {idx + 1}
-        </span>
+      {/* Idx / active marker — absolutely positioned, centered to the entire row */}
+      <span aria-hidden style={{
+        position: 'absolute', left: 10, top: 0, bottom: 0, width: 14,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '0.78rem', fontWeight: 700, lineHeight: 1,
+        color: isActive ? 'var(--c-accent)' : 'var(--c-muted)',
+        opacity: isActive ? 1 : 0.55,
+        pointerEvents: 'none',
+      }}>
+        {isActive
+          ? <span style={{ display: 'inline-block', transform: 'translateX(1px)' }}>▶</span>
+          : idx + 1}
+      </span>
+
+      {/* Top row: roll | name | total */}
+      <div className="flex items-center" style={{ gap: 8, paddingLeft: 22 }}>
 
         <InitInput
           id={c.id}

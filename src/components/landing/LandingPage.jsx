@@ -1,19 +1,7 @@
 import { useState } from 'react'
 import { useUIStore } from '../../store/uiStore'
 import { usePwaInstall } from '../../hooks/usePwaInstall'
-
-function D20Hero({ size = 150 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 512 512" aria-hidden="true">
-      <polygon points="256,97.3 421.8,217.2 256,280.7" fill="currentColor" fillOpacity="0.95" />
-      <polygon points="256,97.3 256,280.7 90.2,217.2" fill="currentColor" fillOpacity="0.75" />
-      <polygon points="421.8,217.2 358.3,432.3 256,280.7" fill="currentColor" fillOpacity="0.55" />
-      <polygon points="90.2,217.2 256,280.7 153.7,432.3" fill="currentColor" fillOpacity="0.45" />
-      <polygon points="256,280.7 358.3,432.3 153.7,432.3" fill="currentColor" fillOpacity="0.3" />
-      <polygon points="256,97.3 421.8,217.2 358.3,432.3 153.7,432.3 90.2,217.2" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round" />
-    </svg>
-  )
-}
+import D20Icon from '../shared/D20Icon'
 
 function DownloadIcon({ size = 15 }) {
   return (
@@ -25,8 +13,15 @@ function DownloadIcon({ size = 15 }) {
 
 export default function LandingPage() {
   const enterApp = useUIStore(s => s.enterApp)
+  const hasOnboarded = useUIStore(s => s.hasOnboarded)
+  const startOnboarding = useUIStore(s => s.startOnboarding)
   const { canInstall, isInstalled, isIos, promptInstall } = usePwaInstall()
   const [showIosHint, setShowIosHint] = useState(false)
+
+  const handleEnter = () => {
+    enterApp()
+    if (!hasOnboarded) startOnboarding()
+  }
 
   const showInstallButton = !isInstalled && (canInstall || isIos)
 
@@ -55,7 +50,7 @@ export default function LandingPage() {
         }}
       >
         <span style={{ color: 'var(--c-accent)', display: 'flex' }}>
-          <D20Hero size={150} />
+          <D20Icon size={150} />
         </span>
 
         <h1
@@ -88,7 +83,7 @@ export default function LandingPage() {
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginTop: 8 }}>
           <button
-            onClick={enterApp}
+            onClick={handleEnter}
             className="btn-primary"
             style={{
               minHeight: 48,

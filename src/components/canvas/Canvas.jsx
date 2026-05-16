@@ -1,17 +1,19 @@
-import { useCallback, useState } from 'react'
+import { lazy, Suspense, useCallback, useState } from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 import { useLayoutStore } from '../../store/layoutStore'
 import { useUIStore } from '../../store/uiStore'
 import ModuleWrapper from './ModuleWrapper'
 import ModulePicker from './ModulePicker'
+import OnboardingFlow from '../onboarding/OnboardingFlow'
+import D20Icon from '../shared/D20Icon'
 
-import InitiativeTracker from '../modules/InitiativeTracker'
-import CombatantTable from '../modules/CombatantTable'
-import ConditionsPanel from '../modules/ConditionsPanel'
-import DiceRoller from '../modules/DiceRoller'
-import NotesPad from '../modules/NotesPad'
-import PartyManager from '../modules/PartyManager'
-import AoeDamage from '../modules/AoeDamage'
+const InitiativeTracker = lazy(() => import('../modules/InitiativeTracker'))
+const CombatantTable    = lazy(() => import('../modules/CombatantTable'))
+const ConditionsPanel   = lazy(() => import('../modules/ConditionsPanel'))
+const DiceRoller        = lazy(() => import('../modules/DiceRoller'))
+const NotesPad          = lazy(() => import('../modules/NotesPad'))
+const PartyManager      = lazy(() => import('../modules/PartyManager'))
+const AoeDamage         = lazy(() => import('../modules/AoeDamage'))
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -87,14 +89,7 @@ export default function Canvas() {
           padding: 24, textAlign: 'center',
         }}>
           <span style={{ color: 'var(--c-accent)', display: 'flex', opacity: 0.6 }}>
-            <svg width="88" height="88" viewBox="0 0 512 512">
-              <polygon points="256,97.3 421.8,217.2 256,280.7" fill="currentColor" fillOpacity="0.95" />
-              <polygon points="256,97.3 256,280.7 90.2,217.2" fill="currentColor" fillOpacity="0.75" />
-              <polygon points="421.8,217.2 358.3,432.3 256,280.7" fill="currentColor" fillOpacity="0.55" />
-              <polygon points="90.2,217.2 256,280.7 153.7,432.3" fill="currentColor" fillOpacity="0.45" />
-              <polygon points="256,280.7 358.3,432.3 153.7,432.3" fill="currentColor" fillOpacity="0.3" />
-              <polygon points="256,97.3 421.8,217.2 358.3,432.3 153.7,432.3 90.2,217.2" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round" />
-            </svg>
+            <D20Icon size={88} />
           </span>
           <div className="display" style={{
             fontSize: '1.6rem', fontWeight: 700, letterSpacing: '0.22em',
@@ -135,7 +130,9 @@ export default function Canvas() {
                 config={m.config ?? {}}
                 minimized={m.minimized}
               >
-                <Component config={m.config ?? {}} />
+                <Suspense fallback={null}>
+                  <Component config={m.config ?? {}} />
+                </Suspense>
               </ModuleWrapper>
             </div>
           )
@@ -147,6 +144,7 @@ export default function Canvas() {
         onClick={openModulePicker}
         title="Add module"
         aria-label="Add module"
+        data-onboarding="fab-add-module"
         style={{
           position: 'fixed', bottom: 24, right: 24, zIndex: 40,
           width: 52, height: 52, minHeight: 'unset', minWidth: 'unset',
@@ -169,6 +167,8 @@ export default function Canvas() {
       >+</button>
 
       {showModulePicker && <ModulePicker onClose={closeModulePicker} />}
+
+      <OnboardingFlow />
     </div>
   )
 }

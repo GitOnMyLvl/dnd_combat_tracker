@@ -26,7 +26,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Precache only critical bundles + HTML on install. Icons/fonts get
+        // fetched lazily and cached by the browser; no need to bloat the SW.
+        globPatterns: ['**/*.{js,css,html}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.open5e\.com\//,

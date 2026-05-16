@@ -28,3 +28,13 @@ claude.md
 CLAUDE.md
 
 .vercel
+
+# Agent tooling (local-only, not part of the project)
+.claude/
+.claude-flow/
+.hive-mind/
+.superpowers/
+.swarm/
+.mcp.json
+*.db
+snapshot.txt

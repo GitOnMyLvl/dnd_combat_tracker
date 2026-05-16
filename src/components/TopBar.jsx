@@ -4,19 +4,7 @@ import { useThemeStore } from '../store/themeStore'
 import { useLayoutStore } from '../store/layoutStore'
 import { useUIStore } from '../store/uiStore'
 import AccentPicker from './AccentPicker'
-
-function D20Icon({ size = 18 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 512 512" aria-hidden="true">
-      <polygon points="256,97.3 421.8,217.2 256,280.7" fill="currentColor" fillOpacity="0.95" />
-      <polygon points="256,97.3 256,280.7 90.2,217.2" fill="currentColor" fillOpacity="0.75" />
-      <polygon points="421.8,217.2 358.3,432.3 256,280.7" fill="currentColor" fillOpacity="0.55" />
-      <polygon points="90.2,217.2 256,280.7 153.7,432.3" fill="currentColor" fillOpacity="0.45" />
-      <polygon points="256,280.7 358.3,432.3 153.7,432.3" fill="currentColor" fillOpacity="0.3" />
-      <polygon points="256,97.3 421.8,217.2 358.3,432.3 153.7,432.3 90.2,217.2" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round" />
-    </svg>
-  )
-}
+import D20Icon from './shared/D20Icon'
 
 function SunIcon({ size = 16 }) {
   return (
@@ -52,6 +40,16 @@ function PlusIcon({ size = 14 }) {
   )
 }
 
+function HelpIcon({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.5 9.5a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5" />
+      <circle cx="12" cy="17" r="0.6" fill="currentColor" />
+    </svg>
+  )
+}
+
 export default function TopBar() {
   const {
     encounter, savedEncounters,
@@ -61,6 +59,7 @@ export default function TopBar() {
   const { theme, toggleTheme } = useThemeStore()
   const clearModules = useLayoutStore(s => s.clearModules)
   const openModulePicker = useUIStore(s => s.openModulePicker)
+  const startOnboarding = useUIStore(s => s.startOnboarding)
   const [editingName, setEditingName] = useState(false)
   const [saveFlash, setSaveFlash] = useState(false)
 
@@ -194,6 +193,15 @@ export default function TopBar() {
         className="btn-ghost"
         style={{ minHeight: 34, minWidth: 'unset', flexShrink: 0 }}
       >New</button>
+
+      {/* Help / replay tour */}
+      <button
+        onClick={startOnboarding}
+        className="btn-ghost"
+        title="Replay tutorial"
+        aria-label="Replay tutorial"
+        style={{ minHeight: 34, minWidth: 34, padding: '0 9px', flexShrink: 0 }}
+      ><HelpIcon /></button>
 
       {/* Theme toggle */}
       <button

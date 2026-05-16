@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { v4 as uuid } from 'uuid'
 
 // Default sizes per module type. Heights sized for rowHeight=72 (see Canvas.jsx).
 const DEFAULT_SIZES = {
@@ -20,10 +19,11 @@ export const useLayoutStore = create(
       setLayout: (modules) => set({ modules }),
 
       addModule: (type, config = {}) => {
-        const id = `${type.toLowerCase()}-${uuid().slice(0, 6)}`
+        const id = `${type.toLowerCase()}-${crypto.randomUUID().slice(0, 6)}`
         const { w, h } = DEFAULT_SIZES[type] ?? { w: 4, h: 6 }
         const newModule = { i: id, type, x: 0, y: Infinity, w, h, config }
         set(s => ({ modules: [...s.modules, newModule] }))
+        return id
       },
 
       clearModules: () => set({ modules: [] }),

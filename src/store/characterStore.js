@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { v4 as uuid } from 'uuid'
 
 /**
  * Extracts saveable character template fields from a combatant.
@@ -51,7 +50,7 @@ export const useCharacterStore = create(
 
       // ─── Characters ───
       saveCharacter: (template) => {
-        const char = { id: uuid(), ...template }
+        const char = { id: crypto.randomUUID(), ...template }
         set(s => ({ characters: [...s.characters, char] }))
         return char.id
       },
@@ -75,7 +74,7 @@ export const useCharacterStore = create(
 
       // ─── Parties ───
       saveParty: (name, characterIds) => {
-        const party = { id: uuid(), name, characterIds }
+        const party = { id: crypto.randomUUID(), name, characterIds }
         set(s => ({ parties: [...s.parties, party] }))
         return party.id
       },

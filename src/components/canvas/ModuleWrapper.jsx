@@ -1,15 +1,6 @@
 import { useState, useRef } from 'react'
 import { useLayoutStore } from '../../store/layoutStore'
-
-const MODULE_TITLES = {
-  InitiativeTracker: 'Initiative',
-  CombatantTable:    null,
-  ConditionsPanel:   'Conditions',
-  DiceRoller:        'Dice',
-  NotesPad:          'Notes',
-  PartyManager:      'Party',
-  AoeDamage:         'AoE Damage',
-}
+import { MODULE_TITLES } from '../../constants/modules'
 
 const MODULE_INFO = {
   InitiativeTracker: {
@@ -139,8 +130,19 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
     borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
   }
 
+  // Data attribute used by onboarding spotlight to target a specific module.
+  // CombatantTable comes in two flavors so we disambiguate by tableType.
+  const onboardingTag = type === 'CombatantTable'
+    ? `module-CombatantTable-${config.tableType ?? 'ally'}`
+    : `module-${type}`
+
   return (
-    <div ref={wrapperRef} className="card flex flex-col h-full" style={{ overflow: 'hidden', position: 'relative' }}>
+    <div
+      ref={wrapperRef}
+      className="card flex flex-col h-full"
+      style={{ overflow: 'hidden', position: 'relative' }}
+      data-onboarding={onboardingTag}
+    >
       {/* Accent stripe */}
       <div className="accent-stripe" />
 
