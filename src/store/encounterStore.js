@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { v4 as uuid } from 'uuid'
+import { rollDie } from '../utils/dice'
 
 const defaultEncounter = () => ({
-  id: uuid(),
+  id: crypto.randomUUID(),
   name: 'New Encounter',
   round: 1,
   currentTurnIndex: 0,
@@ -13,7 +13,7 @@ const defaultEncounter = () => ({
 })
 
 const makeCombatant = (overrides = {}) => ({
-  id: uuid(),
+  id: crypto.randomUUID(),
   name: 'Unknown',
   type: 'enemy', // 'ally' | 'enemy'
   hp: { current: 10, max: 10, temp: 0 },
@@ -168,6 +168,22 @@ export const useEncounterStore = create(
       // Initiative
       setInitiativeMode: (mode) => {
         set(s => ({ encounter: { ...s.encounter, initiativeMode: mode } }))
+      },
+
+      rollAllEnemyInitiative: () => {
+        const { combatants } = get().encounter
+        const enemies = combatants.filter(c => c.type === 'enemy')
+        const unrolled = enemies.filter(c => !c.initiative.roll)
+        const targets = unrolled.length > 0 ? unrolled : enemies
+        set(s => ({
+          encounter: {
+            ...s.encounter,
+            combatants: s.encounter.combatants.map(c => {
+              if (!targets.find(t => t.id === c.id)) return c
+              return { ...c, initiative: { ...c.initiative, roll: rollDie(20) } }
+            }),
+          }
+        }))
       },
 
       setInitiativeRoll: (id, roll) => {

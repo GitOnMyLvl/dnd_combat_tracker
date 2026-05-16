@@ -10,9 +10,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'D&D Battle Tracker',
-        short_name: 'Battle Tracker',
-        description: 'D&D 5e combat tracker for dungeon masters',
+        name: 'Initiative Tracker',
+        short_name: 'Initiative',
+        description: 'Track initiative, manage combat, and run battles for any tabletop RPG.',
         theme_color: '#0c0c0e',
         background_color: '#0d0d12',
         display: 'standalone',
@@ -26,7 +26,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Precache only critical bundles + HTML on install. Icons/fonts get
+        // fetched lazily and cached by the browser; no need to bloat the SW.
+        globPatterns: ['**/*.{js,css,html}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.open5e\.com\//,

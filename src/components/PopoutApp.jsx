@@ -1,14 +1,6 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { MODULE_COMPONENTS } from './canvas/Canvas'
-
-const MODULE_TITLES = {
-  InitiativeTracker: 'Initiative',
-  CombatantTable: 'Combatants',
-  ConditionsPanel: 'Conditions',
-  DiceRoller: 'Dice',
-  NotesPad: 'Notes',
-  PartyManager: 'Party',
-}
+import { MODULE_TITLES } from '../constants/modules'
 
 export default function PopoutApp({ type, config }) {
   const Component = MODULE_COMPONENTS[type]
@@ -45,7 +37,9 @@ export default function PopoutApp({ type, config }) {
   return (
     <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--c-bg)', color: 'var(--c-text)', overflow: 'hidden' }}>
       <div style={{ flex: 1, minHeight: 0, padding: '10px 12px 12px', overflowY: 'auto', overflowX: 'hidden' }}>
-        <Component config={config} />
+        <Suspense fallback={null}>
+          <Component config={config} />
+        </Suspense>
       </div>
       <div style={{ flexShrink: 0, padding: '4px 12px 6px', borderTop: '1px solid var(--c-border)', fontSize: '0.7rem', color: 'var(--c-muted)', textAlign: 'center' }}>
         Changes sync automatically between windows

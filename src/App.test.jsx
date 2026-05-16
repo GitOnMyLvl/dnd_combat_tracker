@@ -31,19 +31,21 @@ describe('App', () => {
     expect(screen.queryByText('TopBar')).not.toBeInTheDocument()
   })
 
-  it('renders normal layout when entered and no popout param', () => {
+  it('renders normal layout when entered and no popout param', async () => {
     setSearch('')
     useUIStore.setState({ hasEntered: true })
     render(<App />)
-    expect(screen.getByText('TopBar')).toBeInTheDocument()
-    expect(screen.getByText('Canvas')).toBeInTheDocument()
+    // TopBar and Canvas are React.lazy-loaded behind a Suspense boundary,
+    // so we wait for them to resolve rather than asserting synchronously.
+    expect(await screen.findByText('TopBar')).toBeInTheDocument()
+    expect(await screen.findByText('Canvas')).toBeInTheDocument()
     expect(screen.queryByText('LandingPage')).not.toBeInTheDocument()
   })
 
-  it('renders PopoutApp when ?popout param is present', () => {
+  it('renders PopoutApp when ?popout param is present', async () => {
     setSearch('?popout=DiceRoller&config=%7B%7D')
     render(<App />)
-    expect(screen.getByText('PopoutApp:DiceRoller')).toBeInTheDocument()
+    expect(await screen.findByText('PopoutApp:DiceRoller')).toBeInTheDocument()
     expect(screen.queryByText('TopBar')).not.toBeInTheDocument()
     expect(screen.queryByText('LandingPage')).not.toBeInTheDocument()
   })
