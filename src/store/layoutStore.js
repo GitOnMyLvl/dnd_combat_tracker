@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { v4 as uuid } from 'uuid'
+import { uuid } from '../utils/id'
 
 // Default sizes per module type. Heights sized for rowHeight=72 (see Canvas.jsx).
 const DEFAULT_SIZES = {

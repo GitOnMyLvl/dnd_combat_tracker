@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { v4 as uuid } from 'uuid'
+import { uuid } from '../utils/id'
 
 const defaultEncounter = () => ({
   id: uuid(),
@@ -34,6 +34,44 @@ const makeCombatant = (overrides = {}) => ({
   _apiData: null,
   ...overrides,
 })
+
+// Applies `fn` to the combatant with `id`, leaving all others untouched.
+const mapCombatant = (encounter, id, fn) => ({
+  ...encounter,
+  combatants: encounter.combatants.map(c => (c.id === id ? fn(c) : c)),
+})
+
+// Removes `id` from the initiative order while keeping the turn pointer on
+// the same combatant (or on the next one, if the current combatant is removed).
+const withoutInInitiative = (encounter, id) => {
+  const order = encounter.initiativeOrder
+  const removedAt = order.indexOf(id)
+  if (removedAt === -1) return encounter
+  const newOrder = order.filter(i => i !== id)
+  let idx = encounter.currentTurnIndex
+  if (removedAt < idx) idx -= 1
+  if (newOrder.length === 0) idx = 0
+  else if (idx >= newOrder.length) idx = 0
+  return { ...encounter, initiativeOrder: newOrder, currentTurnIndex: idx }
+}
+
+const initiativeTotal = (c, isManual) =>
+  isManual ? c.initiative.roll : c.initiative.roll + c.initiative.bonus
+
+// Damage is absorbed by temporary HP first (5e PHB "Temporary Hit Points").
+export function applyHPDelta(hp, delta) {
+  if (delta >= 0) {
+    return { ...hp, current: Math.min(hp.max, hp.current + delta) }
+  }
+  const damage = -delta
+  const temp = hp.temp ?? 0
+  const absorbed = Math.min(temp, damage)
+  return {
+    ...hp,
+    temp: temp - absorbed,
+    current: Math.max(0, hp.current - (damage - absorbed)),
+  }
+}
 
 export const useEncounterStore = create(
   persist(
@@ -83,85 +121,54 @@ export const useEncounterStore = create(
       },
 
       removeCombatant: (id) => {
-        set(s => ({
-          encounter: {
-            ...s.encounter,
-            combatants: s.encounter.combatants.filter(c => c.id !== id),
-            initiativeOrder: s.encounter.initiativeOrder.filter(i => i !== id),
+        set(s => {
+          const encounter = withoutInInitiative(s.encounter, id)
+          return {
+            encounter: { ...encounter, combatants: encounter.combatants.filter(c => c.id !== id) },
+            selectedCombatantId: s.selectedCombatantId === id ? null : s.selectedCombatantId,
           }
-        }))
+        })
       },
 
       updateCombatant: (id, changes) => {
-        set(s => ({
-          encounter: {
-            ...s.encounter,
-            combatants: s.encounter.combatants.map(c =>
-              c.id === id ? { ...c, ...changes } : c
-            ),
-          }
-        }))
+        set(s => ({ encounter: mapCombatant(s.encounter, id, c => ({ ...c, ...changes })) }))
       },
 
       updateHP: (id, delta) => {
-        set(s => ({
-          encounter: {
-            ...s.encounter,
-            combatants: s.encounter.combatants.map(c => {
-              if (c.id !== id) return c
-              const current = Math.max(0, Math.min(c.hp.max, c.hp.current + delta))
-              return { ...c, hp: { ...c.hp, current } }
-            }),
-          }
-        }))
+        set(s => ({ encounter: mapCombatant(s.encounter, id, c => ({ ...c, hp: applyHPDelta(c.hp, delta) })) }))
       },
 
       setHP: (id, value) => {
         set(s => ({
-          encounter: {
-            ...s.encounter,
-            combatants: s.encounter.combatants.map(c => {
-              if (c.id !== id) return c
-              const current = Math.max(0, Math.min(c.hp.max, value))
-              return { ...c, hp: { ...c.hp, current } }
-            }),
-          }
+          encounter: mapCombatant(s.encounter, id, c => ({
+            ...c, hp: { ...c.hp, current: Math.max(0, Math.min(c.hp.max, value)) },
+          })),
         }))
       },
 
       toggleCondition: (id, condition) => {
         set(s => ({
-          encounter: {
-            ...s.encounter,
-            combatants: s.encounter.combatants.map(c => {
-              if (c.id !== id) return c
-              const has = c.conditions.includes(condition)
-              return {
-                ...c,
-                conditions: has
-                  ? c.conditions.filter(x => x !== condition)
-                  : [...c.conditions, condition],
-              }
-            }),
-          }
+          encounter: mapCombatant(s.encounter, id, c => ({
+            ...c,
+            conditions: c.conditions.includes(condition)
+              ? c.conditions.filter(x => x !== condition)
+              : [...c.conditions, condition],
+          })),
         }))
       },
 
       resetCombatantToApi: (id) => {
         set(s => ({
-          encounter: {
-            ...s.encounter,
-            combatants: s.encounter.combatants.map(c => {
-              if (c.id !== id || !c._apiData) return c
-              return makeCombatant({
-                id: c.id,
-                type: c.type,
-                _source: 'api',
-                _apiData: c._apiData,
-                ...mapApiToCombatant(c._apiData),
-              })
-            }),
-          }
+          encounter: mapCombatant(s.encounter, id, c => {
+            if (!c._apiData) return c
+            return makeCombatant({
+              id: c.id,
+              type: c.type,
+              _source: 'api',
+              _apiData: c._apiData,
+              ...mapApiToCombatant(c._apiData),
+            })
+          }),
         }))
       },
 
@@ -172,59 +179,41 @@ export const useEncounterStore = create(
 
       setInitiativeRoll: (id, roll) => {
         set(s => ({
-          encounter: {
-            ...s.encounter,
-            combatants: s.encounter.combatants.map(c =>
-              c.id === id ? { ...c, initiative: { ...c.initiative, roll } } : c
-            ),
-          }
+          encounter: mapCombatant(s.encounter, id, c => ({ ...c, initiative: { ...c.initiative, roll } })),
         }))
       },
 
       setExhaustion: (id, level) => {
         set(s => ({
-          encounter: {
-            ...s.encounter,
-            combatants: s.encounter.combatants.map(c =>
-              c.id === id ? { ...c, exhaustion: Math.max(0, Math.min(10, level)) } : c
-            ),
-          }
+          encounter: mapCombatant(s.encounter, id, c => ({ ...c, exhaustion: Math.max(0, Math.min(10, level)) })),
         }))
       },
 
       toggleInspiration: (id) => {
         set(s => ({
-          encounter: {
-            ...s.encounter,
-            combatants: s.encounter.combatants.map(c =>
-              c.id === id ? { ...c, inspiration: !c.inspiration } : c
-            ),
-          }
+          encounter: mapCombatant(s.encounter, id, c => ({ ...c, inspiration: !c.inspiration })),
         }))
       },
 
+      // Sorting before combat has started (round 1, first turn) starts at the top.
+      // Mid-combat, the round is kept and the turn stays with the current combatant.
       sortInitiative: () => {
         set(s => {
-          const isManual = s.encounter.initiativeMode === 'manual'
-          const inOrder = s.encounter.initiativeOrder
-            .map(id => s.encounter.combatants.find(c => c.id === id))
+          const { encounter } = s
+          const isManual = encounter.initiativeMode === 'manual'
+          const currentId = encounter.initiativeOrder[encounter.currentTurnIndex]
+          const notStarted = encounter.round === 1 && encounter.currentTurnIndex === 0
+          const sorted = encounter.initiativeOrder
+            .map(id => encounter.combatants.find(c => c.id === id))
             .filter(Boolean)
-          const sorted = [...inOrder]
             .sort((a, b) => {
-              const aTotal = isManual ? a.initiative.roll : a.initiative.roll + a.initiative.bonus
-              const bTotal = isManual ? b.initiative.roll : b.initiative.roll + b.initiative.bonus
-              if (bTotal !== aTotal) return bTotal - aTotal
+              const diff = initiativeTotal(b, isManual) - initiativeTotal(a, isManual)
+              if (diff !== 0) return diff
               return (b.abilities?.dex ?? 10) - (a.abilities?.dex ?? 10)
             })
             .map(c => c.id)
-          return {
-            encounter: {
-              ...s.encounter,
-              initiativeOrder: sorted,
-              currentTurnIndex: 0,
-              round: 1,
-            }
-          }
+          const currentTurnIndex = notStarted ? 0 : Math.max(0, sorted.indexOf(currentId))
+          return { encounter: { ...encounter, initiativeOrder: sorted, currentTurnIndex } }
         })
       },
 
@@ -233,13 +222,11 @@ export const useEncounterStore = create(
           const len = s.encounter.initiativeOrder.length
           if (len === 0) return s
           const next = s.encounter.currentTurnIndex + 1
-          const newIndex = next % len
-          const newRound = next >= len ? s.encounter.round + 1 : s.encounter.round
           return {
             encounter: {
               ...s.encounter,
-              currentTurnIndex: newIndex,
-              round: newRound,
+              currentTurnIndex: next % len,
+              round: next >= len ? s.encounter.round + 1 : s.encounter.round,
             }
           }
         })
@@ -250,51 +237,58 @@ export const useEncounterStore = create(
           const len = s.encounter.initiativeOrder.length
           if (len === 0) return s
           const prev = s.encounter.currentTurnIndex - 1
-          const newIndex = prev < 0 ? len - 1 : prev
-          const newRound = prev < 0
-            ? Math.max(1, s.encounter.round - 1)
-            : s.encounter.round
           return {
             encounter: {
               ...s.encounter,
-              currentTurnIndex: newIndex,
-              round: newRound,
+              currentTurnIndex: prev < 0 ? len - 1 : prev,
+              round: prev < 0 ? Math.max(1, s.encounter.round - 1) : s.encounter.round,
             }
           }
         })
       },
 
+      // Keeps the turn with whoever currently has it.
       reorderInitiative: (newOrder) => {
-        set(s => ({
-          encounter: {
-            ...s.encounter,
-            initiativeOrder: newOrder,
-          }
-        }))
-      },
-
-      addToInitiative: (id) => {
         set(s => {
-          if (s.encounter.initiativeOrder.includes(id)) return s
-          const combatant = s.encounter.combatants.find(c => c.id === id)
-          if (!combatant) return s
-          const isManual = s.encounter.initiativeMode === 'manual'
-          const newTotal = isManual ? combatant.initiative.roll : combatant.initiative.roll + combatant.initiative.bonus
-          const order = s.encounter.initiativeOrder
-          const insertAt = order.findIndex(existingId => {
-            const c = s.encounter.combatants.find(x => x.id === existingId)
-            if (!c) return false
-            const total = isManual ? c.initiative.roll : c.initiative.roll + c.initiative.bonus
-            if (newTotal !== total) return newTotal > total
-            return (combatant.abilities?.dex ?? 10) > (c.abilities?.dex ?? 10)
-          })
-          const newOrder = insertAt === -1
-            ? [...order, id]
-            : [...order.slice(0, insertAt), id, ...order.slice(insertAt)]
+          const currentId = s.encounter.initiativeOrder[s.encounter.currentTurnIndex]
+          const idx = newOrder.indexOf(currentId)
           return {
             encounter: {
               ...s.encounter,
               initiativeOrder: newOrder,
+              currentTurnIndex: idx >= 0 ? idx : Math.min(s.encounter.currentTurnIndex, Math.max(0, newOrder.length - 1)),
+            }
+          }
+        })
+      },
+
+      addToInitiative: (id) => {
+        set(s => {
+          const { encounter } = s
+          if (encounter.initiativeOrder.includes(id)) return s
+          const combatant = encounter.combatants.find(c => c.id === id)
+          if (!combatant) return s
+          const isManual = encounter.initiativeMode === 'manual'
+          const newTotal = initiativeTotal(combatant, isManual)
+          const order = encounter.initiativeOrder
+          const insertAt = order.findIndex(existingId => {
+            const c = encounter.combatants.find(x => x.id === existingId)
+            if (!c) return false
+            const total = initiativeTotal(c, isManual)
+            if (newTotal !== total) return newTotal > total
+            return (combatant.abilities?.dex ?? 10) > (c.abilities?.dex ?? 10)
+          })
+          const at = insertAt === -1 ? order.length : insertAt
+          const newOrder = [...order.slice(0, at), id, ...order.slice(at)]
+          // Inserting before (or at) the current turn shifts the pointer so the
+          // same combatant keeps their turn. Before combat starts, stay at the top.
+          const notStarted = encounter.round === 1 && encounter.currentTurnIndex === 0
+          const shift = !notStarted && order.length > 0 && at <= encounter.currentTurnIndex ? 1 : 0
+          return {
+            encounter: {
+              ...encounter,
+              initiativeOrder: newOrder,
+              currentTurnIndex: encounter.currentTurnIndex + shift,
             }
           }
         })
@@ -303,40 +297,20 @@ export const useEncounterStore = create(
       // Death saves
       setDeathSave: (id, type, value) => {
         set(s => ({
-          encounter: {
-            ...s.encounter,
-            combatants: s.encounter.combatants.map(c =>
-              c.id === id
-                ? { ...c, deathSaves: { ...c.deathSaves, [type]: Math.max(0, Math.min(3, value)) } }
-                : c
-            ),
-          }
+          encounter: mapCombatant(s.encounter, id, c => ({
+            ...c, deathSaves: { ...c.deathSaves, [type]: Math.max(0, Math.min(3, value)) },
+          })),
         }))
       },
 
       resetDeathSaves: (id) => {
         set(s => ({
-          encounter: {
-            ...s.encounter,
-            combatants: s.encounter.combatants.map(c =>
-              c.id === id ? { ...c, deathSaves: { successes: 0, failures: 0 } } : c
-            ),
-          }
+          encounter: mapCombatant(s.encounter, id, c => ({ ...c, deathSaves: { successes: 0, failures: 0 } })),
         }))
       },
 
       removeFromInitiative: (id) => {
-        set(s => {
-          const order = s.encounter.initiativeOrder.filter(i => i !== id)
-          const idx = order.length === 0 ? 0 : Math.min(s.encounter.currentTurnIndex, order.length - 1)
-          return {
-            encounter: {
-              ...s.encounter,
-              initiativeOrder: order,
-              currentTurnIndex: idx,
-            }
-          }
-        })
+        set(s => ({ encounter: withoutInInitiative(s.encounter, id) }))
       },
 
       // Selected combatant (for conditions panel etc.)
@@ -345,6 +319,8 @@ export const useEncounterStore = create(
     }),
     {
       name: 'dnd-tracker-encounter',
+      version: 1,
+      migrate: (persisted) => persisted,
       partialize: (state) => ({
         encounter: state.encounter,
         savedEncounters: state.savedEncounters,

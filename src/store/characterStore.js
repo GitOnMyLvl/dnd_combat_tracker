@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { v4 as uuid } from 'uuid'
+import { uuid } from '../utils/id'
 
 /**
  * Extracts saveable character template fields from a combatant.
