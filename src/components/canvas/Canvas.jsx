@@ -28,7 +28,7 @@ export const MODULE_COMPONENTS = {
 }
 
 export default function Canvas() {
-  const { modules, setLayout } = useLayoutStore(useShallow(s => ({ modules: s.modules, setLayout: s.setLayout })))
+  const { modules, setLayout, applyDefaultLayout } = useLayoutStore(useShallow(s => ({ modules: s.modules, setLayout: s.setLayout, applyDefaultLayout: s.applyDefaultLayout })))
   const { showModulePicker, openModulePicker, closeModulePicker } = useUIStore(useShallow(s => ({ showModulePicker: s.showModulePicker, openModulePicker: s.openModulePicker, closeModulePicker: s.closeModulePicker })))
 
   const layouts = {
@@ -76,9 +76,13 @@ export default function Canvas() {
             BATTLE TRACKER
           </div>
           <div className="ornament">Ready your party</div>
-          <p style={{ color: 'var(--c-muted)', fontSize: '0.9rem', margin: 0, maxWidth: 340, lineHeight: 1.6 }}>
-            Canvas is empty — tap <strong style={{ color: 'var(--c-accent)' }}>+ Module</strong> to summon your first panel.
+          <p style={{ color: 'var(--c-muted)', fontSize: '0.9rem', margin: 0, maxWidth: 360, lineHeight: 1.6 }}>
+            Canvas is empty. Start with the standard layout (initiative, enemies, allies and dice)
+            or pick panels yourself with <strong style={{ color: 'var(--c-accent)' }}>+ Module</strong>.
           </p>
+          <button className="btn-primary" onClick={applyDefaultLayout} style={{ pointerEvents: 'auto', minHeight: 44, padding: '0 20px', fontSize: '0.9rem' }}>
+            Use standard layout
+          </button>
         </div>
       )}
 

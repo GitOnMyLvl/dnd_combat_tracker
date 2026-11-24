@@ -12,6 +12,13 @@ const DEFAULT_SIZES = {
   PartyManager:      { w: 4, h: 7 },
 }
 
+const defaultLayout = () => [
+  { i: `initiativetracker-${uuid().slice(0, 6)}`, type: 'InitiativeTracker', x: 0, y: 0, w: 4, h: 9, config: {} },
+  { i: `combatanttable-${uuid().slice(0, 6)}`, type: 'CombatantTable', x: 4, y: 0, w: 4, h: 9, config: { tableType: 'enemy' } },
+  { i: `combatanttable-${uuid().slice(0, 6)}`, type: 'CombatantTable', x: 8, y: 0, w: 4, h: 5, config: { tableType: 'ally' } },
+  { i: `diceroller-${uuid().slice(0, 6)}`, type: 'DiceRoller', x: 8, y: 5, w: 4, h: 6, config: {} },
+]
+
 export const useLayoutStore = create(
   persist(
     (set) => ({
@@ -27,6 +34,9 @@ export const useLayoutStore = create(
       },
 
       clearModules: () => set({ modules: [] }),
+
+      // What most DMs need: turn order front and centre, both sides, dice.
+      applyDefaultLayout: () => set({ modules: defaultLayout() }),
 
       removeModule: (id) => {
         set(s => ({ modules: s.modules.filter(m => m.i !== id) }))

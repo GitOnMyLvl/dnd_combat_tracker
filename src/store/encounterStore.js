@@ -73,6 +73,15 @@ export function applyHPDelta(hp, delta) {
   }
 }
 
+const DEMO_COMBATANTS = [
+  { name: 'Thorin (Fighter)', type: 'ally', hp: { current: 44, max: 44, temp: 0 }, ac: 18, initiative: { bonus: 1, roll: 12 }, abilities: { str: 16, dex: 12, con: 16, int: 10, wis: 12, cha: 8 } },
+  { name: 'Lyra (Wizard)', type: 'ally', hp: { current: 27, max: 27, temp: 0 }, ac: 13, initiative: { bonus: 3, roll: 15 }, spellSaveDC: 15, abilities: { str: 8, dex: 16, con: 14, int: 18, wis: 12, cha: 10 } },
+  { name: 'Mira (Cleric)', type: 'ally', hp: { current: 33, max: 33, temp: 0 }, ac: 16, initiative: { bonus: 0, roll: 7 }, spellSaveDC: 14, abilities: { str: 14, dex: 10, con: 14, int: 10, wis: 17, cha: 12 } },
+  { name: 'Goblin Boss', type: 'enemy', hp: { current: 21, max: 21, temp: 0 }, ac: 17, initiative: { bonus: 2, roll: 14 }, abilities: { str: 10, dex: 14, con: 10, int: 10, wis: 8, cha: 10 } },
+  { name: 'Goblin 1', type: 'enemy', hp: { current: 7, max: 7, temp: 0 }, ac: 15, initiative: { bonus: 2, roll: 11 }, abilities: { str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8 } },
+  { name: 'Goblin 2', type: 'enemy', hp: { current: 7, max: 7, temp: 0 }, ac: 15, initiative: { bonus: 2, roll: 4 }, abilities: { str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8 } },
+]
+
 export const useEncounterStore = create(
   persist(
     (set, get) => ({
@@ -81,6 +90,14 @@ export const useEncounterStore = create(
 
       // Encounter management
       newEncounter: () => set({ encounter: defaultEncounter() }),
+
+      // A small ready-to-run fight so first-time visitors can see how it works.
+      loadDemoEncounter: () => {
+        const encounter = { ...defaultEncounter(), name: 'Demo: Goblin Ambush' }
+        encounter.combatants = DEMO_COMBATANTS.map(c => makeCombatant(c))
+        set({ encounter, selectedCombatantId: null })
+        encounter.combatants.forEach(c => get().addToInitiative(c.id))
+      },
 
       saveEncounter: () => {
         const { encounter, savedEncounters } = get()
@@ -109,6 +126,8 @@ export const useEncounterStore = create(
       },
 
       // Combatants
+      // New combatants join the initiative order right away; they can be moved
+      // out of combat (and back) from the Initiative module.
       addCombatant: (data = {}) => {
         const c = makeCombatant(data)
         set(s => ({
@@ -117,6 +136,7 @@ export const useEncounterStore = create(
             combatants: [...s.encounter.combatants, c],
           }
         }))
+        get().addToInitiative(c.id)
         return c.id
       },
 

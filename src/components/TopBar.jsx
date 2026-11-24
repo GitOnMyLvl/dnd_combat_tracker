@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { useEncounterStore } from '../store/encounterStore'
 import { useThemeStore } from '../store/themeStore'
-import { useLayoutStore } from '../store/layoutStore'
 import { useUIStore } from '../store/uiStore'
 import AccentPicker from './AccentPicker'
 import { downloadBackup, importBackupFile } from '../utils/backup'
@@ -46,6 +45,14 @@ function SaveIcon({ size = 15 }) {
   )
 }
 
+function MenuIcon({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  )
+}
+
 function PlusIcon({ size = 14 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
@@ -61,8 +68,9 @@ export default function TopBar() {
   } = useEncounterStore(useShallow(s => ({ encounter: s.encounter, savedEncounters: s.savedEncounters, newEncounter: s.newEncounter, saveEncounter: s.saveEncounter, loadEncounter: s.loadEncounter, deleteEncounter: s.deleteEncounter, renameEncounter: s.renameEncounter })))
   const [showEncounters, setShowEncounters] = useState(false)
   const { theme, toggleTheme } = useThemeStore(useShallow(s => ({ theme: s.theme, toggleTheme: s.toggleTheme })))
-  const clearModules = useLayoutStore(s => s.clearModules)
   const openModulePicker = useUIStore(s => s.openModulePicker)
+  const resetToLanding = useUIStore(s => s.resetToLanding)
+  const [showMenu, setShowMenu] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const [saveFlash, setSaveFlash] = useState(false)
   const fileInputRef = useRef(null)
@@ -99,13 +107,19 @@ export default function TopBar() {
         boxShadow: '0 1px 0 var(--c-border)',
       }}
     >
-      {/* Logo */}
-      <div className="flex items-center" style={{ gap: 10, flexShrink: 0 }}>
+      {/* Logo — back to the start page */}
+      <button
+        onClick={resetToLanding}
+        title="Start page"
+        aria-label="Battle Tracker start page"
+        className="flex items-center"
+        style={{ gap: 10, flexShrink: 0, background: 'none', border: 'none', padding: 0, minHeight: 'unset', minWidth: 'unset', cursor: 'pointer' }}
+      >
         <span style={{ color: 'var(--c-accent)', display: 'flex' }}>
           <D20Icon size={22} />
         </span>
         <span
-          className="display"
+          className="display topbar-brand"
           style={{
             fontSize: '0.95rem',
             color: 'var(--c-text)',
@@ -118,9 +132,9 @@ export default function TopBar() {
         >
           BATTLE TRACKER
         </span>
-      </div>
+      </button>
 
-      <div style={{ width: 1, height: 24, background: 'var(--c-border)', flexShrink: 0, margin: '0 var(--sp-1)' }} />
+      <div className="topbar-brand" style={{ width: 1, height: 24, background: 'var(--c-border)', flexShrink: 0, margin: '0 var(--sp-1)' }} />
 
       {/* Encounter name */}
       {editingName ? (
@@ -159,14 +173,27 @@ export default function TopBar() {
         className="btn-primary"
         style={{ minHeight: 34, minWidth: 'unset', padding: '0 14px', fontSize: '0.8rem', flexShrink: 0, gap: 6, display: 'inline-flex', alignItems: 'center' }}
       >
-        <PlusIcon /> Module
+        <PlusIcon /> <span>Module</span>
       </button>
 
-      <div style={{ width: 1, height: 22, background: 'var(--c-border)', flexShrink: 0, margin: '0 var(--sp-1)' }} />
+      {/* On narrow screens the secondary actions collapse into this menu */}
+      <button
+        className="btn-ghost topbar-menu-btn"
+        onClick={() => setShowMenu(v => !v)}
+        aria-expanded={showMenu}
+        aria-label="Menu"
+        style={{ minHeight: 34, minWidth: 34, padding: '0 9px', flexShrink: 0 }}
+      >
+        <MenuIcon />
+      </button>
+
+      <div className={`topbar-secondary${showMenu ? ' open' : ''}`} onClick={e => { if (e.target.closest('button[data-closes-menu]')) setShowMenu(false) }}>
+      <div className="topbar-sep" style={{ width: 1, height: 22, background: 'var(--c-border)', flexShrink: 0, margin: '0 var(--sp-1)' }} />
 
       {/* Save */}
       <button
         onClick={handleSave}
+        data-closes-menu
         className="btn-ghost"
         title="Save encounter"
         style={{
@@ -183,6 +210,7 @@ export default function TopBar() {
       {/* Encounters */}
       <button
         onClick={() => setShowEncounters(v => !v)}
+        data-closes-menu
         className="btn-ghost"
         style={{
           minHeight: 34, minWidth: 'unset',
@@ -206,7 +234,9 @@ export default function TopBar() {
 
       {/* New */}
       <button
-        onClick={() => { if (window.confirm('Start a new encounter? Unsaved changes will be lost.')) { newEncounter(); clearModules() } }}
+        onClick={() => { if (window.confirm('Start a new encounter? Unsaved changes will be lost.')) newEncounter() }}
+        data-closes-menu
+        title="Start a new, empty encounter (keeps your panels)"
         className="btn-ghost"
         style={{ minHeight: 34, minWidth: 'unset', flexShrink: 0 }}
       >New</button>
@@ -218,9 +248,10 @@ export default function TopBar() {
         title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
         aria-label="Toggle theme"
         style={{ minHeight: 34, minWidth: 34, padding: '0 9px', flexShrink: 0 }}
-      >{theme === 'dark' ? <SunIcon /> : <MoonIcon />}</button>
+      >{theme === 'dark' ? <SunIcon /> : <MoonIcon />}<span className="topbar-menu-label">{theme === 'dark' ? 'Light theme' : 'Dark theme'}</span></button>
 
       <AccentPicker />
+      </div>
 
       {/* Encounters dropdown */}
       {showEncounters && (

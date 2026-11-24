@@ -45,9 +45,12 @@ async function addModules(page) {
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
+  // Start from an empty canvas, past the landing page and first-run guide
+  await page.evaluate(() => {
+    localStorage.clear()
+    localStorage.setItem('dnd-tracker-ui', JSON.stringify({ state: { hasEntered: true, showGuide: false }, version: 0 }))
+  })
   await page.reload()
-  await page.getByRole('button', { name: 'Roll for Initiative' }).click()
   await setupCombat(page)
   await addModules(page)
 })

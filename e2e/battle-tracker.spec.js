@@ -3,9 +3,12 @@ import { test, expect } from '@playwright/test'
 // Clear localStorage before each test for a clean slate
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
+  // Start from an empty canvas, past the landing page and first-run guide
+  await page.evaluate(() => {
+    localStorage.clear()
+    localStorage.setItem('dnd-tracker-ui', JSON.stringify({ state: { hasEntered: true, showGuide: false }, version: 0 }))
+  })
   await page.reload()
-  await page.getByRole('button', { name: 'Roll for Initiative' }).click()
 })
 
 test.describe('Empty Canvas', () => {
@@ -113,12 +116,10 @@ test.describe('Initiative Tracking', () => {
     // Wait for modal to close
     await expect(page.getByPlaceholder('Name')).not.toBeVisible()
 
-    // Move both into the initiative order, then sort and advance
+    // Both joined the initiative order automatically; sort and advance
     const tracker = page.locator('.card', { has: page.locator('.drag-handle', { hasText: 'INITIATIVE' }) })
-    await tracker.getByRole('button', { name: /Out of Combat/ }).click()
-    await tracker.getByTitle('Move to combat').first().click()
-    await tracker.getByTitle('Move to combat').first().click()
-    await tracker.getByRole('button', { name: /In Combat/ }).click()
+    await expect(tracker.getByText('Goblin')).toBeVisible()
+    await expect(tracker.getByText('Fighter')).toBeVisible()
     await tracker.getByRole('button', { name: 'Sort', exact: true }).click()
     await expect(tracker.getByTestId('round-number')).toHaveText('1')
     await tracker.getByRole('button', { name: /Next/ }).click()
@@ -167,23 +168,19 @@ test.describe('Encounter Management', () => {
   test('renames encounter', async ({ page }) => {
     // Click the encounter name button in the top bar
     await page.getByTitle('Click to rename').click()
-    const topBar = page.locator('div', { has: page.getByRole('button', { name: 'Toggle theme' }) }).last()
-
-    // The input should appear
-    const nameInput = topBar.locator('input')
+    const nameInput = page.locator('input:focus')
     await nameInput.clear()
     await nameInput.fill('Dragon Fight')
     await nameInput.press('Enter')
 
     // Should display new name
-    await expect(topBar.getByText('Dragon Fight')).toBeVisible()
+    await expect(page.getByTitle('Click to rename')).toHaveText('Dragon Fight')
   })
 
   test('saves and loads encounter', async ({ page }) => {
     // Rename first
     await page.getByTitle('Click to rename').click()
-    const topBar = page.locator('div', { has: page.getByRole('button', { name: 'Toggle theme' }) }).last()
-    const nameInput = topBar.locator('input')
+    const nameInput = page.locator('input:focus')
     await nameInput.clear()
     await nameInput.fill('Saved Battle')
     await nameInput.press('Enter')

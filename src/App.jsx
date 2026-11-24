@@ -2,6 +2,7 @@ import TopBar from './components/TopBar'
 import Canvas from './components/canvas/Canvas'
 import PopoutApp from './components/PopoutApp'
 import LandingPage from './components/landing/LandingPage'
+import QuickGuide from './components/QuickGuide'
 import { useStorageSync } from './hooks/useStorageSync'
 import { useUIStore } from './store/uiStore'
 
@@ -11,6 +12,7 @@ export default function App() {
   const params = new URLSearchParams(window.location.search)
   const popoutType = params.get('popout')
   const hasEntered = useUIStore(s => s.hasEntered)
+  const showGuide = useUIStore(s => s.showGuide)
 
   if (popoutType) {
     let config = {}
@@ -25,6 +27,7 @@ export default function App() {
   return (
     <div className="flex flex-col" style={{ height: '100dvh', overflow: 'hidden' }}>
       <TopBar />
+      {showGuide && <QuickGuide />}
       <div className="flex-1 overflow-auto">
         <Canvas />
       </div>

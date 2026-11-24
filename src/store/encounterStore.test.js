@@ -606,4 +606,23 @@ describe('encounterStore', () => {
       expect(encounter().combatants[0].hp).toEqual({ current: 15, max: 20, temp: 0 })
     })
   })
+
+  describe('adding combatants', () => {
+    it('puts new combatants straight into the initiative order', () => {
+      const id = state().addCombatant({ name: 'Goblin' })
+      expect(encounter().initiativeOrder).toEqual([id])
+    })
+
+    it('loads a sorted demo encounter', () => {
+      state().loadDemoEncounter()
+      const { combatants, initiativeOrder } = encounter()
+      expect(combatants.length).toBeGreaterThan(3)
+      expect(initiativeOrder).toHaveLength(combatants.length)
+      const totals = initiativeOrder.map(id => {
+        const c = combatants.find(x => x.id === id)
+        return c.initiative.roll + c.initiative.bonus
+      })
+      expect(totals).toEqual([...totals].sort((a, b) => b - a))
+    })
+  })
 })
