@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useEncounterStore } from '../store/encounterStore'
 import { useThemeStore } from '../store/themeStore'
 import { useLayoutStore } from '../store/layoutStore'
 import { useUIStore } from '../store/uiStore'
 import AccentPicker from './AccentPicker'
+import { downloadBackup, importBackupFile } from '../utils/backup'
 
 function D20Icon({ size = 18 }) {
   return (
@@ -63,6 +64,20 @@ export default function TopBar() {
   const openModulePicker = useUIStore(s => s.openModulePicker)
   const [editingName, setEditingName] = useState(false)
   const [saveFlash, setSaveFlash] = useState(false)
+  const fileInputRef = useRef(null)
+
+  const handleImport = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!window.confirm('Importing replaces your current encounters, characters and layout. Continue?')) return
+    try {
+      await importBackupFile(file)
+      setShowEncounters(false)
+    } catch (err) {
+      window.alert(err.message)
+    }
+  }
 
   const handleSave = () => {
     saveEncounter()
@@ -241,13 +256,30 @@ export default function TopBar() {
                   </div>
                 </button>
                 <button
-                  onClick={() => deleteEncounter(e.id)}
+                  onClick={() => { if (window.confirm(`Delete "${e.name}"?`)) deleteEncounter(e.id) }}
                   className="btn-danger"
                   style={{ minHeight: 36, minWidth: 36, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   title="Delete"
+                  aria-label={`Delete ${e.name}`}
                 >✕</button>
               </div>
             ))}
+          </div>
+          <div className="label" style={{ margin: 'var(--sp-3) 0 var(--sp-2)' }}>Backup</div>
+          <div className="flex" style={{ gap: 6 }}>
+            <button className="btn-ghost" style={{ flex: 1, minHeight: 36 }} onClick={downloadBackup}>
+              Export
+            </button>
+            <button className="btn-ghost" style={{ flex: 1, minHeight: 36 }} onClick={() => fileInputRef.current?.click()}>
+              Import
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleImport}
+              style={{ display: 'none' }}
+            />
           </div>
         </div>
       )}
