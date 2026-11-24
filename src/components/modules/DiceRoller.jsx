@@ -129,7 +129,7 @@ export default function DiceRoller() {
       `}</style>
 
       {/* Dice + pocket grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 5, flexShrink: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(56px, 1fr))', gap: 5, flexShrink: 0 }}>
         {DICE.map(d => {
           const count = pocket[d] || 0
           const active = count > 0

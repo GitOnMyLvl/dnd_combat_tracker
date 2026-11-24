@@ -120,7 +120,7 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
           )}
         </div>
 
-        {/* Stats: AC (when wide enough) + saves (when wide) + HP */}
+        {/* Stats: AC (when wide enough) + HP; ability scores live in the expanded view */}
         <div className="flex items-center" style={{ gap: 10, flexShrink: 0 }}>
           {/* AC — hidden when too narrow */}
           {rowWidth >= 260 && (
@@ -129,20 +129,6 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
               <span style={{ fontWeight: 700, fontSize: '0.95rem', textAlign: 'center' }}>{combatant.ac ?? '—'}</span>
             </div>
           )}
-
-          {/* Saving throw modifiers — visible when card is wide enough */}
-          {rowWidth > 440 && (() => {
-            const abilities = combatant.abilities ?? DEFAULT_ABILITIES
-            return ABILITY_LABELS.map(a => {
-              const score = abilities[a] ?? 10
-              return (
-                <div key={a} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
-                  <span className="label">{a.toUpperCase()}</span>
-                  <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>{formatModifier(score)}</span>
-                </div>
-              )
-            })
-          })()}
 
           {/* HP — always rightmost */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>

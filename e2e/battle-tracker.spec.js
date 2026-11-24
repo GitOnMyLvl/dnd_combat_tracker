@@ -185,12 +185,10 @@ test.describe('Encounter Management', () => {
     await nameInput.fill('Saved Battle')
     await nameInput.press('Enter')
 
-    // Save
-    await page.getByRole('button', { name: 'Save', exact: true }).click()
-
-    // Open encounters dropdown
+    // Save it to the list from the Encounters menu
     await page.getByRole('button', { name: /Encounters/ }).click()
-    await expect(page.getByText('Saved Encounters')).toBeVisible()
+    await expect(page.getByText('Saved Encounters', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Save "Saved Battle" to list' }).click()
     // The dropdown shows the encounter name — verify by checking the dropdown list
     const dropdown = page.locator('.card', { hasText: 'Saved Encounters' })
     await expect(dropdown.getByText('Saved Battle')).toBeVisible()

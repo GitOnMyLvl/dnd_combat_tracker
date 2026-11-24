@@ -5,7 +5,6 @@ import ErrorBoundary from './shared/ErrorBoundary'
 const MODULE_TITLES = {
   InitiativeTracker: 'Initiative',
   CombatantTable: 'Combatants',
-  ConditionsPanel: 'Conditions',
   DiceRoller: 'Dice',
   NotesPad: 'Notes',
   PartyManager: 'Party',

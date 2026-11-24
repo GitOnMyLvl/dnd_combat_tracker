@@ -6,17 +6,16 @@ import { uuid } from '../utils/id'
 const DEFAULT_SIZES = {
   InitiativeTracker: { w: 3, h: 7 },
   CombatantTable:    { w: 5, h: 7 },
-  ConditionsPanel:   { w: 4, h: 5 },
   DiceRoller:        { w: 4, h: 6 },
   NotesPad:          { w: 4, h: 5 },
   PartyManager:      { w: 4, h: 7 },
 }
 
 const defaultLayout = () => [
-  { i: `initiativetracker-${uuid().slice(0, 6)}`, type: 'InitiativeTracker', x: 0, y: 0, w: 4, h: 9, config: {} },
-  { i: `combatanttable-${uuid().slice(0, 6)}`, type: 'CombatantTable', x: 4, y: 0, w: 4, h: 9, config: { tableType: 'enemy' } },
-  { i: `combatanttable-${uuid().slice(0, 6)}`, type: 'CombatantTable', x: 8, y: 0, w: 4, h: 5, config: { tableType: 'ally' } },
-  { i: `diceroller-${uuid().slice(0, 6)}`, type: 'DiceRoller', x: 8, y: 5, w: 4, h: 6, config: {} },
+  { i: `initiativetracker-${uuid().slice(0, 6)}`, type: 'InitiativeTracker', x: 0, y: 0, w: 5, h: 9, config: {} },
+  { i: `combatanttable-${uuid().slice(0, 6)}`, type: 'CombatantTable', x: 5, y: 0, w: 4, h: 9, config: { tableType: 'enemy' } },
+  { i: `combatanttable-${uuid().slice(0, 6)}`, type: 'CombatantTable', x: 9, y: 0, w: 3, h: 4, config: { tableType: 'ally' } },
+  { i: `diceroller-${uuid().slice(0, 6)}`, type: 'DiceRoller', x: 9, y: 4, w: 3, h: 6, config: {} },
 ]
 
 export const useLayoutStore = create(
@@ -54,6 +53,14 @@ export const useLayoutStore = create(
         }))
       },
     }),
-    { name: 'dnd-tracker-layout' }
+    {
+      name: 'dnd-tracker-layout',
+      version: 1,
+      // v1: the Conditions module was removed (conditions are set on each combatant row).
+      migrate: (persisted) => ({
+        ...persisted,
+        modules: (persisted?.modules ?? []).filter(m => m.type !== 'ConditionsPanel'),
+      }),
+    }
   )
 )

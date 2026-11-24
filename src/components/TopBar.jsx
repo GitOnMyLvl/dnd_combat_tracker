@@ -190,23 +190,6 @@ export default function TopBar() {
       <div className={`topbar-secondary${showMenu ? ' open' : ''}`} onClick={e => { if (e.target.closest('button[data-closes-menu]')) setShowMenu(false) }}>
       <div className="topbar-sep" style={{ width: 1, height: 22, background: 'var(--c-border)', flexShrink: 0, margin: '0 var(--sp-1)' }} />
 
-      {/* Save */}
-      <button
-        onClick={handleSave}
-        data-closes-menu
-        className="btn-ghost"
-        title="Save encounter"
-        style={{
-          minHeight: 34, minWidth: 'unset',
-          color: saveFlash ? 'var(--c-success)' : undefined,
-          borderColor: saveFlash ? 'var(--c-success)' : undefined,
-          flexShrink: 0,
-        }}
-      >
-        {saveFlash ? '✓' : <SaveIcon />}
-        <span>{saveFlash ? 'Saved' : 'Save'}</span>
-      </button>
-
       {/* Encounters */}
       <button
         onClick={() => setShowEncounters(v => !v)}
@@ -234,7 +217,7 @@ export default function TopBar() {
 
       {/* New */}
       <button
-        onClick={() => { if (window.confirm('Start a new encounter? Unsaved changes will be lost.')) newEncounter() }}
+        onClick={() => { if (window.confirm('Start a new, empty encounter? The current one is lost unless you saved it to your Encounters list.')) newEncounter() }}
         data-closes-menu
         title="Start a new, empty encounter (keeps your panels)"
         className="btn-ghost"
@@ -263,6 +246,21 @@ export default function TopBar() {
             boxShadow: 'var(--shadow-pop)',
           }}
         >
+          <p style={{ margin: '0 0 var(--sp-2)', fontSize: '0.78rem', color: 'var(--c-muted)', lineHeight: 1.45 }}>
+            Your current fight is saved automatically. Add it to this list to reuse it later.
+          </p>
+          <button
+            onClick={handleSave}
+            className="btn-ghost"
+            style={{
+              width: '100%', minHeight: 40, justifyContent: 'center', marginBottom: 'var(--sp-3)',
+              color: saveFlash ? 'var(--c-success)' : undefined,
+              borderColor: saveFlash ? 'var(--c-success)' : undefined,
+            }}
+          >
+            {saveFlash ? '✓' : <SaveIcon />}
+            <span>{saveFlash ? 'Saved to list' : `Save "${encounter.name}" to list`}</span>
+          </button>
           <div className="label" style={{ marginBottom: 'var(--sp-2)' }}>Saved Encounters</div>
           {savedEncounters.length === 0 && (
             <p style={{ color: 'var(--c-muted)', fontSize: '0.82rem', padding: '8px 0', fontStyle: 'italic' }}>

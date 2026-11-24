@@ -9,7 +9,6 @@ import ErrorBoundary from '../shared/ErrorBoundary'
 
 import InitiativeTracker from '../modules/InitiativeTracker'
 import CombatantTable from '../modules/CombatantTable'
-import ConditionsPanel from '../modules/ConditionsPanel'
 import DiceRoller from '../modules/DiceRoller'
 import NotesPad from '../modules/NotesPad'
 import PartyManager from '../modules/PartyManager'
@@ -20,7 +19,6 @@ const ResponsiveGridLayout = WidthProvider(Responsive)
 export const MODULE_COMPONENTS = {
   InitiativeTracker,
   CombatantTable,
-  ConditionsPanel,
   DiceRoller,
   NotesPad,
   PartyManager,

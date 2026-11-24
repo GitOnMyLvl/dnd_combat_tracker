@@ -2,6 +2,12 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { useEncounterStore } from '../../store/encounterStore'
 
+// Auto: you type the raw d20, the bonus is added. Manual: you type the final total.
+const MODE_HINTS = {
+  auto: 'Auto: type the d20 roll, the initiative bonus is added for you.',
+  manual: 'Manual: type the final total (e.g. what a player calls out), no bonus is added.',
+}
+
 const EMPTY_TOKEN = { name: '', init: '', init_mod: '', hp: '', ac: '', spell_dc: '', spell_atk: '', type: 'enemy' }
 
 function NumField({ label, fieldKey, fields, set, onKey, placeholder = '—', style }) {
@@ -432,6 +438,8 @@ export default function InitiativeTracker() {
                 <button
                   key={m}
                   onClick={() => setInitiativeMode(m)}
+                  title={MODE_HINTS[m]}
+                  aria-pressed={initiativeMode === m}
                   style={{
                     minHeight: 36, minWidth: 'unset', padding: '0 12px', fontSize: '0.92rem', fontWeight: 600,
                     borderRadius: 0, border: 'none',
@@ -455,6 +463,9 @@ export default function InitiativeTracker() {
               title="Add a token directly to initiative"
             >+ Token</button>
           </div>
+          <p className="flex-shrink-0" style={{ margin: 0, fontSize: '0.75rem', color: 'var(--c-muted)' }}>
+            {MODE_HINTS[initiativeMode]}
+          </p>
 
           {showTokenForm && (
             <AddTokenForm
