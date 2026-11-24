@@ -27,6 +27,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Only precache Latin font subsets; other scripts load on demand.
+        globIgnores: ['**/*-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese}-*.woff2'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.open5e\.com\//,
