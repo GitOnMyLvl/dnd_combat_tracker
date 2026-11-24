@@ -4,6 +4,7 @@ import { useLayoutStore } from '../../store/layoutStore'
 import { useUIStore } from '../../store/uiStore'
 import ModuleWrapper from './ModuleWrapper'
 import ModulePicker from './ModulePicker'
+import ErrorBoundary from '../shared/ErrorBoundary'
 
 import InitiativeTracker from '../modules/InitiativeTracker'
 import CombatantTable from '../modules/CombatantTable'
@@ -105,7 +106,9 @@ export default function Canvas() {
                 config={m.config ?? {}}
                 minimized={m.minimized}
               >
-                <Component config={m.config ?? {}} />
+                <ErrorBoundary>
+                  <Component config={m.config ?? {}} />
+                </ErrorBoundary>
               </ModuleWrapper>
             </div>
           )
