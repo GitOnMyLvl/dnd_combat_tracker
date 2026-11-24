@@ -61,8 +61,9 @@ export default function DiceRoller() {
   const clearPocket = () => setPocket(Object.fromEntries(DICE.map(d => [d, 0])))
 
   const last = history[0]
-  const isNat20 = last && last.kind === 'd20' && /\[20/.test(last.breakdown)
-  const isNat1  = last && last.kind === 'd20' && /^\[1[,\]]/.test(last.breakdown)
+  // 'd20' entries are single d20 rolls (incl. adv/dis), so the kept die is the total.
+  const isNat20 = last && last.kind === 'd20' && last.total === 20
+  const isNat1  = last && last.kind === 'd20' && last.total === 1
 
   const heroColor  = isNat20 ? 'var(--c-success)' : isNat1 ? 'var(--c-danger)' : 'var(--c-accent)'
   const heroBg     = isNat20 ? 'rgba(74,222,128,0.09)' : isNat1 ? 'var(--c-danger-dim)' : 'var(--c-elevated)'

@@ -1,3 +1,7 @@
+// Guards against expressions like "99999999d6" freezing the tab.
+export const MAX_DICE = 100
+export const MAX_SIDES = 1000
+
 export function rollDie(sides) {
   return Math.floor(Math.random() * sides) + 1
 }
@@ -9,9 +13,12 @@ export function rollDie(sides) {
 export function parseExpression(expr) {
   const match = expr.trim().replace(/\s/g, '').match(/^(\d*)d(\d+)([+-]\d+)?$/i)
   if (!match) return null
+  const count = parseInt(match[1] || '1', 10)
+  const sides = parseInt(match[2], 10)
+  if (count < 1 || count > MAX_DICE || sides < 1 || sides > MAX_SIDES) return null
   return {
-    count: parseInt(match[1] || '1', 10),
-    sides: parseInt(match[2], 10),
+    count,
+    sides,
     mod: match[3] ? parseInt(match[3], 10) : 0,
   }
 }
@@ -40,6 +47,9 @@ export function parseAndRoll(expr) {
     }
   }
   if (terms.length === 0) return null
+  const diceTerms = terms.filter(t => t.type === 'dice')
+  if (diceTerms.some(t => t.sides < 1 || t.sides > MAX_SIDES || t.count < 1)) return null
+  if (diceTerms.reduce((n, t) => n + t.count, 0) > MAX_DICE) return null
 
   let total = 0
   const parts = []

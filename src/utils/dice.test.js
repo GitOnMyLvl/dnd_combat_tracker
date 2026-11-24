@@ -126,4 +126,14 @@ describe('parseAndRoll', () => {
     expect(result).not.toBeNull()
     expect(result.total).toBe(8) // 1 + 10 - 3
   })
+
+  it('rejects absurd dice counts and sizes instead of freezing', () => {
+    expect(parseAndRoll('99999999d6')).toBeNull()
+    expect(parseAndRoll('60d6+60d6')).toBeNull()
+    expect(parseAndRoll('1d0')).toBeNull()
+    expect(parseAndRoll('0d6')).toBeNull()
+    expect(parseAndRoll('1d99999')).toBeNull()
+    expect(parseExpression('1000d6')).toBeNull()
+    expect(parseExpression('d0')).toBeNull()
+  })
 })
