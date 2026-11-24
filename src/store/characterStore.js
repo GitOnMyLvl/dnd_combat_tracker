@@ -45,7 +45,7 @@ export function templateToCombatant(template) {
 
 export const useCharacterStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       characters: [],
       parties: [],
 

@@ -5,18 +5,16 @@ export default defineConfig({
   timeout: 30000,
   use: {
     baseURL: 'http://localhost:5173',
-    // headed: true means you SEE the browser
-    headless: false,
-    // slow down actions so you can watch
+    // `npm run test:e2e:headed` shows the browser; slow it down there so you can watch.
     launchOptions: {
-      slowMo: 300,
+      slowMo: process.argv.includes('--headed') ? 300 : 0,
     },
     viewport: { width: 1280, height: 800 },
   },
   webServer: {
     command: 'npm run dev',
     port: 5173,
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
   },
   projects: [
     {

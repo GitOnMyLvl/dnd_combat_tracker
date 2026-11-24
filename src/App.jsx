@@ -14,7 +14,7 @@ export default function App() {
 
   if (popoutType) {
     let config = {}
-    try { config = JSON.parse(decodeURIComponent(params.get('config') ?? '{}')) } catch (_) {}
+    try { config = JSON.parse(decodeURIComponent(params.get('config') ?? '{}')) } catch { /* malformed config → defaults */ }
     return <PopoutApp type={popoutType} config={config} />
   }
 

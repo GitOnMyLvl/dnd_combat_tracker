@@ -9,7 +9,7 @@ import CharacterFormModal from '../shared/CharacterFormModal'
 import Modal from '../shared/Modal'
 import { useCharacterStore, combatantToTemplate, templateToCombatant, DEFAULT_ABILITIES } from '../../store/characterStore'
 import { CONDITION_NAMES } from '../../constants/conditions'
-import { ABILITY_LABELS, abilityModifier, formatModifier } from '../../utils/abilities'
+import { ABILITY_LABELS, formatModifier } from '../../utils/abilities'
 import { getHpStatus } from '../../utils/hpStatus'
 
 function AddManualModal({ tableType, onClose }) {

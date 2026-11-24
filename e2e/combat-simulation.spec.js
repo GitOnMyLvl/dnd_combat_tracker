@@ -47,6 +47,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/')
   await page.evaluate(() => localStorage.clear())
   await page.reload()
+  await page.getByRole('button', { name: 'Roll for Initiative' }).click()
   await setupCombat(page)
   await addModules(page)
 })
@@ -140,8 +141,9 @@ test.describe('Combat Simulation � 3 players vs 4 enemies', () => {
   test('EditableField name survives store re-render mid-edit', async ({ page }) => {
     // Validates fix: value removed from useEffect deps in EditableField
     const alliesSection = page.locator('.card', { has: page.locator('.drag-handle', { hasText: 'ALLIES' }) })
-    await alliesSection.getByRole('button', { name: 'Gorak' }).click()
-    const nameInput = alliesSection.locator('input').filter({ hasValue: 'Gorak' })
+    await alliesSection.getByText('Gorak', { exact: true }).click() // expand row
+    await alliesSection.getByRole('button', { name: 'Gorak', exact: true }).click()
+    const nameInput = alliesSection.locator('input.font-semibold')
     await expect(nameInput).toBeVisible()
     await nameInput.selectText()
     await nameInput.fill('Gorak the Mighty')
@@ -152,7 +154,7 @@ test.describe('Combat Simulation � 3 players vs 4 enemies', () => {
     })
     await expect(nameInput).toHaveValue('Gorak the Mighty')
     await nameInput.press('Enter')
-    await expect(alliesSection.getByText('Gorak the Mighty')).toBeVisible()
+    await expect(alliesSection.getByText('Gorak the Mighty').first()).toBeVisible()
   })
 
   test('condition applied to enemy shows badge on row', async ({ page }) => {
