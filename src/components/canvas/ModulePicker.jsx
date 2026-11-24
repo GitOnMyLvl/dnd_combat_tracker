@@ -23,7 +23,7 @@ const AVAILABLE_MODULES = [
   { type: 'CombatantTable',    icon: ICONS.AlliesTable,       label: 'Allies Table',       desc: 'HP, AC, conditions for your party', config: { tableType: 'ally' } },
   { type: 'CombatantTable',    icon: ICONS.EnemiesTable,      label: 'Enemies Table',      desc: 'Monsters — search or add manually', config: { tableType: 'enemy' } },
   { type: 'ConditionsPanel',   icon: ICONS.ConditionsPanel,   label: 'Conditions',         desc: 'Apply conditions to selected combatant', config: {} },
-  { type: 'DiceRoller',        icon: ICONS.DiceRoller,        label: 'Dice Roller',        desc: 'd4–d100, advantage, custom rolls', config: {} },
+  { type: 'DiceRoller',        icon: ICONS.DiceRoller,        label: 'Dice Roller',        desc: 'd4–d100, advantage, mixed dice pools', config: {} },
   { type: 'NotesPad',          icon: ICONS.NotesPad,          label: 'Notes',              desc: 'Free text, auto-saved', config: {} },
   { type: 'PartyManager',      icon: ICONS.PartyManager,      label: 'Party Manager',      desc: 'Save characters & parties', config: {} },
   { type: 'AoeDamage',         icon: ICONS.AoeDamage,         label: 'AoE Damage',         desc: 'Damage or heal many at once', config: {} },

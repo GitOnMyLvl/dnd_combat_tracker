@@ -9,6 +9,7 @@ const MODULE_TITLES = {
   DiceRoller: 'Dice',
   NotesPad: 'Notes',
   PartyManager: 'Party',
+  AoeDamage: 'AoE Damage',
 }
 
 export default function PopoutApp({ type, config }) {
