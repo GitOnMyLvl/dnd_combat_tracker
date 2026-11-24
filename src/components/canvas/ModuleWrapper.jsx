@@ -1,10 +1,10 @@
 import { useState, useRef } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { useLayoutStore } from '../../store/layoutStore'
 
 const MODULE_TITLES = {
   InitiativeTracker: 'Initiative',
   CombatantTable:    null,
-  ConditionsPanel:   'Conditions',
   DiceRoller:        'Dice',
   NotesPad:          'Notes',
   PartyManager:      'Party',
@@ -14,67 +14,48 @@ const MODULE_TITLES = {
 const MODULE_INFO = {
   InitiativeTracker: {
     title: 'Initiative Tracker',
-    body: `Manages turn order, HP, and round count during combat.
+    body: `Manages turn order, HP and the round count during combat.
 
 Turn Order
-• Enter each combatant's dice roll in the small input on the left of their name
-• Auto mode: final initiative = roll + bonus. Manual mode: you type the total directly
-• Hit "Sort by Initiative" to lock in the order
-• Use ▲ / ▼ to manually reorder combatants after sorting
-• ▶ / ◀ buttons step forward or backward through turns
-• The active combatant is highlighted and marked with ▶
-• Combatants not yet added to the order appear in a "Not in initiative" section at the bottom — give them a roll and hit + to include them
+• Everyone you add (tables, monster search, parties, + Token) joins the order automatically
+• Type each initiative roll in the box left of the name, then hit Sort
+• Auto: type the d20 roll; the combatant's initiative bonus is added for you
+• Manual: type the final total (e.g. what a player calls out); the bonus is not added
+• Ties are broken by Dexterity score
+• ▲ / ▼ reorder by hand; Next ▶ / ◀ step through turns, the round counts up automatically
+• "Out of Combat" holds anyone you removed from the order; → Combat brings them back
 
 HP & Damage
-• Use the ± input + DMG / HEAL buttons on each row to update HP on the fly
-• The HP bar changes color: green → orange → red as HP drops
-• When HP hits 0, the combatant gets a DOWN badge and a red border
+• Use the amount field with DMG / HEAL on each row; damage uses up temp HP first
+• The HP bar goes green → orange → red as HP drops
 
 Death Saves
-• Death save pips appear automatically when a combatant is downed (HP = 0)
-• Click the ✓ pips to record successes, ✗ pips for failures
-• 3 successes → STABLE · 3 failures → DEAD
-• Hit ↺ to reset death saves
-
-Ability Scores
-• When the panel is wide enough, each combatant's six ability scores are shown for quick reference`,
+• Pips appear when a combatant is at 0 HP
+• 3 successes → STABLE · 3 failures → DEAD · ↺ resets`,
   },
   CombatantTable_ally: {
     title: 'Allies Table',
     body: `Tracks your party members during combat.
 
-• Click "+ Add Ally" to create a character manually
-• Click any row to expand it — shows HP editor, conditions, ability scores, spell stats and notes
-• Edit stats inline by clicking on any value (AC, abilities, etc.)
-• Load saved characters from the Party Manager module
-• Conditions applied here are reflected in the Conditions panel`,
+• "+ Add" creates a character; saved characters and parties come from the Party Manager
+• Tap a row to expand it: HP, temp HP, conditions, exhaustion, ability scores, spell stats and notes
+• Tap any value (AC, abilities, …) to edit it`,
   },
   CombatantTable_enemy: {
     title: 'Enemies Table',
     body: `Tracks monsters and enemies during combat.
 
-• Click "+ Add Enemy" to create one manually, or use "Search Monsters" to look up any creature from the D&D 5e SRD
-• Click any row to expand it — shows HP editor, AC, conditions, ability scores and more
-• The reset button (↺) on API-sourced monsters restores all stats to the original values
-• Click a row to select that combatant — the Conditions panel will then apply to them`,
-  },
-  ConditionsPanel: {
-    title: 'Conditions',
-    body: `Apply and remove status conditions from combatants.
-
-• First select a combatant by clicking their row in the Allies or Enemies table
-• Then click any condition to toggle it on or off
-• Active conditions are highlighted and shown as badges on the combatant's row
-• Hover a condition name for a short rules reminder`,
+• "+ Monster" searches the 5e SRD and fills in HP, AC and ability scores; "+ Add" creates one by hand
+• Tap a row to expand it: HP, temp HP, conditions, exhaustion, ability scores and notes
+• "Reset to Default" on a looked-up monster restores its original stats`,
   },
   DiceRoller: {
     title: 'Dice Roller',
     body: `Roll any standard dice with modifiers.
 
-• Click a die button (d4, d6, d8, d10, d12, d20, d100) to roll it once
-• Advantage: rolls twice, takes the higher result
-• Disadvantage: rolls twice, takes the lower result
-• Custom field: type any expression like 2d6+3 or d20-1 and press Enter
+• Tap a die (d4 … d100) to roll it once
+• Advantage / Disadvantage: a d20 is rolled twice, keeping the higher / lower result
+• Use − / + under the dice to build a pool (e.g. 2d6 + 1d8), then "Roll dice"
 • The last 20 rolls are shown in the history below`,
   },
   NotesPad: {
@@ -112,7 +93,7 @@ function getInfo(type, config) {
 }
 
 export default function ModuleWrapper({ id, type, config = {}, minimized, children }) {
-  const { removeModule, toggleMinimize } = useLayoutStore()
+  const { removeModule, toggleMinimize } = useLayoutStore(useShallow(s => ({ removeModule: s.removeModule, toggleMinimize: s.toggleMinimize })))
   const [infoOpen, setInfoOpen] = useState(false)
   const wrapperRef = useRef(null)
 
@@ -155,7 +136,7 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
         }}
       >
         {/* Drag handle: grip + title */}
-        <div className="drag-handle flex items-center gap-2" style={{ flex: 1, cursor: 'grab', height: '100%' }}>
+        <div className="drag-handle flex items-center gap-2" style={{ flex: 1, minWidth: 0, cursor: 'grab', height: '100%' }}>
           <svg width="10" height="16" viewBox="0 0 10 16" fill="none" style={{ opacity: 0.3, flexShrink: 0 }}>
             {[0,4,8,12].map(y => [0,4].map(x => (
               <circle key={`${x}-${y}`} cx={x+1} cy={y+2} r={1} fill="currentColor"/>
@@ -171,6 +152,9 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
               textTransform: 'uppercase',
               lineHeight: 1,
               transform: 'translateY(2px)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             }}
           >
             {title}
@@ -178,11 +162,12 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
         </div>
 
         {/* Controls — outside drag handle */}
-        <div className="flex items-center" style={{ gap: 4 }}>
+        <div className="flex items-center" style={{ gap: 4, flexShrink: 0 }}>
           {info && (
             <button
               onClick={() => setInfoOpen(o => !o)}
               title="About this module"
+              aria-label="About this module"
               style={{ ...btnStyle, color: infoOpen ? 'var(--c-accent)' : 'var(--c-muted)', fontWeight: 700, fontSize: '0.8rem' }}
               onMouseEnter={e => { e.currentTarget.style.color = infoOpen ? 'var(--c-accent)' : 'var(--c-text)'; e.currentTarget.style.background = 'var(--c-elevated)' }}
               onMouseLeave={e => { e.currentTarget.style.color = infoOpen ? 'var(--c-accent)' : 'var(--c-muted)'; e.currentTarget.style.background = 'none' }}
@@ -199,6 +184,7 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
           <button
             onClick={() => toggleMinimize(id)}
             title={minimized ? 'Expand' : 'Collapse'}
+            aria-label={minimized ? 'Expand' : 'Collapse'}
             style={btnStyle}
             onMouseEnter={e => { e.currentTarget.style.color = 'var(--c-text)'; e.currentTarget.style.background = 'var(--c-elevated)' }}
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--c-muted)'; e.currentTarget.style.background = 'none' }}
@@ -208,6 +194,7 @@ export default function ModuleWrapper({ id, type, config = {}, minimized, childr
           <button
             onClick={() => removeModule(id)}
             title="Remove"
+            aria-label="Remove panel"
             style={btnStyle}
             onMouseEnter={e => { e.currentTarget.style.color = 'var(--c-danger)'; e.currentTarget.style.background = 'var(--c-elevated)' }}
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--c-muted)'; e.currentTarget.style.background = 'none' }}

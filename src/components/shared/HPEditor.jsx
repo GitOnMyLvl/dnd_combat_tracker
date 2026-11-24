@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { useEncounterStore } from '../../store/encounterStore'
 
 export default function HPEditor({ combatant }) {
-  const { updateHP, setHP, updateCombatant } = useEncounterStore()
+  const { updateHP, setHP, updateCombatant } = useEncounterStore(useShallow(s => ({ updateHP: s.updateHP, setHP: s.setHP, updateCombatant: s.updateCombatant })))
   const [inputVal, setInputVal] = useState('')
   const [hpDraft, setHpDraft] = useState(null) // null = not editing
   const [maxHpDraft, setMaxHpDraft] = useState(null) // null = not editing

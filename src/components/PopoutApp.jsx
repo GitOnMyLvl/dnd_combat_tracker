@@ -1,13 +1,14 @@
 import { useEffect } from 'react'
 import { MODULE_COMPONENTS } from './canvas/Canvas'
+import ErrorBoundary from './shared/ErrorBoundary'
 
 const MODULE_TITLES = {
   InitiativeTracker: 'Initiative',
   CombatantTable: 'Combatants',
-  ConditionsPanel: 'Conditions',
   DiceRoller: 'Dice',
   NotesPad: 'Notes',
   PartyManager: 'Party',
+  AoeDamage: 'AoE Damage',
 }
 
 export default function PopoutApp({ type, config }) {
@@ -45,7 +46,9 @@ export default function PopoutApp({ type, config }) {
   return (
     <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--c-bg)', color: 'var(--c-text)', overflow: 'hidden' }}>
       <div style={{ flex: 1, minHeight: 0, padding: '10px 12px 12px', overflowY: 'auto', overflowX: 'hidden' }}>
-        <Component config={config} />
+        <ErrorBoundary>
+          <Component config={config} />
+        </ErrorBoundary>
       </div>
       <div style={{ flexShrink: 0, padding: '4px 12px 6px', borderTop: '1px solid var(--c-border)', fontSize: '0.7rem', color: 'var(--c-muted)', textAlign: 'center' }}>
         Changes sync automatically between windows

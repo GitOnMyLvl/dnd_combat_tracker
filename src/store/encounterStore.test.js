@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEncounterStore, mapApiToCombatant } from './encounterStore'
 
 // Reset store before each test
@@ -266,15 +266,26 @@ describe('encounterStore', () => {
       expect(encounter().initiativeOrder).toEqual([b, a])
     })
 
-    it('resets round and turn index on sort', () => {
-      state().addCombatant({ name: 'A', initiative: { bonus: 0, roll: 10 } })
-      // Advance the round
-      useEncounterStore.setState(s => ({
-        encounter: { ...s.encounter, round: 5, currentTurnIndex: 3 },
-      }))
+    it('starts at the top when sorting before combat starts', () => {
+      const a = state().addCombatant({ name: 'A', initiative: { bonus: 0, roll: 5 } })
+      const b = state().addCombatant({ name: 'B', initiative: { bonus: 0, roll: 15 } })
+      ;[a, b].forEach(id => state().addToInitiative(id))
+      useEncounterStore.setState(s => ({ encounter: { ...s.encounter, initiativeOrder: [a, b] } }))
       state().sortInitiative()
       expect(encounter().round).toBe(1)
       expect(encounter().currentTurnIndex).toBe(0)
+    })
+
+    it('keeps the round and the current combatant when sorting mid-combat', () => {
+      const a = state().addCombatant({ name: 'A', initiative: { bonus: 0, roll: 5 } })
+      const b = state().addCombatant({ name: 'B', initiative: { bonus: 0, roll: 15 } })
+      const c = state().addCombatant({ name: 'C', initiative: { bonus: 0, roll: 10 } })
+      useEncounterStore.setState(s => ({
+        encounter: { ...s.encounter, initiativeOrder: [a, b, c], round: 3, currentTurnIndex: 0 },
+      }))
+      state().sortInitiative() // → [b, c, a]; it's still A's turn
+      expect(encounter().round).toBe(3)
+      expect(encounter().initiativeOrder[encounter().currentTurnIndex]).toBe(a)
     })
 
     it('adds combatant to initiative in correct position', () => {
@@ -517,6 +528,101 @@ describe('encounterStore', () => {
       state().nextTurn() // index = 1
       state().removeFromInitiative(id1) // now only 1 in order
       expect(encounter().currentTurnIndex).toBeLessThanOrEqual(encounter().initiativeOrder.length - 1)
+    })
+  })
+
+  // ─── Turn pointer stability ───
+
+  describe('turn pointer stability', () => {
+    let a, b, c
+    beforeEach(() => {
+      a = state().addCombatant({ name: 'A', initiative: { bonus: 0, roll: 20 } })
+      b = state().addCombatant({ name: 'B', initiative: { bonus: 0, roll: 15 } })
+      c = state().addCombatant({ name: 'C', initiative: { bonus: 0, roll: 10 } })
+      ;[a, b, c].forEach(id => state().addToInitiative(id))
+      state().nextTurn()
+      state().nextTurn() // C's turn
+    })
+
+    const currentId = () => encounter().initiativeOrder[encounter().currentTurnIndex]
+
+    it('keeps the turn when a combatant before the current one is removed', () => {
+      state().removeCombatant(a)
+      expect(currentId()).toBe(c)
+    })
+
+    it('keeps the turn when removed from initiative only', () => {
+      state().removeFromInitiative(b)
+      expect(currentId()).toBe(c)
+    })
+
+    it('passes the turn on when the current combatant is removed', () => {
+      state().prevTurn() // B's turn
+      state().removeCombatant(b)
+      expect(currentId()).toBe(c)
+    })
+
+    it('wraps to the top when the last combatant in order is removed on their turn', () => {
+      state().removeCombatant(c)
+      expect(encounter().currentTurnIndex).toBe(0)
+    })
+
+    it('keeps the turn when someone joins ahead of the current combatant', () => {
+      const d = state().addCombatant({ name: 'D', initiative: { bonus: 0, roll: 25 } })
+      state().addToInitiative(d)
+      expect(currentId()).toBe(c)
+    })
+
+    it('keeps the turn on manual reorder', () => {
+      state().reorderInitiative([c, b, a])
+      expect(currentId()).toBe(c)
+    })
+
+    it('clears the selection when the selected combatant is removed', () => {
+      state().selectCombatant(a)
+      state().removeCombatant(a)
+      expect(state().selectedCombatantId).toBeNull()
+    })
+  })
+
+  // ─── Temporary HP ───
+
+  describe('temporary HP', () => {
+    it('absorbs damage with temp HP first', () => {
+      const id = state().addCombatant({ hp: { current: 20, max: 20, temp: 5 } })
+      state().updateHP(id, -3)
+      expect(encounter().combatants[0].hp).toEqual({ current: 20, max: 20, temp: 2 })
+    })
+
+    it('spills damage over into current HP once temp HP is gone', () => {
+      const id = state().addCombatant({ hp: { current: 20, max: 20, temp: 5 } })
+      state().updateHP(id, -8)
+      expect(encounter().combatants[0].hp).toEqual({ current: 17, max: 20, temp: 0 })
+    })
+
+    it('does not restore temp HP when healing', () => {
+      const id = state().addCombatant({ hp: { current: 10, max: 20, temp: 0 } })
+      state().updateHP(id, 5)
+      expect(encounter().combatants[0].hp).toEqual({ current: 15, max: 20, temp: 0 })
+    })
+  })
+
+  describe('adding combatants', () => {
+    it('puts new combatants straight into the initiative order', () => {
+      const id = state().addCombatant({ name: 'Goblin' })
+      expect(encounter().initiativeOrder).toEqual([id])
+    })
+
+    it('loads a sorted demo encounter', () => {
+      state().loadDemoEncounter()
+      const { combatants, initiativeOrder } = encounter()
+      expect(combatants.length).toBeGreaterThan(3)
+      expect(initiativeOrder).toHaveLength(combatants.length)
+      const totals = initiativeOrder.map(id => {
+        const c = combatants.find(x => x.id === id)
+        return c.initiative.roll + c.initiative.bonus
+      })
+      expect(totals).toEqual([...totals].sort((a, b) => b - a))
     })
   })
 })

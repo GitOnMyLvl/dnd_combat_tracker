@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { useEncounterStore } from '../store/encounterStore'
 import { useThemeStore } from '../store/themeStore'
-import { useLayoutStore } from '../store/layoutStore'
 import { useUIStore } from '../store/uiStore'
 import AccentPicker from './AccentPicker'
+import { downloadBackup, importBackupFile } from '../utils/backup'
 
 function D20Icon({ size = 18 }) {
   return (
@@ -44,6 +45,14 @@ function SaveIcon({ size = 15 }) {
   )
 }
 
+function MenuIcon({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  )
+}
+
 function PlusIcon({ size = 14 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
@@ -56,13 +65,28 @@ export default function TopBar() {
   const {
     encounter, savedEncounters,
     newEncounter, saveEncounter, loadEncounter, deleteEncounter, renameEncounter,
-  } = useEncounterStore()
+  } = useEncounterStore(useShallow(s => ({ encounter: s.encounter, savedEncounters: s.savedEncounters, newEncounter: s.newEncounter, saveEncounter: s.saveEncounter, loadEncounter: s.loadEncounter, deleteEncounter: s.deleteEncounter, renameEncounter: s.renameEncounter })))
   const [showEncounters, setShowEncounters] = useState(false)
-  const { theme, toggleTheme } = useThemeStore()
-  const clearModules = useLayoutStore(s => s.clearModules)
+  const { theme, toggleTheme } = useThemeStore(useShallow(s => ({ theme: s.theme, toggleTheme: s.toggleTheme })))
   const openModulePicker = useUIStore(s => s.openModulePicker)
+  const resetToLanding = useUIStore(s => s.resetToLanding)
+  const [showMenu, setShowMenu] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const [saveFlash, setSaveFlash] = useState(false)
+  const fileInputRef = useRef(null)
+
+  const handleImport = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!window.confirm('Importing replaces your current encounters, characters and layout. Continue?')) return
+    try {
+      await importBackupFile(file)
+      setShowEncounters(false)
+    } catch (err) {
+      window.alert(err.message)
+    }
+  }
 
   const handleSave = () => {
     saveEncounter()
@@ -83,13 +107,19 @@ export default function TopBar() {
         boxShadow: '0 1px 0 var(--c-border)',
       }}
     >
-      {/* Logo */}
-      <div className="flex items-center" style={{ gap: 10, flexShrink: 0 }}>
+      {/* Logo — back to the start page */}
+      <button
+        onClick={resetToLanding}
+        title="Start page"
+        aria-label="Battle Tracker start page"
+        className="flex items-center"
+        style={{ gap: 10, flexShrink: 0, background: 'none', border: 'none', padding: 0, minHeight: 'unset', minWidth: 'unset', cursor: 'pointer' }}
+      >
         <span style={{ color: 'var(--c-accent)', display: 'flex' }}>
           <D20Icon size={22} />
         </span>
         <span
-          className="display"
+          className="display topbar-brand"
           style={{
             fontSize: '0.95rem',
             color: 'var(--c-text)',
@@ -102,9 +132,9 @@ export default function TopBar() {
         >
           BATTLE TRACKER
         </span>
-      </div>
+      </button>
 
-      <div style={{ width: 1, height: 24, background: 'var(--c-border)', flexShrink: 0, margin: '0 var(--sp-1)' }} />
+      <div className="topbar-brand" style={{ width: 1, height: 24, background: 'var(--c-border)', flexShrink: 0, margin: '0 var(--sp-1)' }} />
 
       {/* Encounter name */}
       {editingName ? (
@@ -143,30 +173,27 @@ export default function TopBar() {
         className="btn-primary"
         style={{ minHeight: 34, minWidth: 'unset', padding: '0 14px', fontSize: '0.8rem', flexShrink: 0, gap: 6, display: 'inline-flex', alignItems: 'center' }}
       >
-        <PlusIcon /> Module
+        <PlusIcon /> <span>Module</span>
       </button>
 
-      <div style={{ width: 1, height: 22, background: 'var(--c-border)', flexShrink: 0, margin: '0 var(--sp-1)' }} />
-
-      {/* Save */}
+      {/* On narrow screens the secondary actions collapse into this menu */}
       <button
-        onClick={handleSave}
-        className="btn-ghost"
-        title="Save encounter"
-        style={{
-          minHeight: 34, minWidth: 'unset',
-          color: saveFlash ? 'var(--c-success)' : undefined,
-          borderColor: saveFlash ? 'var(--c-success)' : undefined,
-          flexShrink: 0,
-        }}
+        className="btn-ghost topbar-menu-btn"
+        onClick={() => setShowMenu(v => !v)}
+        aria-expanded={showMenu}
+        aria-label="Menu"
+        style={{ minHeight: 34, minWidth: 34, padding: '0 9px', flexShrink: 0 }}
       >
-        {saveFlash ? '✓' : <SaveIcon />}
-        <span>{saveFlash ? 'Saved' : 'Save'}</span>
+        <MenuIcon />
       </button>
+
+      <div className={`topbar-secondary${showMenu ? ' open' : ''}`} onClick={e => { if (e.target.closest('button[data-closes-menu]')) setShowMenu(false) }}>
+      <div className="topbar-sep" style={{ width: 1, height: 22, background: 'var(--c-border)', flexShrink: 0, margin: '0 var(--sp-1)' }} />
 
       {/* Encounters */}
       <button
         onClick={() => setShowEncounters(v => !v)}
+        data-closes-menu
         className="btn-ghost"
         style={{
           minHeight: 34, minWidth: 'unset',
@@ -190,7 +217,9 @@ export default function TopBar() {
 
       {/* New */}
       <button
-        onClick={() => { if (window.confirm('Start a new encounter? Unsaved changes will be lost.')) { newEncounter(); clearModules() } }}
+        onClick={() => { if (window.confirm('Start a new, empty encounter? The current one is lost unless you saved it to your Encounters list.')) newEncounter() }}
+        data-closes-menu
+        title="Start a new, empty encounter (keeps your panels)"
         className="btn-ghost"
         style={{ minHeight: 34, minWidth: 'unset', flexShrink: 0 }}
       >New</button>
@@ -202,9 +231,10 @@ export default function TopBar() {
         title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
         aria-label="Toggle theme"
         style={{ minHeight: 34, minWidth: 34, padding: '0 9px', flexShrink: 0 }}
-      >{theme === 'dark' ? <SunIcon /> : <MoonIcon />}</button>
+      >{theme === 'dark' ? <SunIcon /> : <MoonIcon />}<span className="topbar-menu-label">{theme === 'dark' ? 'Light theme' : 'Dark theme'}</span></button>
 
       <AccentPicker />
+      </div>
 
       {/* Encounters dropdown */}
       {showEncounters && (
@@ -216,6 +246,21 @@ export default function TopBar() {
             boxShadow: 'var(--shadow-pop)',
           }}
         >
+          <p style={{ margin: '0 0 var(--sp-2)', fontSize: '0.78rem', color: 'var(--c-muted)', lineHeight: 1.45 }}>
+            Your current fight is saved automatically. Add it to this list to reuse it later.
+          </p>
+          <button
+            onClick={handleSave}
+            className="btn-ghost"
+            style={{
+              width: '100%', minHeight: 40, justifyContent: 'center', marginBottom: 'var(--sp-3)',
+              color: saveFlash ? 'var(--c-success)' : undefined,
+              borderColor: saveFlash ? 'var(--c-success)' : undefined,
+            }}
+          >
+            {saveFlash ? '✓' : <SaveIcon />}
+            <span>{saveFlash ? 'Saved to list' : `Save "${encounter.name}" to list`}</span>
+          </button>
           <div className="label" style={{ marginBottom: 'var(--sp-2)' }}>Saved Encounters</div>
           {savedEncounters.length === 0 && (
             <p style={{ color: 'var(--c-muted)', fontSize: '0.82rem', padding: '8px 0', fontStyle: 'italic' }}>
@@ -241,13 +286,30 @@ export default function TopBar() {
                   </div>
                 </button>
                 <button
-                  onClick={() => deleteEncounter(e.id)}
+                  onClick={() => { if (window.confirm(`Delete "${e.name}"?`)) deleteEncounter(e.id) }}
                   className="btn-danger"
                   style={{ minHeight: 36, minWidth: 36, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   title="Delete"
+                  aria-label={`Delete ${e.name}`}
                 >✕</button>
               </div>
             ))}
+          </div>
+          <div className="label" style={{ margin: 'var(--sp-3) 0 var(--sp-2)' }}>Backup</div>
+          <div className="flex" style={{ gap: 6 }}>
+            <button className="btn-ghost" style={{ flex: 1, minHeight: 36 }} onClick={downloadBackup}>
+              Export
+            </button>
+            <button className="btn-ghost" style={{ flex: 1, minHeight: 36 }} onClick={() => fileInputRef.current?.click()}>
+              Import
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleImport}
+              style={{ display: 'none' }}
+            />
           </div>
         </div>
       )}

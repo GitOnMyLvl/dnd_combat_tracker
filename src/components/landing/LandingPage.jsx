@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useUIStore } from '../../store/uiStore'
+import { useLayoutStore } from '../../store/layoutStore'
+import { useEncounterStore } from '../../store/encounterStore'
 import { usePwaInstall } from '../../hooks/usePwaInstall'
+import { FAQ } from './faq'
 
 function D20Hero({ size = 150 }) {
   return (
@@ -23,6 +26,21 @@ function DownloadIcon({ size = 15 }) {
   )
 }
 
+const STEPS = [
+  { title: 'Add heroes & monsters', text: 'Type them in, pick a saved party, or search 300+ SRD monsters with stats filled in.' },
+  { title: 'Enter initiative', text: 'Type each roll, hit Sort. Ties are broken by Dexterity automatically.' },
+  { title: 'Run the fight', text: 'Press Next to step through turns. Apply damage, healing and conditions with a tap.' },
+]
+
+const FEATURES = [
+  { title: 'Initiative & rounds', text: 'Turn order, round counter, and a clear marker for whose turn it is.' },
+  { title: 'HP, temp HP & death saves', text: 'Damage eats temp HP first, downed heroes get death-save pips.' },
+  { title: 'Conditions', text: 'All 5e conditions plus exhaustion, visible at a glance on every row.' },
+  { title: 'Monster lookup', text: 'SRD monsters from Open5e with HP, AC and ability scores ready to go.' },
+  { title: 'AoE damage', text: 'Fireball five goblins at once, with half damage on a save.' },
+  { title: 'Dice roller', text: 'd4 to d100, advantage and disadvantage, mixed pools.' },
+]
+
 export default function LandingPage() {
   const enterApp = useUIStore(s => s.enterApp)
   const { canInstall, isInstalled, isIos, promptInstall } = usePwaInstall()
@@ -30,127 +48,118 @@ export default function LandingPage() {
 
   const showInstallButton = !isInstalled && (canInstall || isIos)
 
+  const start = (demo) => {
+    if (useLayoutStore.getState().modules.length === 0) {
+      useLayoutStore.getState().applyDefaultLayout()
+    }
+    if (demo) {
+      const { encounter, loadDemoEncounter } = useEncounterStore.getState()
+      const hasWork = encounter.combatants.length > 0
+      if (!hasWork || window.confirm('Replace your current encounter with the demo fight?')) {
+        loadDemoEncounter()
+      }
+    }
+    enterApp()
+  }
+
   return (
-    <div
-      style={{
-        height: '100dvh',
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 24,
-        background: 'var(--c-bg)',
-        backgroundImage: 'var(--c-bg-pattern)',
-        overflow: 'auto',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 22,
-          textAlign: 'center',
-          maxWidth: 520,
-        }}
-      >
-        <span style={{ color: 'var(--c-accent)', display: 'flex' }}>
-          <D20Hero size={150} />
+    <div className="landing">
+      <header className="landing-hero">
+        <span className="landing-logo" aria-hidden="true">
+          <D20Hero size={96} />
         </span>
-
-        <h1
-          className="display"
-          style={{
-            margin: 0,
-            fontSize: 'clamp(1.8rem, 5vw, 2.6rem)',
-            fontWeight: 700,
-            letterSpacing: '0.22em',
-            color: 'var(--c-text)',
-            lineHeight: 1,
-          }}
-        >
-          BATTLE TRACKER
+        <p className="ornament">Battle Tracker</p>
+        <h1 className="landing-title">
+          Free D&amp;D 5e initiative &amp; combat tracker
         </h1>
-
-        <div className="ornament">A D&amp;D 5e companion</div>
-
-        <p
-          style={{
-            color: 'var(--c-muted)',
-            fontSize: '0.95rem',
-            margin: 0,
-            lineHeight: 1.6,
-            maxWidth: 380,
-          }}
-        >
-          One quiet canvas for every encounter. Initiative, hit points, conditions, and dice — shaped to your table, ready when the fight begins.
+        <p className="landing-lead">
+          Track turn order, hit points and conditions for every encounter, right in your browser.
+          Built for Dungeon Masters on a laptop or tablet at the table.
         </p>
 
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginTop: 8 }}>
-          <button
-            onClick={enterApp}
-            className="btn-primary"
-            style={{
-              minHeight: 48,
-              minWidth: 220,
-              fontSize: '0.95rem',
-              fontFamily: 'var(--font-display)',
-              fontWeight: 600,
-              padding: '0 24px',
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 12,
-            }}
-          >
-            <span style={{ paddingLeft: '0.16em' }}>Roll for Initiative</span>
+        <div className="landing-ctas">
+          <button className="btn-primary landing-cta" onClick={() => start(false)}>
+            Start tracking
           </button>
-
-          {showInstallButton && (
-            <button
-              onClick={() => {
-                if (canInstall) promptInstall()
-                else if (isIos) setShowIosHint(v => !v)
-              }}
-              className="btn-ghost"
-              style={{
-                minHeight: 48,
-                minWidth: 160,
-                fontSize: '0.85rem',
-                padding: '0 20px',
-                letterSpacing: '0.04em',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-              }}
-            >
-              <DownloadIcon /> Install app
-            </button>
-          )}
+          <button className="btn-ghost landing-cta" onClick={() => start(true)}>
+            Try a demo fight
+          </button>
         </div>
+        <p className="landing-trust">No sign-up · Free · Works offline · Your data stays on your device</p>
 
-        {showIosHint && (
-          <div
-            className="card"
-            style={{
-              padding: '14px 18px',
-              marginTop: 4,
-              maxWidth: 380,
-              fontSize: '0.82rem',
-              color: 'var(--c-muted2)',
-              lineHeight: 1.55,
-              textAlign: 'left',
+        {showInstallButton && (
+          <button
+            className="landing-install"
+            onClick={() => {
+              if (canInstall) promptInstall()
+              else if (isIos) setShowIosHint(v => !v)
             }}
           >
-            <div className="label" style={{ marginBottom: 6 }}>Install on iOS</div>
-            Tap the <strong style={{ color: 'var(--c-text)' }}>Share</strong> icon in Safari,
-            then choose <strong style={{ color: 'var(--c-text)' }}>Add to Home Screen</strong>.
+            <DownloadIcon /> Install as app
+          </button>
+        )}
+        {showIosHint && (
+          <div className="card landing-ios-hint">
+            Tap the <strong>Share</strong> icon in Safari, then choose <strong>Add to Home Screen</strong>.
           </div>
         )}
-      </div>
+      </header>
+
+      <img
+        className="landing-preview"
+        src="/preview.webp"
+        width="1600"
+        height="1000"
+        alt="Battle Tracker showing an initiative order, a goblin enemy table and a dice roller"
+      />
+
+      <section className="landing-section" aria-labelledby="how-title">
+        <h2 id="how-title">How it works</h2>
+        <ol className="landing-steps">
+          {STEPS.map((s, i) => (
+            <li key={s.title} className="card">
+              <span className="landing-step-num">{i + 1}</span>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="landing-section" aria-labelledby="features-title">
+        <h2 id="features-title">Everything you need for combat, nothing you don't</h2>
+        <ul className="landing-features">
+          {FEATURES.map(f => (
+            <li key={f.title}>
+              <h3>{f.title}</h3>
+              <p>{f.text}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="landing-section" aria-labelledby="faq-title">
+        <h2 id="faq-title">FAQ</h2>
+        <div className="landing-faq">
+          {FAQ.map(({ q, a }) => (
+            <details key={q} className="card">
+              <summary>{q}</summary>
+              <p>{a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-section landing-final">
+        <button className="btn-primary landing-cta" onClick={() => start(false)}>
+          Start tracking
+        </button>
+      </section>
+
+      <footer className="landing-footer">
+        Monster data from the 5e SRD via Open5e. Battle Tracker is unofficial fan content and not
+        affiliated with Wizards of the Coast.
+      </footer>
     </div>
   )
 }

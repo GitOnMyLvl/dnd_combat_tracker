@@ -28,3 +28,11 @@ claude.md
 CLAUDE.md
 
 .vercel
+
+# Test output
+test-results/
+playwright-report/
+dev-dist/
+
+# Local Claude Code settings
+.claude/settings.local.json

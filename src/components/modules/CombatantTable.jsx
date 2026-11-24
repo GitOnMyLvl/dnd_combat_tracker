@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { useEncounterStore } from '../../store/encounterStore'
 import HPEditor from '../shared/HPEditor'
 import EditableField from '../shared/EditableField'
@@ -8,7 +9,7 @@ import CharacterFormModal from '../shared/CharacterFormModal'
 import Modal from '../shared/Modal'
 import { useCharacterStore, combatantToTemplate, templateToCombatant, DEFAULT_ABILITIES } from '../../store/characterStore'
 import { CONDITION_NAMES } from '../../constants/conditions'
-import { ABILITY_LABELS, abilityModifier, formatModifier } from '../../utils/abilities'
+import { ABILITY_LABELS, formatModifier } from '../../utils/abilities'
 import { getHpStatus } from '../../utils/hpStatus'
 
 function AddManualModal({ tableType, onClose }) {
@@ -49,7 +50,7 @@ function StatPill({ label, value, onChange }) {
 }
 
 function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
-  const { updateCombatant, removeCombatant, toggleCondition, selectCombatant, resetCombatantToApi, setExhaustion, toggleInspiration } = useEncounterStore()
+  const { updateCombatant, removeCombatant, toggleCondition, selectCombatant, resetCombatantToApi, setExhaustion, toggleInspiration } = useEncounterStore(useShallow(s => ({ updateCombatant: s.updateCombatant, removeCombatant: s.removeCombatant, toggleCondition: s.toggleCondition, selectCombatant: s.selectCombatant, resetCombatantToApi: s.resetCombatantToApi, setExhaustion: s.setExhaustion, toggleInspiration: s.toggleInspiration })))
   const saveCharacter = useCharacterStore(s => s.saveCharacter)
   const [expanded, setExpanded] = useState(false)
   const [saveFlash, setSaveFlash] = useState(false)
@@ -119,7 +120,7 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
           )}
         </div>
 
-        {/* Stats: AC (when wide enough) + saves (when wide) + HP */}
+        {/* Stats: AC (when wide enough) + HP; ability scores live in the expanded view */}
         <div className="flex items-center" style={{ gap: 10, flexShrink: 0 }}>
           {/* AC — hidden when too narrow */}
           {rowWidth >= 260 && (
@@ -128,20 +129,6 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
               <span style={{ fontWeight: 700, fontSize: '0.95rem', textAlign: 'center' }}>{combatant.ac ?? '—'}</span>
             </div>
           )}
-
-          {/* Saving throw modifiers — visible when card is wide enough */}
-          {rowWidth > 440 && (() => {
-            const abilities = combatant.abilities ?? DEFAULT_ABILITIES
-            return ABILITY_LABELS.map(a => {
-              const score = abilities[a] ?? 10
-              return (
-                <div key={a} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
-                  <span className="label">{a.toUpperCase()}</span>
-                  <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>{formatModifier(score)}</span>
-                </div>
-              )
-            })
-          })()}
 
           {/* HP — always rightmost */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 28 }}>
@@ -345,7 +332,7 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
 
 export default function CombatantTable({ config = {} }) {
   const { tableType = 'enemy' } = config
-  const { encounter, selectedCombatantId } = useEncounterStore()
+  const { encounter, selectedCombatantId } = useEncounterStore(useShallow(s => ({ encounter: s.encounter, selectedCombatantId: s.selectedCombatantId })))
   const [showManual, setShowManual] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const rowRefs = useRef({})

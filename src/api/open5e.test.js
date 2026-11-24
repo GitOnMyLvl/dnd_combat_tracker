@@ -88,3 +88,28 @@ describe('getMonster', () => {
     expect(fetch).toHaveBeenCalledOnce()
   })
 })
+
+describe('cache limits', () => {
+  it('evicts the oldest entries beyond the cap', async () => {
+    for (let i = 0; i < 160; i++) {
+      fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ slug: `m${i}` }) })
+      await getMonster(`m${i}`)
+    }
+    const cachedKeys = Object.keys(storage).filter(k => k.startsWith('open5e_monster_slug_'))
+    expect(cachedKeys).toHaveLength(150)
+    expect(storage['open5e_monster_slug_m0']).toBeUndefined()
+    expect(storage['open5e_monster_slug_m159']).toBeDefined()
+  })
+
+  it('frees space and retries when storage is full', async () => {
+    for (let i = 0; i < 4; i++) {
+      fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ slug: `old${i}` }) })
+      await getMonster(`old${i}`)
+    }
+    localStorageMock.setItem.mockImplementationOnce(() => { throw new Error('QuotaExceededError') })
+    fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ slug: 'new' }) })
+    await getMonster('new')
+    expect(storage['open5e_monster_slug_new']).toBeDefined()
+    expect(storage['open5e_monster_slug_old0']).toBeUndefined()
+  })
+})

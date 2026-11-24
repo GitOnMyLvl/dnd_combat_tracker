@@ -3,14 +3,18 @@ import { test, expect } from '@playwright/test'
 // Clear localStorage before each test for a clean slate
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
+  // Start from an empty canvas, past the landing page and first-run guide
+  await page.evaluate(() => {
+    localStorage.clear()
+    localStorage.setItem('dnd-tracker-ui', JSON.stringify({ state: { hasEntered: true, showGuide: false }, version: 0 }))
+  })
   await page.reload()
 })
 
 test.describe('Empty Canvas', () => {
   test('shows empty state message', async ({ page }) => {
     await expect(page.getByText('Canvas is empty')).toBeVisible()
-    await expect(page.getByText('COMBAT TRACKER')).toBeVisible()
+    await expect(page.getByText('Ready your party')).toBeVisible()
   })
 })
 
@@ -27,7 +31,7 @@ test.describe('Module Picker', () => {
   })
 
   test('opens module picker via top bar button', async ({ page }) => {
-    await page.getByRole('button', { name: '+ Module' }).click()
+    await page.getByRole('button', { name: 'Module', exact: true }).click()
     await expect(page.getByText('Add Module', { exact: true })).toBeVisible()
   })
 
@@ -112,11 +116,15 @@ test.describe('Initiative Tracking', () => {
     // Wait for modal to close
     await expect(page.getByPlaceholder('Name')).not.toBeVisible()
 
-    // Sort initiative
-    await page.getByRole('button', { name: 'Sort by Initiative' }).click()
-
-    // Advance turn
-    await page.getByRole('button', { name: /Next/ }).click()
+    // Both joined the initiative order automatically; sort and advance
+    const tracker = page.locator('.card', { has: page.locator('.drag-handle', { hasText: 'INITIATIVE' }) })
+    await expect(tracker.getByText('Goblin')).toBeVisible()
+    await expect(tracker.getByText('Fighter')).toBeVisible()
+    await tracker.getByRole('button', { name: 'Sort', exact: true }).click()
+    await expect(tracker.getByTestId('round-number')).toHaveText('1')
+    await tracker.getByRole('button', { name: /Next/ }).click()
+    await tracker.getByRole('button', { name: /Next/ }).click()
+    await expect(tracker.getByTestId('round-number')).toHaveText('2')
   })
 })
 
@@ -125,71 +133,62 @@ test.describe('Dice Roller', () => {
     await page.getByTitle('Add module').click()
     await page.getByRole('button', { name: /Dice Roller/ }).click()
 
-    // Roll a d20
-    await page.getByRole('button', { name: 'd20', exact: true }).click()
+    await page.getByRole('button', { name: 'Roll 1d20' }).click()
 
-    // History should show a roll entry with "d20" label
-    const history = page.locator('.module-content')
-    await expect(history.locator('span', { hasText: 'd20' })).toBeVisible()
+    const dice = page.locator('.card', { has: page.locator('.drag-handle', { hasText: 'DICE' }) })
+    await expect(dice.getByText('d20', { exact: true }).last()).toBeVisible()
   })
 
-  test('rolls custom expression', async ({ page }) => {
+  test('rolls a pocket of mixed dice', async ({ page }) => {
     await page.getByTitle('Add module').click()
     await page.getByRole('button', { name: /Dice Roller/ }).click()
 
-    await page.getByPlaceholder('e.g. 2d6+3+4d8+7').fill('2d6+3')
-    await page.getByRole('button', { name: 'Roll', exact: true }).click()
+    await page.getByRole('button', { name: 'Increase d6 count' }).click()
+    await page.getByRole('button', { name: 'Increase d6 count' }).click()
+    await page.getByRole('button', { name: 'Increase d8 count' }).click()
+    await page.getByRole('button', { name: 'Roll dice (3)' }).click()
 
-    // Should show in history
-    await expect(page.locator('.module-content').getByText('2d6+3')).toBeVisible()
+    const dice = page.locator('.card', { has: page.locator('.drag-handle', { hasText: 'DICE' }) })
+    await expect(dice.getByText('2d6 + 1d8').first()).toBeVisible()
   })
 
   test('rolls with advantage', async ({ page }) => {
     await page.getByTitle('Add module').click()
     await page.getByRole('button', { name: /Dice Roller/ }).click()
 
-    // Select advantage (exact match to avoid Disadvantage)
     await page.getByRole('button', { name: 'Advantage', exact: true }).click()
+    await page.getByRole('button', { name: 'Roll 1d20' }).click()
 
-    // Roll d20
-    await page.getByRole('button', { name: 'd20', exact: true }).click()
-
-    // Should show advantage label in history
-    await expect(page.locator('.module-content').getByText('(Adv)')).toBeVisible()
+    const dice = page.locator('.card', { has: page.locator('.drag-handle', { hasText: 'DICE' }) })
+    await expect(dice.getByText('d20 · ADV').first()).toBeVisible()
   })
 })
 
 test.describe('Encounter Management', () => {
   test('renames encounter', async ({ page }) => {
     // Click the encounter name button in the top bar
-    const topBar = page.locator('div', { has: page.getByText('COMBAT TRACKER') }).first()
-    await topBar.getByText('New Encounter').click()
-
-    // The input should appear
-    const nameInput = topBar.locator('input')
+    await page.getByTitle('Click to rename').click()
+    const nameInput = page.locator('input:focus')
     await nameInput.clear()
     await nameInput.fill('Dragon Fight')
     await nameInput.press('Enter')
 
     // Should display new name
-    await expect(topBar.getByText('Dragon Fight')).toBeVisible()
+    await expect(page.getByTitle('Click to rename')).toHaveText('Dragon Fight')
   })
 
   test('saves and loads encounter', async ({ page }) => {
     // Rename first
-    const topBar = page.locator('div', { has: page.getByText('COMBAT TRACKER') }).first()
-    await topBar.getByText('New Encounter').click()
-    const nameInput = topBar.locator('input')
+    await page.getByTitle('Click to rename').click()
+    const nameInput = page.locator('input:focus')
     await nameInput.clear()
     await nameInput.fill('Saved Battle')
     await nameInput.press('Enter')
 
-    // Save
-    await page.getByRole('button', { name: 'Save', exact: true }).click()
-
-    // Open encounters dropdown
+    // Save it to the list from the Encounters menu
     await page.getByRole('button', { name: /Encounters/ }).click()
-    await expect(page.getByText('Saved Encounters')).toBeVisible()
+    await expect(page.getByText('Saved Encounters', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Save "Saved Battle" to list' }).click()
     // The dropdown shows the encounter name — verify by checking the dropdown list
     const dropdown = page.locator('.card', { hasText: 'Saved Encounters' })
     await expect(dropdown.getByText('Saved Battle')).toBeVisible()
@@ -200,10 +199,10 @@ test.describe('Theme', () => {
   test('toggles between dark and light theme', async ({ page }) => {
     await expect(page.locator('html')).not.toHaveClass(/light/)
 
-    await page.getByRole('button', { name: 'Light', exact: true }).click()
+    await page.getByRole('button', { name: 'Toggle theme' }).click()
     await expect(page.locator('html')).toHaveClass(/light/)
 
-    await page.getByRole('button', { name: 'Dark', exact: true }).click()
+    await page.getByRole('button', { name: 'Toggle theme' }).click()
     await expect(page.locator('html')).not.toHaveClass(/light/)
   })
 })
