@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { useEncounterStore } from '../../store/encounterStore'
 import HPEditor from '../shared/HPEditor'
 import EditableField from '../shared/EditableField'
@@ -49,7 +50,7 @@ function StatPill({ label, value, onChange }) {
 }
 
 function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
-  const { updateCombatant, removeCombatant, toggleCondition, selectCombatant, resetCombatantToApi, setExhaustion, toggleInspiration } = useEncounterStore()
+  const { updateCombatant, removeCombatant, toggleCondition, selectCombatant, resetCombatantToApi, setExhaustion, toggleInspiration } = useEncounterStore(useShallow(s => ({ updateCombatant: s.updateCombatant, removeCombatant: s.removeCombatant, toggleCondition: s.toggleCondition, selectCombatant: s.selectCombatant, resetCombatantToApi: s.resetCombatantToApi, setExhaustion: s.setExhaustion, toggleInspiration: s.toggleInspiration })))
   const saveCharacter = useCharacterStore(s => s.saveCharacter)
   const [expanded, setExpanded] = useState(false)
   const [saveFlash, setSaveFlash] = useState(false)
@@ -345,7 +346,7 @@ function CombatantRow({ combatant, isSelected, isActive, rowRef: scrollRef }) {
 
 export default function CombatantTable({ config = {} }) {
   const { tableType = 'enemy' } = config
-  const { encounter, selectedCombatantId } = useEncounterStore()
+  const { encounter, selectedCombatantId } = useEncounterStore(useShallow(s => ({ encounter: s.encounter, selectedCombatantId: s.selectedCombatantId })))
   const [showManual, setShowManual] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const rowRefs = useRef({})

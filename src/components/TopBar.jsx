@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { useEncounterStore } from '../store/encounterStore'
 import { useThemeStore } from '../store/themeStore'
 import { useLayoutStore } from '../store/layoutStore'
@@ -57,9 +58,9 @@ export default function TopBar() {
   const {
     encounter, savedEncounters,
     newEncounter, saveEncounter, loadEncounter, deleteEncounter, renameEncounter,
-  } = useEncounterStore()
+  } = useEncounterStore(useShallow(s => ({ encounter: s.encounter, savedEncounters: s.savedEncounters, newEncounter: s.newEncounter, saveEncounter: s.saveEncounter, loadEncounter: s.loadEncounter, deleteEncounter: s.deleteEncounter, renameEncounter: s.renameEncounter })))
   const [showEncounters, setShowEncounters] = useState(false)
-  const { theme, toggleTheme } = useThemeStore()
+  const { theme, toggleTheme } = useThemeStore(useShallow(s => ({ theme: s.theme, toggleTheme: s.toggleTheme })))
   const clearModules = useLayoutStore(s => s.clearModules)
   const openModulePicker = useUIStore(s => s.openModulePicker)
   const [editingName, setEditingName] = useState(false)

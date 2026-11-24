@@ -1,8 +1,9 @@
 import { useEncounterStore } from '../../store/encounterStore'
+import { useShallow } from 'zustand/react/shallow'
 import { CONDITIONS } from '../../constants/conditions'
 
 export default function ConditionsPanel() {
-  const { selectedCombatantId, encounter, toggleCondition } = useEncounterStore()
+  const { selectedCombatantId, encounter, toggleCondition } = useEncounterStore(useShallow(s => ({ selectedCombatantId: s.selectedCombatantId, encounter: s.encounter, toggleCondition: s.toggleCondition })))
   const selected = encounter.combatants.find(c => c.id === selectedCombatantId)
 
   return (

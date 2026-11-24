@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { useThemeStore } from '../store/themeStore'
 
 // Sorted by hue around the colour wheel (red → pink → orange → yellow → green → teal → sky → blue → purple → lavender)
@@ -13,7 +14,7 @@ const PRESETS = [
 ]
 
 export default function AccentPicker() {
-  const { accent, setAccent } = useThemeStore()
+  const { accent, setAccent } = useThemeStore(useShallow(s => ({ accent: s.accent, setAccent: s.setAccent })))
   const [open, setOpen] = useState(false)
   const [hex, setHex] = useState(accent)
   const ref = useRef(null)

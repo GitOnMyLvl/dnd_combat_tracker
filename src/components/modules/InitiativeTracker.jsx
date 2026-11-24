@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { useEncounterStore } from '../../store/encounterStore'
 
 const EMPTY_TOKEN = { name: '', init: '', init_mod: '', hp: '', ac: '', spell_dc: '', spell_atk: '', type: 'enemy' }
@@ -76,6 +77,7 @@ function AddTokenForm({ onAdd, onCancel }) {
           className="btn-ghost"
           style={{ minHeight: 36, minWidth: 36, padding: 0, fontSize: '0.85rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           title="Close"
+          aria-label="Close"
         >✕</button>
       </div>
     </div>
@@ -111,7 +113,7 @@ function InitInput({ id, value, onCommit, style }) {
 
 
 function DeathSaves({ combatant }) {
-  const { setDeathSave, resetDeathSaves } = useEncounterStore()
+  const { setDeathSave, resetDeathSaves } = useEncounterStore(useShallow(s => ({ setDeathSave: s.setDeathSave, resetDeathSaves: s.resetDeathSaves })))
   const { successes, failures } = combatant.deathSaves ?? { successes: 0, failures: 0 }
 
   const Pips = ({ count, max, color, type }) => (
@@ -153,7 +155,7 @@ function DeathSaves({ combatant }) {
 function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect, onMoveUp, onMoveDown, onRemove, rowRef }) {
   const [amt, setAmt] = useState('')
   const [confirmRemove, setConfirmRemove] = useState(false)
-  const { setInitiativeRoll, updateHP } = useEncounterStore()
+  const { setInitiativeRoll, updateHP } = useEncounterStore(useShallow(s => ({ setInitiativeRoll: s.setInitiativeRoll, updateHP: s.updateHP })))
 
   const total = isManual ? c.initiative.roll : c.initiative.roll + c.initiative.bonus
   const isDowned = c.hp.current === 0
@@ -236,10 +238,12 @@ function CombatantRow({ c, idx, isActive, isSelected, isManual, isLast, onSelect
           <button
             onClick={onMoveUp}
             disabled={idx === 0}
+            aria-label="Move up in initiative"
             style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 18, minWidth: 36, padding: '1px 4px', fontSize: '0.8rem', lineHeight: 1, opacity: idx === 0 ? 0.2 : 0.6 }}
           >▲</button>
           <button
             onClick={onMoveDown}
+            aria-label="Move down in initiative"
             disabled={isLast}
             style={{ background: 'none', border: 'none', color: 'var(--c-muted)', minHeight: 18, minWidth: 36, padding: '1px 4px', fontSize: '0.8rem', lineHeight: 1, opacity: isLast ? 0.2 : 0.6 }}
           >▼</button>
@@ -326,7 +330,7 @@ export default function InitiativeTracker() {
     sortInitiative, setInitiativeRoll, setInitiativeMode,
     selectCombatant, selectedCombatantId,
     addCombatant, addToInitiative, reorderInitiative, removeFromInitiative,
-  } = useEncounterStore()
+  } = useEncounterStore(useShallow(s => ({ encounter: s.encounter, nextTurn: s.nextTurn, prevTurn: s.prevTurn, sortInitiative: s.sortInitiative, setInitiativeRoll: s.setInitiativeRoll, setInitiativeMode: s.setInitiativeMode, selectCombatant: s.selectCombatant, selectedCombatantId: s.selectedCombatantId, addCombatant: s.addCombatant, addToInitiative: s.addToInitiative, reorderInitiative: s.reorderInitiative, removeFromInitiative: s.removeFromInitiative })))
 
   const { initiativeOrder, combatants, currentTurnIndex, round, initiativeMode = 'auto' } = encounter
   const isManual = initiativeMode === 'manual'
@@ -407,6 +411,7 @@ export default function InitiativeTracker() {
             <div className="flex" style={{ gap: 'var(--sp-1)' }}>
               <button
                 onClick={prevTurn}
+                aria-label="Previous turn"
                 className="btn-ghost"
                 style={{ minHeight: 36, minWidth: 36, padding: 0, justifyContent: 'center', fontSize: '0.8rem' }}
                 disabled={initiativeOrder.length === 0}

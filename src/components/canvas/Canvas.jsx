@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 import { useLayoutStore } from '../../store/layoutStore'
 import { useUIStore } from '../../store/uiStore'
@@ -27,8 +28,8 @@ export const MODULE_COMPONENTS = {
 }
 
 export default function Canvas() {
-  const { modules, setLayout } = useLayoutStore()
-  const { showModulePicker, openModulePicker, closeModulePicker } = useUIStore()
+  const { modules, setLayout } = useLayoutStore(useShallow(s => ({ modules: s.modules, setLayout: s.setLayout })))
+  const { showModulePicker, openModulePicker, closeModulePicker } = useUIStore(useShallow(s => ({ showModulePicker: s.showModulePicker, openModulePicker: s.openModulePicker, closeModulePicker: s.closeModulePicker })))
 
   const layouts = {
     lg: modules.map(m => ({

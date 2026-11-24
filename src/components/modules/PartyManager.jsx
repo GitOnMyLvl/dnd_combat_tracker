@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { useCharacterStore, templateToCombatant } from '../../store/characterStore'
 import { useEncounterStore } from '../../store/encounterStore'
 import CharacterFormModal from '../shared/CharacterFormModal'
@@ -45,6 +46,7 @@ function CharacterCard({ char, compact, onRemove, onEdit, actions }) {
               minHeight: 36, minWidth: 36, fontSize: '0.85rem', borderRadius: 6, padding: 0,
             }}
             title="Delete"
+            aria-label="Delete"
           >✕</button>
         )}
       </div>
@@ -53,7 +55,7 @@ function CharacterCard({ char, compact, onRemove, onEdit, actions }) {
 }
 
 function CharactersTab() {
-  const { characters, removeCharacter, saveCharacter, updateCharacter } = useCharacterStore()
+  const { characters, removeCharacter, saveCharacter, updateCharacter } = useCharacterStore(useShallow(s => ({ characters: s.characters, removeCharacter: s.removeCharacter, saveCharacter: s.saveCharacter, updateCharacter: s.updateCharacter })))
   const addCombatant = useEncounterStore(s => s.addCombatant)
   const [showNew, setShowNew] = useState(false)
   const [editing, setEditing] = useState(null) // character object or null
@@ -123,7 +125,7 @@ function CharactersTab() {
 }
 
 function CreatePartyModal({ onClose }) {
-  const { characters, saveParty } = useCharacterStore()
+  const { characters, saveParty } = useCharacterStore(useShallow(s => ({ characters: s.characters, saveParty: s.saveParty })))
   const [name, setName] = useState('')
   const [selected, setSelected] = useState(new Set())
 
@@ -199,7 +201,7 @@ function CreatePartyModal({ onClose }) {
 }
 
 function AddToPartyModal({ party, onClose }) {
-  const { characters, addCharacterToParty } = useCharacterStore()
+  const { characters, addCharacterToParty } = useCharacterStore(useShallow(s => ({ characters: s.characters, addCharacterToParty: s.addCharacterToParty })))
   const [addedIds, setAddedIds] = useState(new Set())
   const available = characters.filter(c => !party.characterIds.includes(c.id))
 
@@ -258,7 +260,7 @@ function AddToPartyModal({ party, onClose }) {
 }
 
 function PartiesTab() {
-  const { parties, characters, removeParty, removeCharacterFromParty } = useCharacterStore()
+  const { parties, characters, removeParty, removeCharacterFromParty } = useCharacterStore(useShallow(s => ({ parties: s.parties, characters: s.characters, removeParty: s.removeParty, removeCharacterFromParty: s.removeCharacterFromParty })))
   const addCombatant = useEncounterStore(s => s.addCombatant)
   const [showCreate, setShowCreate] = useState(false)
   const [addingToParty, setAddingToParty] = useState(null)

@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { useLayoutStore } from '../../store/layoutStore'
 
 const MODULE_TITLES = {
@@ -112,7 +113,7 @@ function getInfo(type, config) {
 }
 
 export default function ModuleWrapper({ id, type, config = {}, minimized, children }) {
-  const { removeModule, toggleMinimize } = useLayoutStore()
+  const { removeModule, toggleMinimize } = useLayoutStore(useShallow(s => ({ removeModule: s.removeModule, toggleMinimize: s.toggleMinimize })))
   const [infoOpen, setInfoOpen] = useState(false)
   const wrapperRef = useRef(null)
 
