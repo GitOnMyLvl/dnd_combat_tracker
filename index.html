@@ -3,13 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>D&amp;D Initiative Tracker – Free 5e Combat Tracker for DMs | Battle Tracker</title>
+    <meta name="description" content="Free D&amp;D 5e initiative and combat tracker for Dungeon Masters. Track turn order, HP, temp HP, conditions and death saves, look up SRD monsters, roll dice. No sign-up, works offline." />
+    <link rel="canonical" href="https://www.initiative-tracker.com/" />
     <meta name="theme-color" content="#0c0c0e" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
-    <title>D&D Battle Tracker</title>
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Battle Tracker" />
+    <meta property="og:url" content="https://www.initiative-tracker.com/" />
+    <meta property="og:title" content="Battle Tracker – Free D&amp;D 5e Initiative &amp; Combat Tracker" />
+    <meta property="og:description" content="Run D&amp;D combat without the spreadsheet: initiative order, HP, conditions, SRD monsters and dice in one browser tab. Free, no sign-up." />
+    <meta property="og:image" content="https://www.initiative-tracker.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Battle Tracker initiative tracker with a goblin encounter" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Battle Tracker",
+        "alternateName": "D&D Initiative Tracker",
+        "url": "https://www.initiative-tracker.com/",
+        "description": "Free D&D 5e initiative and combat tracker for Dungeon Masters.",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any (web browser)",
+        "browserRequirements": "Requires JavaScript",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "image": "https://www.initiative-tracker.com/og-image.png"
+      }
+    </script>
+    <!--faq-jsonld-->
+
+    <script>
+      // Returning visitors and pop-outs go straight into the app: hide the
+      // prerendered landing page until React mounts to avoid a flash.
+      try {
+        var ui = JSON.parse(localStorage.getItem('dnd-tracker-ui') || '{}')
+        if ((ui.state && ui.state.hasEntered) || location.search.indexOf('popout=') !== -1) {
+          document.documentElement.classList.add('skip-landing')
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><!--landing-html--></div>
+    <noscript>Battle Tracker needs JavaScript to run. Please enable it in your browser.</noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

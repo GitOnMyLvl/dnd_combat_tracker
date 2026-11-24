@@ -2,11 +2,13 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { prerenderLanding } from './scripts/prerender-landing.js'
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    prerenderLanding(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
@@ -26,9 +28,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,webp}'],
         // Only precache Latin font subsets; other scripts load on demand.
-        globIgnores: ['**/*-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese}-*.woff2'],
+        globIgnores: ['og-image.png', '**/*-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese}-*.woff2'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.open5e\.com\//,
